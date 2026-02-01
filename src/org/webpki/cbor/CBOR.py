@@ -1,4 +1,4 @@
-import binascii
+import binascii, struct, math
 
 class CBOR:
   class Exception(Exception):
@@ -43,7 +43,7 @@ class CBOR:
           break  
         modifier += 1
       return bytearray([tag | modifier]) + array
-    # True "BigInt".
+    # True "bigint".
     return bytearray([0xc2 if neg == 0 else 0xc3]) + CBOR.encodeString(0x40, array)
 
   @staticmethod
@@ -65,14 +65,26 @@ class CBOR:
   class CborObject:
     print("Hi")
 
-    def getInteger(self):
-      if type(self).__name__ != 'Int':
-        raise CBOR.Exception("Expected: " + 'CBOR.Int' + 
+    def checkAndGet(self, expected):
+      if type(self).__name__ != expected:
+        raise CBOR.Exception("Expected: '" + 'CBOR.' + expected +
                              "', got 'CBOR." + type(self).__name__  + "'")
-      return self.value
+      return self._get()
+
+    def getInteger(self):
+      return self.checkAndGet('Int')
 
     def getInt8(self):
       return CBOR.intRange(self.getInteger(), -128, 127)
+    
+    def getU128(self):
+      return CBOR.intRange(self.getInteger(), 0, 0xffffffffffffffffffffffffffffffff)
+    
+    def getFloat64(self):
+      return self.checkAndGet('Float')
+    
+    def getString(self):
+      return self.checkAndGet('String')
 
     def encode(self):
       return self.internalEncode()
@@ -86,17 +98,43 @@ class CBOR:
 
     def internalEncode(self):
       return CBOR.encodeInteger(0x00, self.value)
+    
+    def _get(self):
+      return self.value
+  
+  ############
+  #  Float   #
+  ############
+  class Float(CborObject):
+    def __init__(self, value):
+      if type(value).__name__ == 'int':
+        value = float(value)
+      self.value = CBOR.checkType(value, 'float')
+      u8 = bytearray(struct.pack('!d', value))
+      print(binascii.hexlify(u8))
+      if math.isfinite(value) == False:
+        raise CBOR.Exception("NF Not implemented")
+      if value == 0:
+        raise CBOR.Exception("0 Not implemented")
 
+    def internalEncode(self):
+      return CBOR.encodeInteger(0x00, 5)
+    
+    def _get(self):
+      return self.value
+  
   ############
   #  String  #
   ############
   class String(CborObject):
-    def __init__(self, value):
-      self.value = CBOR.checkType(value, 'str')
+    def __init__(self, string):
+      self.string = CBOR.checkType(string, 'str')
 
     def internalEncode(self):
-
-      return self.value
+      return CBOR.encodeString(0x60, self.string.encode("utf8"))
+  
+    def _get(self):
+      return self.string
     
   ############
   #  Array   #
@@ -106,7 +144,10 @@ class CBOR:
       self.objects = list()
 
     def internalEncode(self):
-      return len(self.objects)
+      encoded = CBOR.encodeInteger(0x80, len(self.objects))
+      for object in self.objects:
+        encoded += object.internalEncode()
+      return encoded
     
     def add(self, object):
       self.objects.append(object)
@@ -117,11 +158,15 @@ print(binascii.hexlify(i.encode()))
 
 print(i.getInt8())
 
-s = CBOR.String("kurt")
-print(s.encode())
+s = CBOR.String("kurt€")
+print(binascii.hexlify(s.encode()))
 
 #print(s.getInt8())
 
 a = CBOR.Array()
 a.add(i).add(s)
-print(a.encode())
+print(binascii.hexlify(a.encode()))
+
+f = CBOR.Float(2.0e50)
+print(f.getFloat64())
+print(binascii.hexlify(f.encode()))
