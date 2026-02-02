@@ -1,3 +1,15 @@
+################################################################
+#                                                              #
+#                 CBOR::Core API for Python3                   #
+#                                                              #
+# Author: Anders Rundgren (anders.rundgren.net@gmail.com)      #
+# Repository: https:##github.com/cyberphone/cbor.py.           #
+#                                                              #
+# Note: this is a "Reference Implementation", not optimized    #
+# for maximum performance.  It is assumed that a productified  #
+# version of cbor.py would be rewritten in C.                  #
+################################################################
+
 import binascii, struct, math, io
 
 class CBOR:
@@ -200,9 +212,10 @@ class CBOR:
       self._current = 0
   
     def decode_with_options(self):
-        while (chunk := self._cbor_stream.read(1)):
-          self._current += 1
-        print(str(self._current))
+      while (chunk := self._cbor_stream.read(1)):
+        self._current += 1
+      # Right, the decoder is yet to be written :)
+      print(str(self._current))
 
   @classmethod
   def decode(cls, cbor):
@@ -246,7 +259,6 @@ CBOR.decode("DEC".encode("utf8"))
 import http.client
 conn = http.client.HTTPSConnection("cyberphone.github.io")
 conn.request("GET", "/javaapi/app-notes/large-payloads/metadata.cbor")
-r1 = conn.getresponse()
-print(r1.status, r1.reason)
-CBOR.init_decoder(r1, 10000).decode_with_options()
-
+response = conn.getresponse()
+print(response.status, response.reason)
+CBOR.init_decoder(response, 10000).decode_with_options()
