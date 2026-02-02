@@ -47,7 +47,7 @@ class CBOR:
 
   @staticmethod
   def _generic_header(tag, value):
-    # Only applies to "int" and "bigint"
+    # The following test only applies to "int" and "bigint", other types only use unsigned values.
     if (value < 0):
       value = ~value
       tag = CBOR._MT_NEGATIVE
