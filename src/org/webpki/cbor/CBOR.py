@@ -47,9 +47,8 @@ class CBOR:
 
   @staticmethod
   def _generic_header(tag, value):
-    neg = value < 0
     # Only applies to "int" and "bigint"
-    if (neg):
+    if (value < 0):
       value = ~value
       tag = CBOR._MT_NEGATIVE
     # Convert int to bytearray (but with a twist).
@@ -79,7 +78,7 @@ class CBOR:
         modifier += 1
       return bytearray([tag | modifier]) + array
     # True "bigint".
-    return bytearray([CBOR._TAG_BIG_UNSIGNED if neg == 0 
+    return bytearray([CBOR._TAG_BIG_UNSIGNED if tag == CBOR._MT_UNSIGNED 
                       else CBOR._TAG_BIG_NEGATIVE]) + CBOR._encode_string(CBOR._MT_BYTES, array)
 
   @staticmethod
