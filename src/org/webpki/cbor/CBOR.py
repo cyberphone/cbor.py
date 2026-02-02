@@ -3,7 +3,7 @@
 #                 CBOR::Core API for Python3                   #
 #                                                              #
 # Author: Anders Rundgren (anders.rundgren.net@gmail.com)      #
-# Repository: https:##github.com/cyberphone/cbor.py.           #
+# Repository: https://github.com/cyberphone/cbor.py.           #
 #                                                              #
 # Note: this is a "Reference Implementation", not optimized    #
 # for maximum performance.  It is assumed that a productified  #
