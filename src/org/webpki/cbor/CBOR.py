@@ -24,6 +24,10 @@ class CBOR:
       super().__init__(msg)
 
   @staticmethod
+  def _error(msg):
+    raise CBOR.Exception(msg)
+
+  @staticmethod
   def _encode_string(tag, binary):
     return CBOR._encode_integer(tag, len(binary)) + binary
 
@@ -65,15 +69,15 @@ class CBOR:
                       else CBOR._MT_BIG_NEGATIVE]) + CBOR._encode_string(CBOR._MT_BYTES, array)
 
   @staticmethod
-  def int_range_check(value, min, max):
+  def _int_range_check(value, min, max):
     if (value < min or value > max):
-      raise CBOR.Exception("Value out of range: " + str(value))
+      CBOR._error("Value out of range: " + str(value))
     return value
 
   @staticmethod
   def _check_argument_type(value, expected):
     if type(value).__name__ != expected:
-      raise CBOR.Exception("Expected '" + expected + "', got '" + type(value).__name__ + "'")
+      CBOR._error("Expected '" + expected + "', got '" + type(value).__name__ + "'")
     return value
     
   @staticmethod
@@ -84,30 +88,30 @@ class CBOR:
     def __init__(self):
       self.readFlag = False
 
-    def check_type_get_value(self, expected):
+    def _check_type_get_value(self, expected):
       if type(self).__name__ != expected:
-        raise CBOR.Exception("Expected: '" + 'CBOR.' + expected +
-                             "', got 'CBOR." + type(self).__name__  + "'")
+        CBOR._error("Expected '" + 'CBOR.' + expected +
+                    "', got 'CBOR." + type(self).__name__  + "'")
       self.readFlag = True
       return self._get()
 
     def _get_integer(self):
-      return self.check_type_get_value('Int')
+      return self._check_type_get_value('Int')
 
     def get_int8(self):
-      return CBOR.int_range_check(self._get_integer(), -128, 127)
+      return CBOR._int_range_check(self._get_integer(), -128, 127)
     
     def get_uint128(self):
-      return CBOR.int_range_check(self._get_integer(), 0, 0xffffffffffffffffffffffffffffffff)
+      return CBOR._int_range_check(self._get_integer(), 0, 0xffffffffffffffffffffffffffffffff)
     
     def get_float64(self):
-      return self.check_type_get_value('Float')
+      return self._check_type_get_value('Float')
     
     def get_string(self):
-      return self.check_type_get_value('String')
+      return self._check_type_get_value('String')
 
     def encode(self):
-      return self.internal_encode()
+      return self._internal_encode()
 
   ############
   #   Int    #
@@ -117,7 +121,7 @@ class CBOR:
       super().__init__()
       self.value = CBOR._check_int_argument(value)
 
-    def internal_encode(self):
+    def _internal_encode(self):
       return CBOR._encode_integer(CBOR._MT_UNSIGNED, self.value)
     
     def _get(self):
@@ -135,11 +139,11 @@ class CBOR:
       u8 = bytearray(struct.pack('!d', value))
       print(binascii.hexlify(u8))
       if math.isfinite(value) == False:
-        raise CBOR.Exception("NF Not implemented")
+        CBOR._error("NF Not implemented")
       if value == 0:
-        raise CBOR.Exception("0 Not implemented")
+        CBOR._error("0 Not implemented")
 
-    def internal_encode(self):
+    def _internal_encode(self):
       return CBOR._encode_integer(0x00, 5)
     
     def _get(self):
@@ -153,7 +157,7 @@ class CBOR:
       super().__init__()
       self.string = CBOR._check_argument_type(string, 'str')
 
-    def internal_encode(self):
+    def _internal_encode(self):
       return CBOR._encode_string(CBOR._MT_STRING, self.string.encode("utf8"))
   
     def _get(self):
@@ -167,10 +171,10 @@ class CBOR:
       super().__init__()
       self.objects = list()
 
-    def internal_encode(self):
+    def _internal_encode(self):
       encoded = CBOR._encode_integer(CBOR._MT_ARRAY, len(self.objects))
       for object in self.objects:
-        encoded += object.internal_encode()
+        encoded += object._internal_encode()
       return encoded
     
     def add(self, object):
@@ -189,7 +193,7 @@ print(i.get_int8())
 s = CBOR.String("kurt€")
 print(binascii.hexlify(s.encode()))
 
-# print(s.get_int8())
+print(s.get_int8())
 
 a = CBOR.Array()
 a.add(i).add(s)
