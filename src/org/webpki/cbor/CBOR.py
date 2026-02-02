@@ -43,10 +43,10 @@ class CBOR:
 
   @staticmethod
   def _encode_string(tag, binary):
-    return CBOR._encode_integer(tag, len(binary)) + binary
+    return CBOR._generic_header(tag, len(binary)) + binary
 
   @staticmethod
-  def _encode_integer(tag, value):
+  def _generic_header(tag, value):
     neg = value < 0
     # Only applies to "int" and "bigint"
     if (neg):
@@ -98,6 +98,12 @@ class CBOR:
   def _check_int_argument(value):
     return CBOR._check_argument_type(value, 'int')
 
+  @staticmethod
+  def _check_bytes_argument(byte_string):  
+    if type(byte_string).__name__ not in ['bytes', 'bytearray']:
+      CBOR._error("Unexpected CBOR argument: " + type(byte_string).__name__)
+    return byte_string
+
   class _CborObject:
     def __init__(self):
       self.readFlag = False
@@ -140,7 +146,7 @@ class CBOR:
       self._value = CBOR._check_int_argument(value)
 
     def _internal_encode(self):
-      return CBOR._encode_integer(CBOR._MT_UNSIGNED, self._value)
+      return CBOR._generic_header(CBOR._MT_UNSIGNED, self._value)
     
     def _get(self):
       return self._value
@@ -162,7 +168,7 @@ class CBOR:
         CBOR._error("0 Not implemented")
 
     def _internal_encode(self):
-      return CBOR._encode_integer(0x00, 5)
+      return CBOR._generic_header(0x00, 5)
     
     def _get(self):
       return self._value
@@ -171,12 +177,26 @@ class CBOR:
   #  String  #
   ############
   class String(_CborObject):
-    def __init__(self, string):
+    def __init__(self, text_string):
       super().__init__()
-      self._string = CBOR._check_argument_type(string, 'str')
+      self._string = CBOR._check_argument_type(text_string, 'str')
 
     def _internal_encode(self):
       return CBOR._encode_string(CBOR._MT_STRING, self._string.encode("utf8"))
+  
+    def _get(self):
+      return self._string
+    
+  ############
+  #  Bytes  #
+  ############
+  class Bytes(_CborObject):
+    def __init__(self, byte_string):
+      super().__init__()
+      self._string = CBOR._check_bytes_argument(byte_string)
+
+    def _internal_encode(self):
+      return CBOR._encode_string(CBOR._MT_BYTES, self._string)
   
     def _get(self):
       return self._string
@@ -190,7 +210,7 @@ class CBOR:
       self._objects = list()
 
     def _internal_encode(self):
-      encoded = CBOR._encode_integer(CBOR._MT_ARRAY, len(self._objects))
+      encoded = CBOR._generic_header(CBOR._MT_ARRAY, len(self._objects))
       for object in self._objects:
         encoded += object._internal_encode()
       return encoded
@@ -218,10 +238,9 @@ class CBOR:
       print(str(self._current))
 
   @classmethod
-  def decode(cls, cbor):
-    if type(cbor).__name__ not in ['bytes', 'bytearray']:
-      CBOR._error("Unexpected CBOR argument: " + type(cbor).__name__)
-    CBOR.init_decoder(io.BytesIO(cbor), len(cbor)).decode_with_options()
+  def decode(cls, cbor_bytes):
+    CBOR._check_bytes_argument(cbor_bytes)
+    CBOR.init_decoder(io.BytesIO(cbor_bytes), len(cbor_bytes)).decode_with_options()
 
   @classmethod
   def init_decoder(cls, cbor_stream, max_length):
@@ -249,6 +268,8 @@ print(binascii.hexlify(a.encode()))
 f = CBOR.Float(2.0e50)
 print(f.get_float64())
 print(binascii.hexlify(f.encode()))
+
+print(binascii.hexlify(CBOR.Bytes(bytes([0,1,0x99])).encode()))
 
 k = CBOR.Int(7)
 k.get_int8()
