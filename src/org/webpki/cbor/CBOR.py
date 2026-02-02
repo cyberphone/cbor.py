@@ -47,11 +47,7 @@ class CBOR:
 
   @staticmethod
   def _generic_header(tag, value):
-    # The following test only applies to "int" and "bigint", other types only use unsigned values.
-    if (value < 0):
-      value = ~value
-      tag = CBOR._MT_NEGATIVE
-    # Convert int to bytearray (but with a twist).
+    # Convert unsigned integer to bytearray (but with a twist).
     array = bytearray()
     while True:
       array += bytes([value & 0xff])
@@ -145,7 +141,12 @@ class CBOR:
       self._value = CBOR._check_int_argument(value)
 
     def _internal_encode(self):
-      return CBOR._generic_header(CBOR._MT_UNSIGNED, self._value)
+      tag = CBOR._MT_UNSIGNED
+      value = self._value
+      if value < 0:
+        tag = CBOR._MT_NEGATIVE
+        value = ~value
+      return CBOR._generic_header(tag, value)
     
     def _get(self):
       return self._value
