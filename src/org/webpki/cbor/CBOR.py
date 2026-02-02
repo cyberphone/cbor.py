@@ -193,7 +193,7 @@ class CBOR:
   class _Decoder:
     def __init__(self, cbor_stream, max_length):
       CBOR._check_int_argument(max_length)
-      if type(cbor_stream).__name__ != 'BytesIO':
+      if not isinstance(cbor_stream, io.BufferedIOBase):
         CBOR._error("Unexpected stream type: " + type(cbor_stream).__name__)
       self._cbor_stream = cbor_stream
       self._max_length = max_length
@@ -242,3 +242,11 @@ k.get_int8()
 k.check_for_unread()
 
 CBOR.decode("DEC".encode("utf8"))
+
+import http.client
+conn = http.client.HTTPSConnection("cyberphone.github.io")
+conn.request("GET", "/javaapi/app-notes/large-payloads/metadata.cbor")
+r1 = conn.getresponse()
+print(r1.status, r1.reason)
+CBOR.init_decoder(r1, 10000).decode_with_options()
+
