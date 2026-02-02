@@ -1,22 +1,39 @@
 import binascii, struct, math
 
 class CBOR:
+
+  _MT_UNSIGNED     = 0x00
+  _MT_NEGATIVE     = 0x20
+  _MT_BYTES        = 0x40
+  _MT_STRING       = 0x60
+  _MT_ARRAY        = 0x80
+  _MT_MAP          = 0xa0
+  _MT_SIMPLE       = 0xe0
+  _MT_TAG          = 0xc0
+  _MT_BIG_UNSIGNED = 0xc2
+  _MT_BIG_NEGATIVE = 0xc3
+  _MT_FALSE        = 0xf4
+  _MT_TRUE         = 0xf5
+  _MT_NULL         = 0xf6
+  _MT_FLOAT16      = 0xf9
+  _MT_FLOAT32      = 0xfa
+  _MT_FLOAT64      = 0xfb
+
   class Exception(Exception):
     def __init__(self, msg):
-      self.msg = msg
-      super().__init__(self.msg)
+      super().__init__(msg)
 
   @staticmethod
-  def encodeString(tag, binary):
-    return CBOR.encodeInteger(tag, len(binary)) + binary
+  def _encode_string(tag, binary):
+    return CBOR._encode_integer(tag, len(binary)) + binary
 
   @staticmethod
-  def encodeInteger(tag, value):
+  def _encode_integer(tag, value):
     neg = value < 0
     # Only applies to "int" and "bigint"
     if (neg):
       value = ~value
-      tag = 0x20
+      tag = CBOR._MT_NEGATIVE
     # Convert int to bytearray (but with a twist).
     array = bytearray()
     while True:
@@ -44,60 +61,64 @@ class CBOR:
         modifier += 1
       return bytearray([tag | modifier]) + array
     # True "bigint".
-    return bytearray([0xc2 if neg == 0 else 0xc3]) + CBOR.encodeString(0x40, array)
+    return bytearray([CBOR._MT_BIG_UNSIGNED if neg == 0 
+                      else CBOR._MT_BIG_NEGATIVE]) + CBOR._encode_string(CBOR._MT_BYTES, array)
 
   @staticmethod
-  def intRange(value, min, max):
+  def int_range_check(value, min, max):
     if (value < min or value > max):
       raise CBOR.Exception("Value out of range: " + str(value))
     return value
 
   @staticmethod
-  def checkType(value, expected):
+  def _check_argument_type(value, expected):
     if type(value).__name__ != expected:
       raise CBOR.Exception("Expected '" + expected + "', got '" + type(value).__name__ + "'")
     return value
     
   @staticmethod
-  def checkInt(value):
-    return CBOR.checkType(value, 'int')
+  def _check_int_argument(value):
+    return CBOR._check_argument_type(value, 'int')
 
   class CborObject:
-    print("Hi")
+    def __init__(self):
+      self.readFlag = False
 
-    def checkAndGet(self, expected):
+    def check_type_get_value(self, expected):
       if type(self).__name__ != expected:
         raise CBOR.Exception("Expected: '" + 'CBOR.' + expected +
                              "', got 'CBOR." + type(self).__name__  + "'")
+      self.readFlag = True
       return self._get()
 
-    def getInteger(self):
-      return self.checkAndGet('Int')
+    def _get_integer(self):
+      return self.check_type_get_value('Int')
 
-    def getInt8(self):
-      return CBOR.intRange(self.getInteger(), -128, 127)
+    def get_int8(self):
+      return CBOR.int_range_check(self._get_integer(), -128, 127)
     
-    def getU128(self):
-      return CBOR.intRange(self.getInteger(), 0, 0xffffffffffffffffffffffffffffffff)
+    def get_uint128(self):
+      return CBOR.int_range_check(self._get_integer(), 0, 0xffffffffffffffffffffffffffffffff)
     
-    def getFloat64(self):
-      return self.checkAndGet('Float')
+    def get_float64(self):
+      return self.check_type_get_value('Float')
     
-    def getString(self):
-      return self.checkAndGet('String')
+    def get_string(self):
+      return self.check_type_get_value('String')
 
     def encode(self):
-      return self.internalEncode()
+      return self.internal_encode()
 
   ############
   #   Int    #
   ############
   class Int(CborObject):
     def __init__(self, value):
-      self.value = CBOR.checkInt(value)
+      super().__init__()
+      self.value = CBOR._check_int_argument(value)
 
-    def internalEncode(self):
-      return CBOR.encodeInteger(0x00, self.value)
+    def internal_encode(self):
+      return CBOR._encode_integer(CBOR._MT_UNSIGNED, self.value)
     
     def _get(self):
       return self.value
@@ -107,9 +128,10 @@ class CBOR:
   ############
   class Float(CborObject):
     def __init__(self, value):
+      super().__init__()
       if type(value).__name__ == 'int':
         value = float(value)
-      self.value = CBOR.checkType(value, 'float')
+      self.value = CBOR._check_argument_type(value, 'float')
       u8 = bytearray(struct.pack('!d', value))
       print(binascii.hexlify(u8))
       if math.isfinite(value) == False:
@@ -117,8 +139,8 @@ class CBOR:
       if value == 0:
         raise CBOR.Exception("0 Not implemented")
 
-    def internalEncode(self):
-      return CBOR.encodeInteger(0x00, 5)
+    def internal_encode(self):
+      return CBOR._encode_integer(0x00, 5)
     
     def _get(self):
       return self.value
@@ -128,10 +150,11 @@ class CBOR:
   ############
   class String(CborObject):
     def __init__(self, string):
-      self.string = CBOR.checkType(string, 'str')
+      super().__init__()
+      self.string = CBOR._check_argument_type(string, 'str')
 
-    def internalEncode(self):
-      return CBOR.encodeString(0x60, self.string.encode("utf8"))
+    def internal_encode(self):
+      return CBOR._encode_string(CBOR._MT_STRING, self.string.encode("utf8"))
   
     def _get(self):
       return self.string
@@ -141,32 +164,39 @@ class CBOR:
   ############
   class Array(CborObject):
     def __init__(self):
+      super().__init__()
       self.objects = list()
 
-    def internalEncode(self):
-      encoded = CBOR.encodeInteger(0x80, len(self.objects))
+    def internal_encode(self):
+      encoded = CBOR._encode_integer(CBOR._MT_ARRAY, len(self.objects))
       for object in self.objects:
-        encoded += object.internalEncode()
+        encoded += object.internal_encode()
       return encoded
     
     def add(self, object):
       self.objects.append(object)
       return self
+  
+  @classmethod
+  def decode(cls, cbor):
+    print(cbor)
 
 i = CBOR.Int(50)
 print(binascii.hexlify(i.encode()))
 
-print(i.getInt8())
+print(i.get_int8())
 
 s = CBOR.String("kurt€")
 print(binascii.hexlify(s.encode()))
 
-#print(s.getInt8())
+# print(s.get_int8())
 
 a = CBOR.Array()
 a.add(i).add(s)
 print(binascii.hexlify(a.encode()))
 
 f = CBOR.Float(2.0e50)
-print(f.getFloat64())
+print(f.get_float64())
 print(binascii.hexlify(f.encode()))
+
+CBOR.decode("DEC")
