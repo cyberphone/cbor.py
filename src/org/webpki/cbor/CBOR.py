@@ -33,6 +33,9 @@ class CBOR:
   _SIMPLE_FLOAT32   = 0xfa
   _SIMPLE_FLOAT64   = 0xfb
 
+  def __init__(self):
+    CBOR._error("Invalid operation")
+
   class Exception(Exception):
     def __init__(self, msg):
       super().__init__(msg)
@@ -160,10 +163,10 @@ class CBOR:
       if type(value).__name__ == 'int':
         value = float(value)
       self._value = CBOR._check_argument_type(value, 'float')
-      u8 = bytearray(struct.pack('!d', value))
-      print(binascii.hexlify(u8))
+      f64b = bytearray(struct.pack('!d', value))
+      print(binascii.hexlify(f64b))
       if not math.isfinite(value):
-        CBOR._error("NF Not implemented")
+        CBOR._error("Not permitted: 'NaN/Infinity'")
       if value == 0:
         CBOR._error("0 Not implemented")
 
