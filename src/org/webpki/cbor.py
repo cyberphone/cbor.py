@@ -123,14 +123,14 @@ class CBOR:
       self.readFlag = True
       return self._get()
 
-    def _get_integer(self):
+    def  get_integer(self):
       return self._check_type_get_value('Int')
 
     def get_int8(self):
-      return CBOR._int_range_check(self._get_integer(), -128, 127)
+      return CBOR._int_range_check(self. get_integer(), -128, 127)
     
     def get_uint128(self):
-      return CBOR._int_range_check(self._get_integer(), 0, 0xffffffffffffffffffffffffffffffff)
+      return CBOR._int_range_check(self. get_integer(), 0, 0xffffffffffffffffffffffffffffffff)
     
     def get_float64(self):
       return self._check_type_get_value('Float')

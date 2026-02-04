@@ -1,30 +1,29 @@
 from org.webpki.cbor import CBOR
-import binascii
-
+from assertions import assert_true, assert_false, fail
 
 ##########################
 #       Testing...       #
 ##########################
 
 i = CBOR.Int(50)
-print(binascii.hexlify(i.encode()))
+print(i.encode().hex())
 
 print(i.get_int8())
 
 s = CBOR.String("kurt€")
-print(binascii.hexlify(s.encode()))
+print(s.encode().hex())
 
 # print(s.get_int8())
 
 a = CBOR.Array()
 a.add(i).add(s)
-print(binascii.hexlify(a.encode()))
+print(a.encode().hex())
 
 f = CBOR.Float(2.0e50)
 print(f.get_float64())
-print(binascii.hexlify(f.encode()))
+print(f.encode().hex())
 
-print(binascii.hexlify(CBOR.Bytes(bytes([0,1,0x99])).encode()))
+print(CBOR.Bytes(bytes([0,1,0x99])).encode().hex())
 
 k = CBOR.Int(7)
 k.get_int8()
@@ -39,16 +38,16 @@ response = conn.getresponse()
 print(response.status, response.reason)
 CBOR.init_decoder(response, 10000).decode_with_options()
 
-print(binascii.hexlify(CBOR.NonFinite(0x7ff0000000000000).encode()))
-print(binascii.hexlify(CBOR.NonFinite.create_payload(0x1).encode()))
-print(binascii.hexlify(CBOR.NonFinite.create_payload((1 << 10) - 1).encode()))
-print(binascii.hexlify(CBOR.NonFinite.create_payload((1 << 23) - 1).encode()))
-print(binascii.hexlify(CBOR.NonFinite.create_payload(1 << 10).encode()))
-print(binascii.hexlify(CBOR.NonFinite.create_payload((1 << 52) - 1).encode()))
-print(binascii.hexlify(CBOR.NonFinite.create_payload((1 << 52) - 1).set_sign(True).encode()))
-print(binascii.hexlify(CBOR.NonFinite.create_payload((1 << 53) - 1).encode()))
-print(binascii.hexlify(CBOR.NonFinite.create_payload((1 << 52) + 1).encode()))
-print(binascii.hexlify(CBOR.NonFinite.create_payload(1 << 23).encode()))
+print(CBOR.NonFinite(0x7ff0000000000000).encode().hex())
+print(CBOR.NonFinite.create_payload(0x1).encode().hex())
+print(CBOR.NonFinite.create_payload((1 << 10) - 1).encode().hex())
+print(CBOR.NonFinite.create_payload((1 << 23) - 1).encode().hex())
+print(CBOR.NonFinite.create_payload(1 << 10).encode().hex())
+print(CBOR.NonFinite.create_payload((1 << 52) - 1).encode().hex())
+print(CBOR.NonFinite.create_payload((1 << 52) - 1).set_sign(True).encode().hex())
+print(CBOR.NonFinite.create_payload((1 << 53) - 1).encode().hex())
+print(CBOR.NonFinite.create_payload((1 << 52) + 1).encode().hex())
+print(CBOR.NonFinite.create_payload(1 << 23).encode().hex())
 
 print(CBOR.NonFinite.create_payload(123456789).get_payload())
 
