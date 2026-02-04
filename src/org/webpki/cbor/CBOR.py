@@ -145,9 +145,9 @@ class CBOR:
       if not self.readFlag:
         CBOR._error("Not read: " + type(self).__name__)
 
-##########################
-#       CBOR.Int         #
-##########################
+  ##########################
+  #       CBOR.Int         #
+  ##########################
   class Int(_CborObject):
     def __init__(self, value):
       super().__init__()
@@ -164,9 +164,9 @@ class CBOR:
     def _get(self):
       return self._value
   
-##########################
-#       CBOR.Float       #
-##########################
+  ##########################
+  #       CBOR.Float       #
+  ##########################
   class Float(_CborObject):
     def __init__(self, value):
       super().__init__()
@@ -186,9 +186,9 @@ class CBOR:
     def _get(self):
       return self._value
   
-##########################
-#      CBOR.String       #
-##########################
+  ##########################
+  #      CBOR.String       #
+  ##########################
   class String(_CborObject):
     def __init__(self, text_string):
       super().__init__()
@@ -200,9 +200,9 @@ class CBOR:
     def _get(self):
       return self._string
     
-##########################
-#       CBOR.Bytes       #
-##########################
+  ##########################
+  #       CBOR.Bytes       #
+  ##########################
   class Bytes(_CborObject):
     def __init__(self, byte_string):
       super().__init__()
@@ -214,9 +214,9 @@ class CBOR:
     def _get(self):
       return self._string
     
-##########################
-#       CBOR.Array       #
-##########################
+  ##########################
+  #       CBOR.Array       #
+  ##########################
   class Array(_CborObject):
     def __init__(self):
       super().__init__()
@@ -232,9 +232,9 @@ class CBOR:
       self._objects.append(object)
       return self
 
-##########################_
-#     CBOR.NonFinite     #
-##########################_
+  ##########################
+  #     CBOR.NonFinite     #
+  ##########################
   class NonFinite(_CborObject):
     def __init__(self, value):
       super().__init__()
@@ -422,4 +422,5 @@ print(binascii.hexlify(CBOR.NonFinite.create_payload(1 << 10).encode()))
 print(binascii.hexlify(CBOR.NonFinite.create_payload((1 << 52) - 1).encode()))
 print(binascii.hexlify(CBOR.NonFinite.create_payload((1 << 52) - 1).set_sign(True).encode()))
 print(binascii.hexlify(CBOR.NonFinite.create_payload((1 << 53) - 1).encode()))
+print(binascii.hexlify(CBOR.NonFinite.create_payload((1 << 52) + 1).encode()))
 print(binascii.hexlify(CBOR.NonFinite.create_payload(1 << 23).encode()))
