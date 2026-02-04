@@ -137,6 +137,9 @@ class CBOR:
     
     def get_string(self):
       return self._check_type_get_value('String')
+    
+    def get_non_finite64(self):
+      return self._check_type_get_value('NonFinite')
 
     def encode(self):
       return self._internal_encode()
@@ -424,3 +427,5 @@ print(binascii.hexlify(CBOR.NonFinite.create_payload((1 << 52) - 1).set_sign(Tru
 print(binascii.hexlify(CBOR.NonFinite.create_payload((1 << 53) - 1).encode()))
 print(binascii.hexlify(CBOR.NonFinite.create_payload((1 << 52) + 1).encode()))
 print(binascii.hexlify(CBOR.NonFinite.create_payload(1 << 23).encode()))
+
+print(CBOR.NonFinite.create_payload(123456789).get_payload())

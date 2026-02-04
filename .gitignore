@@ -1,0 +1,7 @@
+.vs
+cbor.js.sln
+*.tgz
+bin
+.tmp
+.DS_Store
+__pycache__
