@@ -55,8 +55,7 @@ class CBOR:
     while True:
       array += bytes([value & 0xff])
       value >>= 8
-      if value == 0:
-        break
+      if value == 0: break
     length = len(array)
     # Prepare for "int" encoding (1, 2, 4, 8).  Only 3, 5, 6, and 7 need an action.
     while length < 8 and length > 2 and length != 4:
@@ -72,8 +71,7 @@ class CBOR:
       modifier = 24
       while True:
         length >>= 1
-        if length == 0:
-          break  
+        if length == 0: break  
         modifier += 1
       return bytearray([tag | modifier]) + array
     # True "bigint".
@@ -101,6 +99,18 @@ class CBOR:
     if type(byte_string).__name__ not in ['bytes', 'bytearray']:
       CBOR._error("Unexpected CBOR argument: " + type(byte_string).__name__)
     return byte_string
+  
+  @staticmethod
+  def _reverse_payload(b51b0):
+    reversed = 0
+    bit_count = 0
+    while b51b0 > 0:
+      bit_count += 1
+      reversed <<= 1
+      if (b51b0 & 1) == 1:
+        reversed |= 1
+      b51b0 >>= 1
+    return reversed << (52 - bit_count)
 
   class _CborObject:
     def __init__(self):
@@ -135,9 +145,9 @@ class CBOR:
       if not self.readFlag:
         CBOR._error("Not read: " + type(self).__name__)
 
-  ############
-  #   Int    #
-  ############
+##########################
+#       CBOR.Int         #
+##########################
   class Int(_CborObject):
     def __init__(self, value):
       super().__init__()
@@ -154,9 +164,9 @@ class CBOR:
     def _get(self):
       return self._value
   
-  ############
-  #  Float   #
-  ############
+##########################
+#       CBOR.Float       #
+##########################
   class Float(_CborObject):
     def __init__(self, value):
       super().__init__()
@@ -176,9 +186,9 @@ class CBOR:
     def _get(self):
       return self._value
   
-  ############
-  #  String  #
-  ############
+##########################
+#      CBOR.String       #
+##########################
   class String(_CborObject):
     def __init__(self, text_string):
       super().__init__()
@@ -190,9 +200,9 @@ class CBOR:
     def _get(self):
       return self._string
     
-  ############
-  #  Bytes  #
-  ############
+##########################
+#       CBOR.Bytes       #
+##########################
   class Bytes(_CborObject):
     def __init__(self, byte_string):
       super().__init__()
@@ -204,9 +214,9 @@ class CBOR:
     def _get(self):
       return self._string
     
-  ############
-  #  Array   #
-  ############
+##########################
+#       CBOR.Array       #
+##########################
   class Array(_CborObject):
     def __init__(self):
       super().__init__()
@@ -221,6 +231,123 @@ class CBOR:
     def add(self, object):
       self._objects.append(object)
       return self
+
+##########################_
+#     CBOR.NonFinite     #
+##########################_
+  class NonFinite(_CborObject):
+    def __init__(self, value):
+      super().__init__()
+      self._original = CBOR._check_int_argument(value)
+      self._create_det_enc(value)
+
+    def _create_det_enc(self, value):
+      while True:
+        self._ieee754 = bytearray()
+        i = value
+        if i < 0: self._bad_value()
+        while True:
+          self._ieee754 += bytes([i & 0xff])
+          i >>= 8
+          if i == 0: break
+        self._ieee754.reverse()
+        match len(self._ieee754):
+          case 2: exponent = 0x7c00
+          case 4: exponent = 0x7f800000
+          case 8: exponent = 0x7ff0000000000000
+          case _: self._bad_value()
+        sign = self._ieee754[0] > 0x7f
+        if (value & exponent) != exponent:
+          self._bad_value()
+        match len(self._ieee754):
+          case 2: break
+          case 4:
+            if value & ((1 << 13) - 1): break
+            value >>= 13
+            value &= 0x7fff
+            if (sign):
+              value |= 0x8000
+            continue
+          case 8:
+            if value & ((1 << 29) - 1): break
+            value >>= 29
+            value &= 0x7fffffff
+            if (sign):
+              value |= 0x80000000
+            continue
+      self._value = value
+      return
+    
+    def _bad_value(self):
+      CBOR._error("Not a non-finite number: " + str(self._original))
+
+    def is_simple(self):
+      return self._value in [0x7e00 , 0x7c00 , 0xfc00]
+
+    def set_sign(self, sign):
+      mask = 1 << (len(self._ieee754) * 8 - 1)
+      self._create_det_enc((self._value & (mask - 1)) | (mask if sign else 0))
+      return self
+
+    def is_nan(self):
+      match len(self._ieee754):
+        case 2: mask = 0x3ff
+        case 4: mask = 0x7fffff
+        case 8: mask = 0xfffffffffffff
+      return (mask & self._value) != 0
+
+    def get_sign(self):
+      return self._ieee754[0] > 0x7f
+
+    @classmethod
+    def create_payload(cls, payload):
+      CBOR._check_int_argument(payload)
+      if (payload & 0x1fffffffffffff) != payload:
+        CBOR._error("Payload out of range: " + payload)
+      left64 = 0xfff0000000000000 if (payload & 0x10000000000000) else 0x7ff0000000000000
+      return CBOR.NonFinite(left64 + CBOR._reverse_payload(payload & 0xfffffffffffff))
+
+    def get_non_finite(self):
+      """
+      self.scan()
+      """
+      return self._value
+
+    def _toNonFinite64(self, significand_length):
+      nf64 = self._value
+      nf64 &= (1 << significand_length) - 1
+      nf64 = 0x7ff0000000000000 | (nf64 << (52 - significand_length))
+      if self.get_sign():
+        nf64 |= 0x8000000000000000
+      return nf64 
+
+    def get_payload(self):
+      return CBOR._reverse_payload(self.get_non_finite64() & 0xfffffffffffff)
+
+    def _internal_encode(self):
+      return bytes([0xf9 + (len(self._ieee754) >> 2)]) + self._ieee754
+
+    """
+    def internalToString(cborPrinter): 
+      if self.is_simple():
+        cborPrinter.append(self.is_nan() ? "NaN" : self.get_sign() ? "-Infinity" : "Infinity")
+      else:
+        cborPrinter.append("float'").append(CBOR.toHex(self._ieee754)).append("'")
+    """
+  
+    def _getLength(self):
+      return len(self._ieee754)
+  
+    def _get(self):
+      match len(self._ieee754):
+        case 2: return self._toNonFinite64(10)
+        case 4: return self._toNonFinite64(23)
+      return self._value
+
+    """
+    def _getValue():
+      return self._value
+    """
 
   ################  
   #   Decoding   #
@@ -286,3 +413,13 @@ conn.request("GET", "/javaapi/app-notes/large-payloads/metadata.cbor")
 response = conn.getresponse()
 print(response.status, response.reason)
 CBOR.init_decoder(response, 10000).decode_with_options()
+
+print(binascii.hexlify(CBOR.NonFinite(0x7ff0000000000000).encode()))
+print(binascii.hexlify(CBOR.NonFinite.create_payload(0x1).encode()))
+print(binascii.hexlify(CBOR.NonFinite.create_payload((1 << 10) - 1).encode()))
+print(binascii.hexlify(CBOR.NonFinite.create_payload((1 << 23) - 1).encode()))
+print(binascii.hexlify(CBOR.NonFinite.create_payload(1 << 10).encode()))
+print(binascii.hexlify(CBOR.NonFinite.create_payload((1 << 52) - 1).encode()))
+print(binascii.hexlify(CBOR.NonFinite.create_payload((1 << 52) - 1).set_sign(True).encode()))
+print(binascii.hexlify(CBOR.NonFinite.create_payload((1 << 53) - 1).encode()))
+print(binascii.hexlify(CBOR.NonFinite.create_payload(1 << 23).encode()))
