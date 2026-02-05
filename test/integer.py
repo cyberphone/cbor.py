@@ -12,7 +12,7 @@ def one_turn(value, expected):
     got = '***=' + got
   else:
     got = ''
-  # assert_true("Failed decoding: " + value, CBOR.decode(cbor).get_integer() == value)
+  # assert_true("Failed decoding: " + value, CBOR.decode(cbor).get_big_integer() == value)
   while len(expected) < 20:
     expected += ' '
   if len(got):
@@ -58,5 +58,5 @@ try {
   assert_true("msg4", error.toString().includes("CBOR.Int expects 1 argument(s)"))
 }
 """
-success(__file__)
+success()
 

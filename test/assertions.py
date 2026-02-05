@@ -9,5 +9,5 @@ def assert_false(text, expression):
 def fail(text):
   raise Exception("Failed on: " + text)
 
-def success(file_name):
-  print("Success[" + file_name + "]")
+def success():
+  print("SUCCESSFUL")
