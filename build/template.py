@@ -22,7 +22,6 @@ TESTS = [
 
 for o in TESTS:
   __name = o[0]
-  print(o[0])
   try:
     exec(o[1])
   except Exception:
