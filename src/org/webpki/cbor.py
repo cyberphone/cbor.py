@@ -212,38 +212,30 @@ class CBOR:
   class Float(_CborObject):
     def __init__(self, value):
       super().__init__()
-      if type(value).__name__ == 'int': # Trying to be kind :)
-        value = float(value)
       self._value = CBOR._check_argument_type(value, 'float')
-      # Begin catching the forbidden use-case.
+      # Catch the forbidden use-case.  See: create_extended_float().
       if not math.isfinite(value):
         CBOR._error("Not permitted: 'NaN/Infinity'")
-      f64b = bytearray(struct.pack('!d', value))
-      print(f64b.hex())
-      # Deal with 0.0 and -0.0
+      f64b = struct.pack('!d', value)
+      # Deal with 0.0 and -0.0 separately.
       if value == 0:
         self._encoded = f64b[0:2]
         return
       while True:
-        unsigned_bin_f64 = 0
-        for v in f64b:
-          unsigned_bin_f64 <<= 8
-          unsigned_bin_f64 += v
-        unsigned_bin_f64 &= 0x7fffffffffffffff
-        f32exp = ((unsigned_bin_f64 & 0x7ff0000000000000) >> 52) - 0x380
-        # Don't go into the non-finite space or underflow
+        f64bin = CBOR._bytes_to_int(f64b)
+        f32exp = ((f64bin & 0x7ff0000000000000) >> 52) - 0x380
+        # Don't go into the non-finite space or underflow.
         if f32exp > 0xfe or f32exp < -23: break
-        f32signif = unsigned_bin_f64 & 0xfffffffffffff
+        f32signif = f64bin & 0xfffffffffffff
         # Must not drop any bits
         if f32signif & 0x1fffffff: break
         # Put significand in position
         f32signif >>= 29
         # Finally, do we need to denormalize the number?
         if f32exp <= 0:
-          if f32signif & ((1 << (1 - f32exp)) - 1):
-            # Losing significand bits is not an option.
-            break
-          # The implicit "1" becomes explicit using subnormal representation.
+          # Losing significand bits is not an option.
+          if f32signif & ((1 << (1 - f32exp)) - 1): break
+          # Denormalize. The implicit "1" becomes explicit using subnormal representation.
           f32signif += 0x800000
           # Put significand in position.
           f32signif >>= (1 - f32exp)
@@ -252,31 +244,40 @@ class CBOR:
         # Maybe we are done but we need to check if float16 is possible as well.
         while True:
           f16exp = f32exp - 0x70
-          # Don't go into the non-finite space or underflow
+          # Don't go into the non-finite space or underflow.
           if f16exp > 0x1e or f16exp < -11: break
           # Must not drop any bits
           if f32signif & 0x1fff: break
           f16signif = f32signif >> 13
           if f16exp <= 0:
-            if f16signif & ((1 << (1 - f16exp)) - 1):
-              # Losing significand bits is not an option.
-              break
-            # The implicit "1" becomes explicit using subnormal representation.
+            # Losing significand bits is not an option.
+            if f16signif & ((1 << (1 - f16exp)) - 1): break
+            # Denormalize. The implicit "1" becomes explicit using subnormal representation.
             f16signif += 0x400
             # Put significand in position.
             f16signif >>= (1 - f16exp)
             # Denormalized exponents are always zero.
             f16exp = 0
-          # float16 it is.
+          # Reached the end of the rope => float16.
           self._encoded = CBOR._encode_16_bits(
             ((f64b[0] & 0x80) << 8) + (f16exp << 10) + f16signif)
           return
-        # float32 it is.
+        # Inner loop broke => float32.
         f32bin = ((f64b[0] & 0x80) << 24) + (f32exp << 23) + f32signif
         self._encoded = CBOR._encode_16_bits(f32bin >> 16) + CBOR._encode_16_bits(f32bin & 0xffff)
         return
-      # float64 it is.
+      # Outer loop broke => float64.
       self._encoded = f64b
+
+    @staticmethod
+    def create_extended_float(value):
+      if math.isfinite(CBOR._check_argument_type(value, 'float')):
+        return CBOR.Float(value)
+      # Not a "genuine" floating-point number.  Handled as a separate data type.
+      nf = CBOR.NonFinite(CBOR._bytes_to_int(struct.pack('!d', value)))
+      if not nf.is_simple():
+        CBOR._error("create_extended_float() does not support NaN with payloads")
+      return nf
 
     def _internal_encode(self):
       return bytes([0xf9 + (len(self._encoded) >> 2)]) + self._encoded
@@ -670,5 +671,13 @@ class CBOR:
     cbor_int = CBOR.Int(value)
     CBOR._int_range_check(value, min, max)
     return cbor_int
+
+  @staticmethod
+  def _bytes_to_int(byte_array):
+    value = 0
+    for v in byte_array:
+      value <<= 8
+      value += v
+    return value
   
   version = '1.0.0'

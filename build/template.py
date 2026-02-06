@@ -1,4 +1,5 @@
 from org.webpki.cbor import CBOR
+import math
 
 def assert_true(text, expression):
   if not expression:

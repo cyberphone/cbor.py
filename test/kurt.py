@@ -1,5 +1,6 @@
 from org.webpki.cbor import CBOR
 from assertions import assert_true, assert_false, fail, success
+import math
 
 i = CBOR.Int(50)
 print(i.encode().hex())
@@ -70,6 +71,7 @@ print(CBOR.Float(-0.0).encode().hex())
 
 print(CBOR.Float(1.401298464324817e-45).encode().hex())
 print(CBOR.Float(5e-324))
+print(CBOR.Float.create_extended_float(math.nan))
 
 success()
 
