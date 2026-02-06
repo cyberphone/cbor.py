@@ -49,6 +49,21 @@ class CBOR:
     def __init__(self):
       self.readFlag = False
 
+    def __repr__(self):
+      return self.to_string()
+
+    def __str__(self):
+      return self.to_string()
+    
+    @property
+    def length(self):
+      if not hasattr(self, "_length"):
+        CBOR._error("'CBOR." + type(self).__name__  + "' does not support len()")
+      return self._length()
+    
+    def __len__(self):
+      return self.length
+
     def _check_type_get_value(self, expected):
       if type(self).__name__ != expected:
         CBOR._error("Expected '" + 'CBOR.' + expected +
@@ -56,7 +71,7 @@ class CBOR:
       self.readFlag = True
       return self._get()
 
-    def  get_big_integer(self):
+    def get_big_integer(self):
       return self._check_type_get_value('Int')
 
     def get_int8(self):
@@ -296,8 +311,7 @@ class CBOR:
     def get(self, index):
       return self._objects[index]
     
-    @property
-    def length(self):
+    def _length(self):
       return len(self._objects)
 
   ##########################

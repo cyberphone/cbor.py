@@ -3,6 +3,7 @@ from assertions import assert_true, assert_false, fail, success
 
 i = CBOR.Int(50)
 print(i.encode().hex())
+# len(i) # NO
 
 CBOR.Int.create_int16(32767)
 
@@ -17,6 +18,11 @@ a = CBOR.Array()
 a.add(i).add(s)
 print(a.encode().hex())
 print(a.to_string())
+print(str(a))
+print(a)
+print(type(a))
+print(a.length)
+print(len(a))
 
 f = CBOR.Float(2.0e50)
 print(f.get_float64())
