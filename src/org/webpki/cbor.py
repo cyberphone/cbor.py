@@ -10,7 +10,7 @@
 # version of cbor.py would be rewritten in C.                  #
 ################################################################
 
-import binascii, struct, math, io
+import struct, math, io
 
 class CBOR:
 
@@ -125,6 +125,9 @@ class CBOR:
       if not self.readFlag:
         CBOR._error("Not read: " + type(self).__name__)
 
+    def scan(self):
+      self.readFlag = True
+
     def get(self):
       CBOR._error('get() not available in: CBOR.' + type(self).__name__)
 
@@ -209,18 +212,74 @@ class CBOR:
   class Float(_CborObject):
     def __init__(self, value):
       super().__init__()
-      if type(value).__name__ == 'int':
+      if type(value).__name__ == 'int': # Trying to be kind :)
         value = float(value)
       self._value = CBOR._check_argument_type(value, 'float')
-      f64b = bytearray(struct.pack('!d', value))
-      print(binascii.hexlify(f64b))
+      # Begin catching the forbidden use-case.
       if not math.isfinite(value):
         CBOR._error("Not permitted: 'NaN/Infinity'")
+      f64b = bytearray(struct.pack('!d', value))
+      print(f64b.hex())
+      # Deal with 0.0 and -0.0
       if value == 0:
-        CBOR._error("0 Not implemented")
+        self._encoded = f64b[0:2]
+        return
+      while True:
+        unsigned_bin_f64 = 0
+        for v in f64b:
+          unsigned_bin_f64 <<= 8
+          unsigned_bin_f64 += v
+        unsigned_bin_f64 &= 0x7fffffffffffffff
+        f32exp = ((unsigned_bin_f64 & 0x7ff0000000000000) >> 52) - 0x380
+        # Don't go into the non-finite space or underflow
+        if f32exp > 0xfe or f32exp < -23: break
+        f32signif = unsigned_bin_f64 & 0xfffffffffffff
+        # Must not drop any bits
+        if f32signif & 0x1fffffff: break
+        # Put significand in position
+        f32signif >>= 29
+        # Finally, do we need to denormalize the number?
+        if f32exp <= 0:
+          if f32signif & ((1 << (1 - f32exp)) - 1):
+            # Losing significand bits is not an option.
+            break
+          # The implicit "1" becomes explicit using subnormal representation.
+          f32signif += 0x800000
+          # Put significand in position.
+          f32signif >>= (1 - f32exp)
+          # Denormalized exponents are always zero.
+          f32exp = 0
+        # Maybe we are done but we need to check if float16 is possible as well.
+        while True:
+          f16exp = f32exp - 0x70
+          # Don't go into the non-finite space or underflow
+          if f16exp > 0x1e or f16exp < -11: break
+          # Must not drop any bits
+          if f32signif & 0x1fff: break
+          f16signif = f32signif >> 13
+          if f16exp <= 0:
+            if f16signif & ((1 << (1 - f16exp)) - 1):
+              # Losing significand bits is not an option.
+              break
+            # The implicit "1" becomes explicit using subnormal representation.
+            f16signif += 0x400
+            # Put significand in position.
+            f16signif >>= (1 - f16exp)
+            # Denormalized exponents are always zero.
+            f16exp = 0
+          # float16 it is.
+          self._encoded = CBOR._encode_16_bits(
+            ((f64b[0] & 0x80) << 8) + (f16exp << 10) + f16signif)
+          return
+        # float32 it is.
+        f32bin = ((f64b[0] & 0x80) << 24) + (f32exp << 23) + f32signif
+        self._encoded = CBOR._encode_16_bits(f32bin >> 16) + CBOR._encode_16_bits(f32bin & 0xffff)
+        return
+      # float64 it is.
+      self._encoded = f64b
 
     def _internal_encode(self):
-      return CBOR._generic_header(0x00, 5)
+      return bytes([0xf9 + (len(self._encoded) >> 2)]) + self._encoded
     
     def _get(self):
       return self._value
@@ -277,6 +336,18 @@ class CBOR:
       super().__init__()
       self._objects = list()
 
+    def add(self, object):
+      self._objects.append(object)
+      return self
+    
+    def get(self, index):
+      return self._objects[self._index_check(index, len(self._objects) - 1)]
+
+    def _index_check(self, index, max):
+      if CBOR._check_int_argument(index) > max or index < 0:
+        CBOR._error("Index out of range: " + str(index))
+      return index
+    
     def _internal_encode(self):
       encoded = CBOR._generic_header(CBOR._MT_ARRAY, len(self._objects))
       for object in self._objects:
@@ -303,13 +374,6 @@ class CBOR:
           notFirst = True
           object._internal_to_string(cbor_printer)
         cbor_printer.append(']')
-    
-    def add(self, object):
-      self._objects.append(object)
-      return self
-    
-    def get(self, index):
-      return self._objects[index]
     
     def _length(self):
       return len(self._objects)
@@ -390,9 +454,7 @@ class CBOR:
       return CBOR.NonFinite(left64 + CBOR._reverse_payload(payload & 0xfffffffffffff))
 
     def get_non_finite(self):
-      """
       self.scan()
-      """
       return self._value
 
     def _toNonFinite64(self, significand_length):
@@ -409,13 +471,12 @@ class CBOR:
     def _internal_encode(self):
       return bytes([0xf9 + (len(self._ieee754) >> 2)]) + self._ieee754
 
-    """
-    def internalToString(cbor_printer): 
+    def _internal_to_string(self, cbor_printer): 
       if self.is_simple():
-        cbor_printer.append(self.is_nan() ? "NaN" : self.get_sign() ? "-Infinity" : "Infinity")
+        cbor_printer.append("NaN" if self.is_nan()
+                            else "-Infinity" if self.get_sign() else "Infinity")
       else:
-        cbor_printer.append("float'").append(CBOR.toHex(self._ieee754)).append("'")
-    """
+        cbor_printer.append("float'").append(self._ieee754.hex()).append("'")
   
     def _getLength(self):
       return len(self._ieee754)
@@ -576,6 +637,10 @@ class CBOR:
     if type(byte_string).__name__ not in ['bytes', 'bytearray']:
       CBOR._error("Unexpected CBOR argument: " + type(byte_string).__name__)
     return byte_string
+  
+  @staticmethod
+  def _encode_16_bits(uint16):
+    return bytes([uint16 >> 8, uint16 & 0xff])
   
   @staticmethod
   def _reverse_payload(b51b0):

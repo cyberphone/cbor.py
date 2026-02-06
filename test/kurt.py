@@ -23,6 +23,7 @@ print(a)
 print(type(a))
 print(a.length)
 print(len(a))
+print(a.get(1))
 
 f = CBOR.Float(2.0e50)
 print(f.get_float64())
@@ -58,7 +59,16 @@ print(CBOR.NonFinite.create_payload(123456789).get_payload())
 
 print(CBOR.NonFinite.create_payload(123456789).get_payload())
 
+nf = CBOR.NonFinite(0x7e00)
+print(nf)
+print(nf.get_non_finite64())
+
+print(CBOR.NonFinite(0x7ff0000010000000))
+
 print(CBOR.version)
+print(CBOR.Float(-0.0).encode().hex())
+
+print(CBOR.Float(1.401298464324817e-45).encode().hex())
 
 success()
 
