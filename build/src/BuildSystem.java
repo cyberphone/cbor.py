@@ -11,6 +11,7 @@ public class BuildSystem {
     String content = UTF8.decode(IO.readFile(testFileDirectory + testFileName));
     content = content.substring(0, content.indexOf("\n") + 1) +
               content.substring(content.indexOf("\n\n") + 1);
+    content = content.replace("\\", "\\\\");
     while (true) {
       int i = content.indexOf("\"\"\"");
       if (i < 0) break;
