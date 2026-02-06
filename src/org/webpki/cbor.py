@@ -281,6 +281,16 @@ class CBOR:
     def _internal_encode(self):
       return bytes([0xf9 + (len(self._encoded) >> 2)]) + self._encoded
     
+    def _internal_to_string(self, cbor_printer):
+      textual = str(self._value)
+      e_pos = textual.find("e")
+      if e_pos > 0 and textual.find(".") < 0:
+        textual = textual[0:e_pos] + ".0" + textual[e_pos:]
+      cbor_printer.append(textual)
+
+    def _length(self):
+      return len(self._encoded)
+    
     def _get(self):
       return self._value
   

@@ -69,6 +69,7 @@ print(CBOR.version)
 print(CBOR.Float(-0.0).encode().hex())
 
 print(CBOR.Float(1.401298464324817e-45).encode().hex())
+print(CBOR.Float(5e-324))
 
 success()
 
