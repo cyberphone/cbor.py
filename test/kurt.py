@@ -1,16 +1,14 @@
 from org.webpki.cbor import CBOR
 from assertions import assert_true, assert_false, fail, success
 
-##########################
-#       Testing...       #
-##########################
-
 i = CBOR.Int(50)
 print(i.encode().hex())
 
+CBOR.Int.create_int16(32767)
+
 print(i.get_int8())
 
-s = CBOR.String("kurt€")
+s = CBOR.String("kurt0€\"\r\x00")
 print(s.encode().hex())
 
 # print(s.get_int8())
@@ -18,6 +16,7 @@ print(s.encode().hex())
 a = CBOR.Array()
 a.add(i).add(s)
 print(a.encode().hex())
+print(a.to_string())
 
 f = CBOR.Float(2.0e50)
 print(f.get_float64())
