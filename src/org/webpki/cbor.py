@@ -223,13 +223,14 @@ class CBOR:
         return
       while True:
         f64bin = CBOR._bytes_to_int(f64b)
+        # Exponent bias difference: 1023 - 127
         f32exp = ((f64bin & 0x7ff0000000000000) >> 52) - 0x380
         # Don't go into the non-finite space or underflow.
-        if f32exp > 0xfe or f32exp < -23: break
+        if f32exp <= -23 or f32exp > 0xfe: break
         f32signif = f64bin & 0xfffffffffffff
         # Must not drop any bits
         if f32signif & 0x1fffffff: break
-        # Put significand in position
+        # Put significand in position. Significand size difference: 52 - 23
         f32signif >>= 29
         # Finally, do we need to denormalize the number?
         if f32exp <= 0:
@@ -243,11 +244,13 @@ class CBOR:
           f32exp = 0
         # Maybe we are done but we need to check if float16 is possible as well.
         while True:
+          # Exponent bias difference: 127 - 15
           f16exp = f32exp - 0x70
           # Don't go into the non-finite space or underflow.
-          if f16exp > 0x1e or f16exp < -11: break
+          if f16exp <= -10 or f16exp > 0x1e: break
           # Must not drop any bits
           if f32signif & 0x1fff: break
+          # Put significand in position. Significand size difference: 23 - 10
           f16signif = f32signif >> 13
           if f16exp <= 0:
             # Losing significand bits is not an option.
