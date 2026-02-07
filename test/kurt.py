@@ -43,7 +43,7 @@ conn = http.client.HTTPSConnection("cyberphone.github.io")
 conn.request("GET", "/javaapi/app-notes/large-payloads/metadata.cbor")
 response = conn.getresponse()
 print(response.status, response.reason)
-CBOR.init_decoder(response, 10000).decode_with_options()
+CBOR.init_decoder(response, 0, 10000).decode_with_options()
 
 print(CBOR.NonFinite(0x7ff0000000000000).encode().hex())
 print(CBOR.NonFinite.create_payload(0x1).encode().hex())

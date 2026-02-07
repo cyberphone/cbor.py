@@ -13,6 +13,8 @@
 import struct, math, io
 
 class CBOR:
+    
+  version = '1.0.0'
 
   _MT_UNSIGNED      = 0x00
   _MT_NEGATIVE      = 0x20
@@ -213,9 +215,10 @@ class CBOR:
     def __init__(self, value):
       super().__init__()
       self._value = CBOR._check_argument_type(value, 'float')
-      # Catch the forbidden use-case.  See: create_extended_float().
+      # Catch the forbidden use-case.  See: CBOR.Float.create_extended_float().
       if not math.isfinite(value):
         CBOR._error("Not permitted: 'NaN/Infinity'")
+      # Get the 8 bytes representing the IEEE-754 double.
       f64b = struct.pack('!d', value)
       # Deal with 0.0 and -0.0 separately.
       if value == 0:
@@ -228,7 +231,7 @@ class CBOR:
         # Don't go into the non-finite space or underflow.
         if f32exp <= -23 or f32exp > 0xfe: break
         f32signif = f64bin & 0xfffffffffffff
-        # Must not drop any bits
+        # The 29 bits to be discarded must all be zero.
         if f32signif & 0x1fffffff: break
         # Put significand in position. Significand size difference: 52 - 23
         f32signif >>= 29
@@ -248,7 +251,7 @@ class CBOR:
           f16exp = f32exp - 0x70
           # Don't go into the non-finite space or underflow.
           if f16exp <= -10 or f16exp > 0x1e: break
-          # Must not drop any bits
+          # The 13 bits to be discarded must all be zero.
           if f32signif & 0x1fff: break
           # Put significand in position. Significand size difference: 23 - 10
           f16signif = f32signif >> 13
@@ -265,11 +268,11 @@ class CBOR:
           self._encoded = CBOR._encode_16_bits(
             ((f64b[0] & 0x80) << 8) + (f16exp << 10) + f16signif)
           return
-        # Inner loop broke => float32.
+        # Exited inner loop  => float32.
         f32bin = ((f64b[0] & 0x80) << 24) + (f32exp << 23) + f32signif
         self._encoded = CBOR._encode_16_bits(f32bin >> 16) + CBOR._encode_16_bits(f32bin & 0xffff)
         return
-      # Outer loop broke => float64.
+      # Exited outer loop => float64.
       self._encoded = f64b
 
     @staticmethod
@@ -399,26 +402,28 @@ class CBOR:
     def __init__(self, value):
       super().__init__()
       self._original = CBOR._check_int_argument(value)
+      if value < 0: self._bad_value()
       self._create_det_enc(value)
 
     def _create_det_enc(self, value):
       while True:
+        # Create a byte representation of the value.
         self._ieee754 = bytearray()
         i = value
-        if i < 0: self._bad_value()
         while True:
           self._ieee754 += bytes([i & 0xff])
           i >>= 8
           if i == 0: break
         self._ieee754.reverse()
+        # Check that the syntax matches a non-finite number.
         match len(self._ieee754):
           case 2: exponent = 0x7c00
           case 4: exponent = 0x7f800000
           case 8: exponent = 0x7ff0000000000000
           case _: self._bad_value()
+        if (value & exponent) != exponent: self._bad_value()
+        # All is good, now apply "preferred serialization".
         sign = self._ieee754[0] > 0x7f
-        if (value & exponent) != exponent:
-          self._bad_value()
         match len(self._ieee754):
           case 2: break
           case 4:
@@ -435,8 +440,8 @@ class CBOR:
             if (sign):
               value |= 0x80000000
             continue
+      # Exited loop => the perfect ("preferred") serialization has been found.
       self._value = value
-      return
     
     def _bad_value(self):
       CBOR._error("Not a non-finite number: " + str(self._original))
@@ -480,7 +485,8 @@ class CBOR:
       return nf64 
 
     def get_payload(self):
-      return CBOR._reverse_payload(self.get_non_finite64() & 0xfffffffffffff)
+      return (0x10000000000000 if self.get_sign() else 0) + CBOR._reverse_payload(
+        self.get_non_finite64() & 0xfffffffffffff)
 
     def _internal_encode(self):
       return bytes([0xf9 + (len(self._ieee754) >> 2)]) + self._ieee754
@@ -506,17 +512,28 @@ class CBOR:
       return self._value
     """
 
-  ################  
-  #   Decoding   #
-  ################
+#======================#  
+#       Decoding       #
+#======================#
+
+  SEQUENCE_MODE           = 0x1
+  LENIENT_MAP_DECODING    = 0x2
+  LENIENT_NUMBER_DECODING = 0x4
+
   class _Decoder:
-    def __init__(self, cbor_stream, max_length):
+    def __init__(self, cbor_stream, options, max_length):
       CBOR._check_int_argument(max_length)
       if not isinstance(cbor_stream, io.BufferedIOBase):
         CBOR._error("Unexpected stream type: " + type(cbor_stream).__name__)
       self._cbor_stream = cbor_stream
+      self.sequenceMode = options & CBOR.SEQUENCE_MODE
+      self.strictMaps = not (options & CBOR.LENIENT_MAP_DECODING)
+      self.strictNumbers = not (options & CBOR.LENIENT_NUMBER_DECODING)
       self._max_length = max_length
+      self.maxNestingLevel = 100
+
       self._current = 0
+      self._nestingLevel = 0
   
     def decode_with_options(self):
       while (chunk := self._cbor_stream.read(1)):
@@ -527,11 +544,11 @@ class CBOR:
   @classmethod
   def decode(cls, cbor_bytes):
     CBOR._check_bytes_argument(cbor_bytes)
-    CBOR.init_decoder(io.BytesIO(cbor_bytes), len(cbor_bytes)).decode_with_options()
+    CBOR.init_decoder(io.BytesIO(cbor_bytes), 0, len(cbor_bytes)).decode_with_options()
 
   @classmethod
-  def init_decoder(cls, cbor_stream, max_length):
-    return CBOR._Decoder(cbor_stream, max_length)
+  def init_decoder(cls, cbor_stream, options, max_length):
+    return CBOR._Decoder(cbor_stream, options, max_length)
   
 #================================#
 #    Internal Support Methods    #
@@ -682,5 +699,3 @@ class CBOR:
       value <<= 8
       value += v
     return value
-  
-  version = '1.0.0'
