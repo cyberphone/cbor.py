@@ -13,735 +13,800 @@
 import struct, math, io
 
 class CBOR:
+        
+    version = '1.0.0'
+
+    _MT_UNSIGNED      = 0x00
+    _MT_NEGATIVE      = 0x20
+    _MT_BYTES         = 0x40
+    _MT_STRING        = 0x60
+    _MT_ARRAY         = 0x80
+    _MT_MAP           = 0xa0
+    _MT_TAG           = 0xc0
+    _MT_SIMPLE        = 0xe0
+
+    _TAG_BIG_UNSIGNED = 0xc2
+    _TAG_BIG_NEGATIVE = 0xc3
+
+    _SIMPLE_FALSE     = 0xf4
+    _SIMPLE_TRUE      = 0xf5
+    _SIMPLE_NULL      = 0xf6
+    _SIMPLE_FLOAT16   = 0xf9
+    _SIMPLE_FLOAT32   = 0xfa
+    _SIMPLE_FLOAT64   = 0xfb
     
-  version = '1.0.0'
+    _ESCAPE_CHARACTERS = [
+    #   0    1    2    3    4    5    6    7
+        1,   1,   1,   1,   1,   1,   1,   1, 
+       98, 116, 110,   1, 102, 114,   1,   1,
+        1,   1,   1,   1,   1,   1,   1,   1,
+        1,   1,   1,   1,   1,   1,   1,   1,
+        0,   0,  34,   0,   0,   0,   0,   0,
+        0,   0,   0,   0,   0,   0,   0,   0,
+        0,   0,   0,   0,   0,   0,   0,   0,
+        0,   0,   0,   0,   0,   0,   0,   0,
+        0,   0,   0,   0,   0,   0,   0,   0,
+        0,   0,   0,   0,   0,   0,   0,   0,
+        0,   0,   0,   0,   0,   0,   0,   0,
+        0,   0,   0,   0,  92]
 
-  _MT_UNSIGNED      = 0x00
-  _MT_NEGATIVE      = 0x20
-  _MT_BYTES         = 0x40
-  _MT_STRING        = 0x60
-  _MT_ARRAY         = 0x80
-  _MT_MAP           = 0xa0
-  _MT_TAG           = 0xc0
-  _MT_SIMPLE        = 0xe0
-
-  _TAG_BIG_UNSIGNED = 0xc2
-  _TAG_BIG_NEGATIVE = 0xc3
-
-  _SIMPLE_FALSE     = 0xf4
-  _SIMPLE_TRUE      = 0xf5
-  _SIMPLE_NULL      = 0xf6
-  _SIMPLE_FLOAT16   = 0xf9
-  _SIMPLE_FLOAT32   = 0xfa
-  _SIMPLE_FLOAT64   = 0xfb
-  
-  _ESCAPE_CHARACTERS = [
-  ##  0    1    2    3    4    5    6    7    8    9    A    B    C    D    E    F
-      1,   1,   1,   1,   1,   1,   1,   1,  98, 116, 110,   1, 102, 114,   1,   1,
-      1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,
-      0,   0,  34,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
-      0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
-      0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
-      0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,  92]
-
-  def __init__(self):
-    CBOR._error("Invalid operation")
-
-  class _CborObject:
     def __init__(self):
-      self.readFlag = False
+        CBOR._error("Invalid operation")
 
-    def __repr__(self):
-      return self.to_string()
+    class _CborObject:
+        def __init__(self):
+            self.readFlag = False
 
-    def __str__(self):
-      return self.to_string()
+        def __repr__(self):
+            return self.to_string()
+
+        def __str__(self):
+            return self.to_string()
+        
+        @property
+        def length(self):
+            if not hasattr(self, "_length"):
+                CBOR._error("'CBOR." + type(self).__name__  +
+                            "' does not support len()")
+            return self._length()
+        
+        def __len__(self):
+            return self.length
+
+        def _check_type_get_value(self, expected):
+            if type(self).__name__ != expected:
+                CBOR._error("Expected '" + 'CBOR.' + expected +
+                            "', got 'CBOR." + type(self).__name__  + "'")
+            self.readFlag = True
+            return self._get()
+
+        def get_big_integer(self):
+            return self._check_type_get_value('Int')
+
+        def get_int8(self):
+            return CBOR._int_range_check(self.get_big_integer(), -128, 127)
+
+        def get_uint8(self):
+            return CBOR._int_range_check(self.get_big_integer(self), 0, 0xff)
+
+        def get_int16(self):
+            return CBOR._int_range_check(self.get_big_integer(self),
+                                         -0x8000, 0x7fff)
+
+        def get_uint16(self):
+            return CBOR._int_range_check(self.get_big_integer(self),
+                                         0, 0xffff)
+
+        def get_int32(self):
+            return CBOR._int_range_check(self.get_big_integer(self),
+                                         -0x80000000, 0x7fffffff)
+
+        def get_uint32(self):
+            return CBOR._int_range_check(self.get_big_integer(self),
+                                         0, 0xffffffff)
+
+        def get_int53(self):
+            return CBOR._int_range_check(self.get_big_integer(self),
+                                         -9007199254740991, 
+                                         9007199254740991)
+
+        def get_int64(self):
+            return CBOR._int_range_check(self.get_big_integer(self),
+                                         -0x8000000000000000, 
+                                         0x7fffffffffffffff)
+
+        def get_uint64(self):
+            return CBOR._int_range_check(self.get_big_integer(self), 
+                                         0, 0xffffffffffffffff)
+
+        def get_int128(self):
+            return CBOR._int_range_check(self.get_big_integer(self), 
+                                         -0x80000000000000000000000000000000,
+                                         0x7fffffffffffffffffffffffffffffff)
+
+        def get_uint128(self):
+            return CBOR._int_range_check(self.get_big_integer(),
+                                         0, 0xffffffffffffffffffffffffffffffff)
+        
+        def get_float64(self):
+            return self._check_type_get_value('Float')
+        
+        def get_string(self):
+            return self._check_type_get_value('String')
+        
+        def get_boolean(self):
+            return self._check_type_get_value('Boolean')
+
+        def is_null(self):
+            if type(self).__name__ == 'Null':
+                self.readFlag = True
+                return True
+            return False
+        
+        def get_non_finite64(self):
+            return self._check_type_get_value('NonFinite')
+
+        def encode(self):
+            return self._internal_encode()
+        
+        def check_for_unread(self):
+            if not self.readFlag:
+                CBOR._error("Not read: " + type(self).__name__)
+
+        def scan(self):
+            self.readFlag = True
+
+        def get(self):
+            CBOR._error('get() not available in: CBOR.' + type(self).__name__)
+
+        def to_diagnostic(self, pretty_print):
+            cbor_printer = CBOR._CborPrinter(
+                CBOR._check_bool_argument(pretty_print))
+            self._internal_to_string(cbor_printer)
+            return cbor_printer.buffer
+
+        def to_string(self):
+            return self.to_diagnostic(True)
+
+    ##########################
+    #       CBOR.Int         #
+    ##########################
+    class Int(_CborObject):
+        def __init__(self, value):
+            super().__init__()
+            self._value = CBOR._check_int_argument(value)
+
+        @classmethod
+        def create_int8(cls, value):
+            return CBOR._create_int(value, -0x80, 0x7f)
+
+        @classmethod
+        def create_uint8(cls, value):
+            return CBOR._create_int(value, 0, 0xff)
+
+        @classmethod
+        def create_int16(cls, value):
+            return CBOR._create_int(value, -0x8000, 0x7fff)
+
+        @classmethod
+        def create_uint16(cls, value):
+            return CBOR._create_int(value, 0, 0xffff)
+
+        @classmethod
+        def create_int32(cls, value):
+            return CBOR._create_int(value, -0x80000000, 0x7fffffff)
+
+        @classmethod
+        def create_uint32(cls, value):
+            return CBOR._create_int(value, 0, 0xffffffff)
+
+        @classmethod
+        def create_int53(cls, value):
+            return CBOR._create_int(value, 
+                                    -9007199254740991, 
+                                    9007199254740991)
+
+        @classmethod
+        def create_int64(cls, value):
+            return CBOR._create_int(value, 
+                                    -0x8000000000000000,
+                                    0x7fffffffffffffff)
+
+        @classmethod
+        def create_uint64(cls, value):
+            return CBOR._create_int(value, 0, 0xffffffffffffffff)
+            
+        @classmethod
+        def create_int128(cls, value):
+            return CBOR._create_int(value, 
+                                    -0x80000000000000000000000000000000,
+                                    0x7fffffffffffffffffffffffffffffff)
+
+        @classmethod
+        def create_uint128(cls, value):
+            return CBOR._create_int(value,
+                                    0, 0xffffffffffffffffffffffffffffffff)
+
+        def _internal_encode(self):
+            tag = CBOR._MT_UNSIGNED
+            value = self._value
+            if value < 0:
+                tag = CBOR._MT_NEGATIVE
+                value = ~value
+            return CBOR._generic_header(tag, value)
+        
+        def _internal_to_string(self, cbor_printer):
+            cbor_printer.append(str(self._value))
+        
+        def _get(self):
+            return self._value
     
-    @property
-    def length(self):
-      if not hasattr(self, "_length"):
-        CBOR._error("'CBOR." + type(self).__name__  + "' does not support len()")
-      return self._length()
+    ##########################
+    #       CBOR.Float       #
+    ##########################
+    class Float(_CborObject):
+        def __init__(self, value):
+            super().__init__()
+            self._value = CBOR._check_argument_type(value, 'float')
+            """ 
+            Catch the forbidden use-case.
+            See: CBOR.Float.create_extended_float().
+            """
+            if not math.isfinite(value):
+                CBOR._error("Not permitted: 'NaN/Infinity'")
+            """ Get the 8 bytes representing the IEEE-754 double. """
+            f64b = struct.pack('!d', value)
+            """ Deal with 0.0 and -0.0 separately. """
+            if value == 0:
+                self._encoded = f64b[0:2]
+                return
+            while True:
+                f64bin = CBOR._bytes_to_int(f64b)
+                """ Exponent bias difference: 1023 - 127 """
+                f32exp = ((f64bin & 0x7ff0000000000000) >> 52) - 0x380
+                """ Don't go into the non-finite space or underflow. """
+                if f32exp <= -23 or f32exp > 0xfe: break
+                f32signif = f64bin & 0xfffffffffffff
+                """ The 29 bits to be discarded must all be zero. """
+                if f32signif & 0x1fffffff: break
+                """
+                Put significand in position.
+                Significand size difference: 52 - 23
+                """
+                f32signif >>= 29
+                """ Finally, do we need to denormalize the number? """
+                if f32exp <= 0:
+                    """ Losing significand bits is not an option. """
+                    if f32signif & ((1 << (1 - f32exp)) - 1): break
+                    """
+                    Denormalize. The implicit "1" becomes explicit using
+                    subnormal representation.
+                    """
+                    f32signif += 0x800000
+                    """ Put significand in position. """
+                    f32signif >>= (1 - f32exp)
+                    """ Denormalized exponents are always zero. """
+                    f32exp = 0
+                """
+                Maybe we are done but we need to check
+                if float16 is possible as well.
+                """
+                while True:
+                    """ Exponent bias difference: 127 - 15 """
+                    f16exp = f32exp - 0x70
+                    """ Don't go into the non-finite space or underflow. """
+                    if f16exp <= -10 or f16exp > 0x1e: break
+                    """ The 13 bits to be discarded must all be zero. """
+                    if f32signif & 0x1fff: break
+                    """
+                    Put significand in position.
+                    Significand size difference: 23 - 10
+                    """
+                    f16signif = f32signif >> 13
+                    if f16exp <= 0:
+                        """ Losing significand bits is not an option. """
+                        if f16signif & ((1 << (1 - f16exp)) - 1): break
+                        """
+                        Denormalize. The implicit "1" becomes explicit 
+                        using subnormal representation.
+                        """
+                        f16signif += 0x400
+                        """ Put significand in position. """
+                        f16signif >>= (1 - f16exp)
+                        """ Denormalized exponents are always zero. """
+                        f16exp = 0
+                    """ Reached the end of the rope => float16. """
+                    self._encoded = CBOR._encode_16_bits(
+                        ((f64b[0] & 0x80) << 8) + (f16exp << 10) + f16signif)
+                    return
+                """ Exited inner loop  => float32. """
+                f32bin = ((f64b[0] & 0x80) << 24) + (f32exp << 23) + f32signif
+                self._encoded = CBOR._encode_16_bits(f32bin >> 16) + CBOR._encode_16_bits(f32bin & 0xffff)
+                return
+            """ Exited outer loop => float64. """
+            self._encoded = f64b
+
+        @staticmethod
+        def create_extended_float(value):
+            if math.isfinite(CBOR._check_argument_type(value, 'float')):
+                return CBOR.Float(value)
+            """ 
+            Not a "genuine" floating-point number.
+            Handled as a separate data type.
+            """
+            nf = CBOR.NonFinite(CBOR._bytes_to_int(struct.pack('!d', value)))
+            if not nf.is_simple():
+                CBOR._error(
+                "create_extended_float() does not support NaN with payloads")
+            return nf
+
+        def _internal_encode(self):
+            return bytes([0xf9 + (len(self._encoded) >> 2)]) + self._encoded
+        
+        def _internal_to_string(self, cbor_printer):
+            textual = str(self._value)
+            e_pos = textual.find("e")
+            if e_pos > 0 and textual.find(".") < 0:
+                textual = textual[0:e_pos] + ".0" + textual[e_pos:]
+            cbor_printer.append(textual)
+
+        def _length(self):
+            return len(self._encoded)
+        
+        def _get(self):
+            return self._value
     
-    def __len__(self):
-      return self.length
+    ##########################
+    #      CBOR.String       #
+    ##########################
+    class String(_CborObject):
+        def __init__(self, text_string):
+            super().__init__()
+            self._string = CBOR._check_argument_type(text_string, 'str')
 
-    def _check_type_get_value(self, expected):
-      if type(self).__name__ != expected:
-        CBOR._error("Expected '" + 'CBOR.' + expected +
-                    "', got 'CBOR." + type(self).__name__  + "'")
-      self.readFlag = True
-      return self._get()
-
-    def get_big_integer(self):
-      return self._check_type_get_value('Int')
-
-    def get_int8(self):
-      return CBOR._int_range_check(self. get_big_integer(), -128, 127)
-
-    def get_uint8(self):
-      return CBOR._int_range_check(self. get_big_integer(self), 0, 0xff)
-
-    def get_int16(self):
-      return CBOR._int_range_check(self. get_big_integer(self), -0x8000, 0x7fff)
-
-    def get_uint16(self):
-      return CBOR._int_range_check(self. get_big_integer(self), 0, 0xffff)
-
-    def get_int32(self):
-      return CBOR._int_range_check(self. get_big_integer(self), -0x80000000, 0x7fffffff)
-
-    def get_uint32(self):
-      return CBOR._int_range_check(self. get_big_integer(self), 0, 0xffffffff)
-
-    def get_int53(self):
-      return CBOR._int_range_check(self. get_big_integer(self), -9007199254740991, 9007199254740991)
-
-    def get_int64(self):
-      return CBOR._int_range_check(self. get_big_integer(self), -0x8000000000000000, 
-        0x7fffffffffffffff)
-
-    def get_uint64(self):
-      return CBOR._int_range_check(self. get_big_integer(self), 0, 0xffffffffffffffff)
-
-    def get_int128(self):
-      return CBOR._int_range_check(self. get_big_integer(self), -0x80000000000000000000000000000000,
-        0x7fffffffffffffffffffffffffffffff)
-
-    def get_uint128(self):
-      return CBOR._int_range_check(self. get_big_integer(), 0, 0xffffffffffffffffffffffffffffffff)
+        def _internal_encode(self):
+            return CBOR._encode_string(
+                CBOR._MT_STRING, self._string.encode("utf8"))
+        
+        def _internal_to_string(self, cbor_printer):
+            cbor_printer.append('"')
+            for q in range(len(self._string)):
+                c = ord(self._string[q])
+                if c <= 0x5c:
+                    escapedCharacter = CBOR._ESCAPE_CHARACTERS[c]
+                    if escapedCharacter:
+                        cbor_printer.append('\\')
+                        if escapedCharacter == 1:
+                            cbor_printer.append('u00').append(bytes([c]).hex())
+                        else:
+                            cbor_printer.append(chr(escapedCharacter))
+                        continue;
+                cbor_printer.append(chr(c))
+            cbor_printer.append('"')
     
-    def get_float64(self):
-      return self._check_type_get_value('Float')
+        def _get(self):
+            return self._string
+        
+    ##########################
+    #       CBOR.Bytes       #
+    ##########################
+    class Bytes(_CborObject):
+        def __init__(self, byte_string):
+            super().__init__()
+            self._string = CBOR._check_bytes_argument(byte_string)
+
+        def _internal_encode(self):
+            return CBOR._encode_string(CBOR._MT_BYTES, self._string)
+        
+        def _internal_to_string(self, cbor_printer):
+            cbor_printer.append("h'").append(self._string.hex()).append("'")
     
-    def get_string(self):
-      return self._check_type_get_value('String')
+        def _get(self):
+            return self._string
+
+    ##########################
+    #      CBOR.Boolean      #
+    ##########################
+    class Boolean(_CborObject):
+        def __init__(self, value):
+            super().__init__()
+            self._value = CBOR._check_bool_argument(value)
+
+        def _internal_encode(self):
+            return bytes(
+                [CBOR._SIMPLE_TRUE if self._value else CBOR._SIMPLE_FALSE])
+        
+        def _internal_to_string(self, cbor_printer):
+            cbor_printer.append("true" if self._value else "false")
     
-    def get_boolean(self):
-      return self._check_type_get_value('Boolean')
+        def _get(self):
+            return self._value
+        
+    ##########################
+    #       CBOR.Null        #
+    ##########################
+    class Null(_CborObject):
+        def __init__(self):
+            super().__init__()
 
-    def is_null(self):
-      if type(self).__name__ == 'Null':
-        self.readFlag = True
-        return True
-      return False
-    
-    def get_non_finite64(self):
-      return self._check_type_get_value('NonFinite')
+        def _internal_encode(self):
+            return bytes([CBOR._SIMPLE_NULL])
+        
+        def _internal_to_string(self, cbor_printer):
+            cbor_printer.append("null")
 
-    def encode(self):
-      return self._internal_encode()
-    
-    def check_for_unread(self):
-      if not self.readFlag:
-        CBOR._error("Not read: " + type(self).__name__)
+    ##########################
+    #       CBOR.Array       #
+    ##########################
+    class Array(_CborObject):
+        def __init__(self):
+            super().__init__()
+            self._objects = list()
 
-    def scan(self):
-      self.readFlag = True
+        def add(self, object):
+            self._objects.append(object)
+            return self
+        
+        def get(self, index):
+            return self._objects[self._index_check(index, len(self._objects) - 1)]
 
-    def get(self):
-      CBOR._error('get() not available in: CBOR.' + type(self).__name__)
-
-    def to_diagnostic(self, pretty_print):
-      cbor_printer = CBOR._CborPrinter(CBOR._check_bool_argument(pretty_print))
-      self._internal_to_string(cbor_printer)
-      return cbor_printer.buffer
-
-    def to_string(self):
-      return self.to_diagnostic(True)
-
-  ##########################
-  #       CBOR.Int         #
-  ##########################
-  class Int(_CborObject):
-    def __init__(self, value):
-      super().__init__()
-      self._value = CBOR._check_int_argument(value)
-
-    @classmethod
-    def create_int8(cls, value):
-      return CBOR._create_int(value, -0x80, 0x7f)
-
-    @classmethod
-    def create_uint8(cls, value):
-      return CBOR._create_int(value, 0, 0xff)
-
-    @classmethod
-    def create_int16(cls, value):
-      return CBOR._create_int(value, -0x8000, 0x7fff)
-
-    @classmethod
-    def create_uint16(cls, value):
-      return CBOR._create_int(value, 0, 0xffff)
-
-    @classmethod
-    def create_int32(cls, value):
-      return CBOR._create_int(value, -0x80000000, 0x7fffffff)
-
-    @classmethod
-    def create_uint32(cls, value):
-      return CBOR._create_int(value, 0, 0xffffffff)
-
-    @classmethod
-    def create_int53(cls, value):
-      return CBOR._create_int(value, -9007199254740991, 9007199254740991)
-
-    @classmethod
-    def create_int64(cls, value):
-      return CBOR._create_int(value, -0x8000000000000000, 0x7fffffffffffffff)
-
-    @classmethod
-    def create_uint64(cls, value):
-      return CBOR._create_int(value, 0, 0xffffffffffffffff)
-      
-    @classmethod
-    def create_int128(cls, value):
-      return CBOR._create_int(value, 
-        -0x80000000000000000000000000000000, 0x7fffffffffffffffffffffffffffffff)
-
-    @classmethod
-    def create_uint128(cls, value):
-      return CBOR._create_int(value, 0, 0xffffffffffffffffffffffffffffffff)
-
-    def _internal_encode(self):
-      tag = CBOR._MT_UNSIGNED
-      value = self._value
-      if value < 0:
-        tag = CBOR._MT_NEGATIVE
-        value = ~value
-      return CBOR._generic_header(tag, value)
-    
-    def _internal_to_string(self, cbor_printer):
-      cbor_printer.append(str(self._value))
-    
-    def _get(self):
-      return self._value
-  
-  ##########################
-  #       CBOR.Float       #
-  ##########################
-  class Float(_CborObject):
-    def __init__(self, value):
-      super().__init__()
-      self._value = CBOR._check_argument_type(value, 'float')
-      # Catch the forbidden use-case.  See: CBOR.Float.create_extended_float().
-      if not math.isfinite(value):
-        CBOR._error("Not permitted: 'NaN/Infinity'")
-      # Get the 8 bytes representing the IEEE-754 double.
-      f64b = struct.pack('!d', value)
-      # Deal with 0.0 and -0.0 separately.
-      if value == 0:
-        self._encoded = f64b[0:2]
-        return
-      while True:
-        f64bin = CBOR._bytes_to_int(f64b)
-        # Exponent bias difference: 1023 - 127
-        f32exp = ((f64bin & 0x7ff0000000000000) >> 52) - 0x380
-        # Don't go into the non-finite space or underflow.
-        if f32exp <= -23 or f32exp > 0xfe: break
-        f32signif = f64bin & 0xfffffffffffff
-        # The 29 bits to be discarded must all be zero.
-        if f32signif & 0x1fffffff: break
-        # Put significand in position. Significand size difference: 52 - 23
-        f32signif >>= 29
-        # Finally, do we need to denormalize the number?
-        if f32exp <= 0:
-          # Losing significand bits is not an option.
-          if f32signif & ((1 << (1 - f32exp)) - 1): break
-          # Denormalize. The implicit "1" becomes explicit using subnormal representation.
-          f32signif += 0x800000
-          # Put significand in position.
-          f32signif >>= (1 - f32exp)
-          # Denormalized exponents are always zero.
-          f32exp = 0
-        # Maybe we are done but we need to check if float16 is possible as well.
-        while True:
-          # Exponent bias difference: 127 - 15
-          f16exp = f32exp - 0x70
-          # Don't go into the non-finite space or underflow.
-          if f16exp <= -10 or f16exp > 0x1e: break
-          # The 13 bits to be discarded must all be zero.
-          if f32signif & 0x1fff: break
-          # Put significand in position. Significand size difference: 23 - 10
-          f16signif = f32signif >> 13
-          if f16exp <= 0:
-            # Losing significand bits is not an option.
-            if f16signif & ((1 << (1 - f16exp)) - 1): break
-            # Denormalize. The implicit "1" becomes explicit using subnormal representation.
-            f16signif += 0x400
-            # Put significand in position.
-            f16signif >>= (1 - f16exp)
-            # Denormalized exponents are always zero.
-            f16exp = 0
-          # Reached the end of the rope => float16.
-          self._encoded = CBOR._encode_16_bits(
-            ((f64b[0] & 0x80) << 8) + (f16exp << 10) + f16signif)
-          return
-        # Exited inner loop  => float32.
-        f32bin = ((f64b[0] & 0x80) << 24) + (f32exp << 23) + f32signif
-        self._encoded = CBOR._encode_16_bits(f32bin >> 16) + CBOR._encode_16_bits(f32bin & 0xffff)
-        return
-      # Exited outer loop => float64.
-      self._encoded = f64b
-
-    @staticmethod
-    def create_extended_float(value):
-      if math.isfinite(CBOR._check_argument_type(value, 'float')):
-        return CBOR.Float(value)
-      # Not a "genuine" floating-point number.  Handled as a separate data type.
-      nf = CBOR.NonFinite(CBOR._bytes_to_int(struct.pack('!d', value)))
-      if not nf.is_simple():
-        CBOR._error("create_extended_float() does not support NaN with payloads")
-      return nf
-
-    def _internal_encode(self):
-      return bytes([0xf9 + (len(self._encoded) >> 2)]) + self._encoded
-    
-    def _internal_to_string(self, cbor_printer):
-      textual = str(self._value)
-      e_pos = textual.find("e")
-      if e_pos > 0 and textual.find(".") < 0:
-        textual = textual[0:e_pos] + ".0" + textual[e_pos:]
-      cbor_printer.append(textual)
-
-    def _length(self):
-      return len(self._encoded)
-    
-    def _get(self):
-      return self._value
-  
-  ##########################
-  #      CBOR.String       #
-  ##########################
-  class String(_CborObject):
-    def __init__(self, text_string):
-      super().__init__()
-      self._string = CBOR._check_argument_type(text_string, 'str')
-
-    def _internal_encode(self):
-      return CBOR._encode_string(CBOR._MT_STRING, self._string.encode("utf8"))
-    
-    def _internal_to_string(self, cbor_printer):
-      cbor_printer.append('"')
-      for q in range(len(self._string)):
-        c = ord(self._string[q])
-        if c <= 0x5c:
-          escapedCharacter = CBOR._ESCAPE_CHARACTERS[c]
-          if escapedCharacter:
-            cbor_printer.append('\\')
-            if escapedCharacter == 1:
-              cbor_printer.append('u00').append(bytes([c]).hex())
+        def _index_check(self, index, max):
+            if CBOR._check_int_argument(index) > max or index < 0:
+                CBOR._error("Index out of range: " + str(index))
+            return index
+        
+        def _internal_encode(self):
+            encoded = CBOR._generic_header(CBOR._MT_ARRAY, len(self._objects))
+            for object in self._objects:
+                encoded += object._internal_encode()
+            return encoded
+        
+        def _internal_to_string(self, cbor_printer):
+            if cbor_printer.arrayFolding(self):
+                cbor_printer.beginList('[')
+                notFirst = False
+                for object in self._objects:
+                    if notFirst:
+                        cbor_printer.append(',')
+                    notFirst = True
+                    cbor_printer.newlineAndIndent()
+                    object._internal_to_string(cbor_printer)
+                cbor_printer.endList(notFirst, ']')
             else:
-              cbor_printer.append(chr(escapedCharacter))
-            continue;
-        cbor_printer.append(chr(c))
-      cbor_printer.append('"')
-  
-    def _get(self):
-      return self._string
+                cbor_printer.append('[')
+                notFirst = False
+                for object in self._objects:
+                    if notFirst:
+                        cbor_printer.append(',').space()
+                    notFirst = True
+                    object._internal_to_string(cbor_printer)
+                cbor_printer.append(']')
+        
+        def _length(self):
+            return len(self._objects)
+
+    ##########################
+    #     CBOR.NonFinite     #
+    ##########################
+    class NonFinite(_CborObject):
+        def __init__(self, value):
+            super().__init__()
+            self._original = CBOR._check_int_argument(value)
+            if value < 0: self._bad_value()
+            self._create_det_enc(value)
+
+        def _create_det_enc(self, value):
+            while True:
+                """ Create a byte representation of the value. """
+                self._ieee754 = bytearray()
+                i = value
+                while True:
+                    self._ieee754 += bytes([i & 0xff])
+                    i >>= 8
+                    if i == 0: break
+                self._ieee754.reverse()
+                """ Check that the syntax matches a non-finite number. """
+                match len(self._ieee754):
+                    case 2: exponent = 0x7c00
+                    case 4: exponent = 0x7f800000
+                    case 8: exponent = 0x7ff0000000000000
+                    case _: self._bad_value()
+                if (value & exponent) != exponent: self._bad_value()
+                """ All is good, now apply "preferred serialization". """
+                sign = self._ieee754[0] > 0x7f
+                match len(self._ieee754):
+                    case 2: break
+                    case 4:
+                        if value & ((1 << 13) - 1): break
+                        value >>= 13
+                        value &= 0x7fff
+                        if (sign):
+                            value |= 0x8000
+                        continue
+                    case 8:
+                        if value & ((1 << 29) - 1): break
+                        value >>= 29
+                        value &= 0x7fffffff
+                        if (sign):
+                            value |= 0x80000000
+                        continue
+            """ 
+            Exited loop => the perfect ("preferred")
+            serialization has been found.
+            """
+            self._value = value
+        
+        def _bad_value(self):
+            CBOR._error("Not a non-finite number: " + str(self._original))
+
+        def is_simple(self):
+            return self._value in [0x7e00 , 0x7c00 , 0xfc00]
+
+        def set_sign(self, sign):
+            mask = 1 << (len(self._ieee754) * 8 - 1)
+            self._create_det_enc(
+                (self._value & (mask - 1)) | (mask if sign else 0))
+            return self
+
+        def is_nan(self):
+            match len(self._ieee754):
+                case 2: mask = 0x3ff
+                case 4: mask = 0x7fffff
+                case 8: mask = 0xfffffffffffff
+            return (mask & self._value) != 0
+
+        def get_sign(self):
+            return self._ieee754[0] > 0x7f
+
+        @classmethod
+        def create_payload(cls, payload):
+            CBOR._check_int_argument(payload)
+            if (payload & 0x1fffffffffffff) != payload:
+                CBOR._error("Payload out of range: " + payload)
+            left64 = (0xfff0000000000000 if (payload & 0x10000000000000)
+                                         else 0x7ff0000000000000)
+            return CBOR.NonFinite(left64 + 
+                CBOR._reverse_payload(payload & 0xfffffffffffff))
+
+        def get_non_finite(self):
+            self.scan()
+            return self._value
+
+        def _toNonFinite64(self, significand_length):
+            nf64 = self._value
+            nf64 &= (1 << significand_length) - 1
+            nf64 = 0x7ff0000000000000 | (nf64 << (52 - significand_length))
+            if self.get_sign():
+                nf64 |= 0x8000000000000000
+            return nf64 
+
+        def get_payload(self):
+            return (0x10000000000000 if self.get_sign()
+                                     else 0) + CBOR._reverse_payload(
+                self.get_non_finite64() & 0xfffffffffffff)
+
+        def _internal_encode(self):
+            return bytes([0xf9 + (len(self._ieee754) >> 2)]) + self._ieee754
+
+        def _internal_to_string(self, cbor_printer): 
+            if self.is_simple():
+                cbor_printer.append("NaN" if self.is_nan()
+                    else "-Infinity" if self.get_sign() else "Infinity")
+            else: 
+                cbor_printer.append("float'").append(
+                    self._ieee754.hex()).append("'")
     
-  ##########################
-  #       CBOR.Bytes       #
-  ##########################
-  class Bytes(_CborObject):
-    def __init__(self, byte_string):
-      super().__init__()
-      self._string = CBOR._check_bytes_argument(byte_string)
-
-    def _internal_encode(self):
-      return CBOR._encode_string(CBOR._MT_BYTES, self._string)
+        def _getLength(self):
+            return len(self._ieee754)
     
-    def _internal_to_string(self, cbor_printer):
-      cbor_printer.append("h'").append(self._string.hex()).append("'")
-  
-    def _get(self):
-      return self._string
+        def _get(self):
+            match len(self._ieee754):
+                case 2: return self._toNonFinite64(10)
+                case 4: return self._toNonFinite64(23)
+            return self._value
 
-  ##########################
-  #      CBOR.Boolean      #
-  ##########################
-  class Boolean(_CborObject):
-    def __init__(self, value):
-      super().__init__()
-      self._value = CBOR._check_bool_argument(value)
-
-    def _internal_encode(self):
-      return bytes([CBOR._SIMPLE_TRUE if self._value else CBOR._SIMPLE_FALSE])
-    
-    def _internal_to_string(self, cbor_printer):
-      cbor_printer.append("true" if self._value else "false")
-  
-    def _get(self):
-      return self._value
-    
-  ##########################
-  #       CBOR.Null        #
-  ##########################
-  class Null(_CborObject):
-    def __init__(self):
-      super().__init__()
-
-    def _internal_encode(self):
-      return bytes([CBOR._SIMPLE_NULL])
-    
-    def _internal_to_string(self, cbor_printer):
-      cbor_printer.append("null")
-
-  ##########################
-  #       CBOR.Array       #
-  ##########################
-  class Array(_CborObject):
-    def __init__(self):
-      super().__init__()
-      self._objects = list()
-
-    def add(self, object):
-      self._objects.append(object)
-      return self
-    
-    def get(self, index):
-      return self._objects[self._index_check(index, len(self._objects) - 1)]
-
-    def _index_check(self, index, max):
-      if CBOR._check_int_argument(index) > max or index < 0:
-        CBOR._error("Index out of range: " + str(index))
-      return index
-    
-    def _internal_encode(self):
-      encoded = CBOR._generic_header(CBOR._MT_ARRAY, len(self._objects))
-      for object in self._objects:
-        encoded += object._internal_encode()
-      return encoded
-    
-    def _internal_to_string(self, cbor_printer):
-      if cbor_printer.arrayFolding(self):
-        cbor_printer.beginList('[')
-        notFirst = False
-        for object in self._objects:
-          if notFirst:
-            cbor_printer.append(',')
-          notFirst = True
-          cbor_printer.newlineAndIndent()
-          object._internal_to_string(cbor_printer)
-        cbor_printer.endList(notFirst, ']')
-      else:
-        cbor_printer.append('[')
-        notFirst = False
-        for object in self._objects:
-          if notFirst:
-            cbor_printer.append(',').space()
-          notFirst = True
-          object._internal_to_string(cbor_printer)
-        cbor_printer.append(']')
-    
-    def _length(self):
-      return len(self._objects)
-
-  ##########################
-  #     CBOR.NonFinite     #
-  ##########################
-  class NonFinite(_CborObject):
-    def __init__(self, value):
-      super().__init__()
-      self._original = CBOR._check_int_argument(value)
-      if value < 0: self._bad_value()
-      self._create_det_enc(value)
-
-    def _create_det_enc(self, value):
-      while True:
-        # Create a byte representation of the value.
-        self._ieee754 = bytearray()
-        i = value
-        while True:
-          self._ieee754 += bytes([i & 0xff])
-          i >>= 8
-          if i == 0: break
-        self._ieee754.reverse()
-        # Check that the syntax matches a non-finite number.
-        match len(self._ieee754):
-          case 2: exponent = 0x7c00
-          case 4: exponent = 0x7f800000
-          case 8: exponent = 0x7ff0000000000000
-          case _: self._bad_value()
-        if (value & exponent) != exponent: self._bad_value()
-        # All is good, now apply "preferred serialization".
-        sign = self._ieee754[0] > 0x7f
-        match len(self._ieee754):
-          case 2: break
-          case 4:
-            if value & ((1 << 13) - 1): break
-            value >>= 13
-            value &= 0x7fff
-            if (sign):
-              value |= 0x8000
-            continue
-          case 8:
-            if value & ((1 << 29) - 1): break
-            value >>= 29
-            value &= 0x7fffffff
-            if (sign):
-              value |= 0x80000000
-            continue
-      # Exited loop => the perfect ("preferred") serialization has been found.
-      self._value = value
-    
-    def _bad_value(self):
-      CBOR._error("Not a non-finite number: " + str(self._original))
-
-    def is_simple(self):
-      return self._value in [0x7e00 , 0x7c00 , 0xfc00]
-
-    def set_sign(self, sign):
-      mask = 1 << (len(self._ieee754) * 8 - 1)
-      self._create_det_enc((self._value & (mask - 1)) | (mask if sign else 0))
-      return self
-
-    def is_nan(self):
-      match len(self._ieee754):
-        case 2: mask = 0x3ff
-        case 4: mask = 0x7fffff
-        case 8: mask = 0xfffffffffffff
-      return (mask & self._value) != 0
-
-    def get_sign(self):
-      return self._ieee754[0] > 0x7f
-
-    @classmethod
-    def create_payload(cls, payload):
-      CBOR._check_int_argument(payload)
-      if (payload & 0x1fffffffffffff) != payload:
-        CBOR._error("Payload out of range: " + payload)
-      left64 = 0xfff0000000000000 if (payload & 0x10000000000000) else 0x7ff0000000000000
-      return CBOR.NonFinite(left64 + CBOR._reverse_payload(payload & 0xfffffffffffff))
-
-    def get_non_finite(self):
-      self.scan()
-      return self._value
-
-    def _toNonFinite64(self, significand_length):
-      nf64 = self._value
-      nf64 &= (1 << significand_length) - 1
-      nf64 = 0x7ff0000000000000 | (nf64 << (52 - significand_length))
-      if self.get_sign():
-        nf64 |= 0x8000000000000000
-      return nf64 
-
-    def get_payload(self):
-      return (0x10000000000000 if self.get_sign() else 0) + CBOR._reverse_payload(
-        self.get_non_finite64() & 0xfffffffffffff)
-
-    def _internal_encode(self):
-      return bytes([0xf9 + (len(self._ieee754) >> 2)]) + self._ieee754
-
-    def _internal_to_string(self, cbor_printer): 
-      if self.is_simple():
-        cbor_printer.append("NaN" if self.is_nan()
-                            else "-Infinity" if self.get_sign() else "Infinity")
-      else:
-        cbor_printer.append("float'").append(self._ieee754.hex()).append("'")
-  
-    def _getLength(self):
-      return len(self._ieee754)
-  
-    def _get(self):
-      match len(self._ieee754):
-        case 2: return self._toNonFinite64(10)
-        case 4: return self._toNonFinite64(23)
-      return self._value
-
-    """
-    def _getValue():
-      return self._value
-    """
+        """
+        def _getValue():
+            return self._value
+        """
 
 #======================#  
 #       Decoding       #
 #======================#
 
-  SEQUENCE_MODE           = 0x1
-  LENIENT_MAP_DECODING    = 0x2
-  LENIENT_NUMBER_DECODING = 0x4
+    SEQUENCE_MODE           = 0x1
+    LENIENT_MAP_DECODING    = 0x2
+    LENIENT_NUMBER_DECODING = 0x4
 
-  class _Decoder:
-    def __init__(self, cbor_stream, options, max_length):
-      CBOR._check_int_argument(max_length)
-      if not isinstance(cbor_stream, io.BufferedIOBase):
-        CBOR._error("Unexpected stream type: " + type(cbor_stream).__name__)
-      self._cbor_stream = cbor_stream
-      self.sequenceMode = options & CBOR.SEQUENCE_MODE
-      self.strictMaps = not (options & CBOR.LENIENT_MAP_DECODING)
-      self.strictNumbers = not (options & CBOR.LENIENT_NUMBER_DECODING)
-      self._max_length = max_length
-      self.maxNestingLevel = 100
+    class _Decoder:
+        def __init__(self, cbor_stream, options, max_length):
+            CBOR._check_int_argument(max_length)
+            if not isinstance(cbor_stream, io.BufferedIOBase):
+                CBOR._error("Unexpected stream type: " + 
+                            type(cbor_stream).__name__)
+            self._cbor_stream = cbor_stream
+            self.sequenceMode = options & CBOR.SEQUENCE_MODE
+            self.strictMaps = not (options & CBOR.LENIENT_MAP_DECODING)
+            self.strictNumbers = not (options & CBOR.LENIENT_NUMBER_DECODING)
+            self._max_length = max_length
+            self.maxNestingLevel = 100
 
-      self._current = 0
-      self._nestingLevel = 0
-  
-    def decode_with_options(self):
-      while (chunk := self._cbor_stream.read(1)):
-        self._current += 1
-      # Right, the decoder is yet to be written :)
-      print(str(self._current))
+            self._current = 0
+            self._nestingLevel = 0
+    
+        def decode_with_options(self):
+            while (chunk := self._cbor_stream.read(1)):
+                self._current += 1
+            """ Right, the decoder is yet to be written :) """
+            print(str(self._current))
 
-  @classmethod
-  def decode(cls, cbor_bytes):
-    CBOR._check_bytes_argument(cbor_bytes)
-    CBOR.init_decoder(io.BytesIO(cbor_bytes), 0, len(cbor_bytes)).decode_with_options()
+    @classmethod
+    def decode(cls, cbor_bytes):
+        CBOR._check_bytes_argument(cbor_bytes)
+        CBOR.init_decoder(io.BytesIO(cbor_bytes), 
+                          0, len(cbor_bytes)).decode_with_options()
 
-  @classmethod
-  def init_decoder(cls, cbor_stream, options, max_length):
-    return CBOR._Decoder(cbor_stream, options, max_length)
-  
+    @classmethod
+    def init_decoder(cls, cbor_stream, options, max_length):
+        return CBOR._Decoder(cbor_stream, options, max_length)
+    
 #================================#
 #    Internal Support Methods    #
 #================================#
 
-  class _CborPrinter:
+    class _CborPrinter:
 
-    def __init__(self, pretty_print):
-      self.pretty_print = pretty_print
-      self.indentation_level = 0
-      self.start_of_line = 0
-      self.buffer = ''
+        def __init__(self, pretty_print):
+            self.pretty_print = pretty_print
+            self.indentation_level = 0
+            self.start_of_line = 0
+            self.buffer = ''
 
-    def beginList(self, endChar):
-      self.indentation_level += 1
-      self.buffer += endChar
+        def beginList(self, endChar):
+            self.indentation_level += 1
+            self.buffer += endChar
 
-    def append(self, string):
-      self.buffer += string
-      return self
+        def append(self, string):
+            self.buffer += string
+            return self
 
-    def space(self):
-      if (self.pretty_print):
-        self.buffer += ' '
+        def space(self):
+            if (self.pretty_print):
+                self.buffer += ' '
 
-    def arrayFolding(self, array):
-      if (self.pretty_print):
-        if array.length == 0:
-          return False
-        arraysInArrays = True
-        for q in range(0, array.length):
-          if not isinstance(array.get(q), CBOR.Array):
-            arraysInArrays = False
-            break
-        if (arraysInArrays):
-            return True
-        if (len(self.buffer) - self.start_of_line +  # Where we are staing at the moment.
-          array.length +                             # space after comma.
-          2 +                                        # [] 
-          (len(array.to_diagnostic(False)) > 70)):
-          return True
-      return False
+        def arrayFolding(self, array):
+            if (self.pretty_print):
+                if array.length == 0:
+                    return False
+                arraysInArrays = True
+                for q in range(0, array.length):
+                    if not isinstance(array.get(q), CBOR.Array):
+                        arraysInArrays = False
+                        break
+                if (arraysInArrays):
+                    return True
+                """ Where we are standing at the moment. """
+                if (len(self.buffer) - self.start_of_line +
+                    array.length +
+                    2 +
+                    (len(array.to_diagnostic(False)) > 70)):
+                    return True
+            return False
 
-    def newlineAndIndent(self):
-      if (self.pretty_print):
-        self.start_of_line = len(self.buffer)
-        self.buffer += '\n'
-        for i in range (self.indentation_level):
-          self.buffer += '  '
+        def newlineAndIndent(self):
+            if (self.pretty_print):
+                self.start_of_line = len(self.buffer)
+                self.buffer += '\n'
+                for i in range (self.indentation_level):
+                    self.buffer += '  '
 
-    def endList(self, notEmpty, endChar):
-      self.indentation_level -= 1
-      if (notEmpty):
-        self.newlineAndIndent()
-      self.buffer += endChar
+        def endList(self, notEmpty, endChar):
+            self.indentation_level -= 1
+            if (notEmpty):
+                self.newlineAndIndent()
+            self.buffer += endChar
 
-  class Exception(Exception):
-    def __init__(self, msg):
-      super().__init__(msg)
+    class Exception(Exception):
+        def __init__(self, msg):
+            super().__init__(msg)
 
-  @staticmethod
-  def _error(msg):
-    raise CBOR.Exception(msg)
+    @staticmethod
+    def _error(msg):
+        raise CBOR.Exception(msg)
 
-  @staticmethod
-  def _encode_string(tag, binary):
-    return CBOR._generic_header(tag, len(binary)) + binary
+    @staticmethod
+    def _encode_string(tag, binary):
+        return CBOR._generic_header(tag, len(binary)) + binary
 
-  @staticmethod
-  def _generic_header(tag, value):
-    # Convert unsigned integer to bytearray (but with a twist).
-    array = bytearray()
-    while True:
-      array += bytes([value & 0xff])
-      value >>= 8
-      if value == 0: break
-    length = len(array)
-    # Prepare for "int" encoding (1, 2, 4, 8).  Only 3, 5, 6, and 7 need an action.
-    while length < 8 and length > 2 and length != 4:
-      array += bytes([0])
-      length += 1
-    # Make big endian.
-    array.reverse()
-    # Does this number qualify as a "bigint"?
-    if length <= 8:
-      # Apparently not, encode it as "int".
-      if length == 1 and array[0] <= 23:
-        return bytearray([array[0] | tag])
-      modifier = 24
-      while True:
-        length >>= 1
-        if length == 0: break  
-        modifier += 1
-      return bytearray([tag | modifier]) + array
-    # True "bigint".
-    return bytearray([CBOR._TAG_BIG_UNSIGNED if tag == CBOR._MT_UNSIGNED 
-                      else CBOR._TAG_BIG_NEGATIVE]) + CBOR._encode_string(CBOR._MT_BYTES, array)
+    @staticmethod
+    def _generic_header(tag, value):
+        """ Convert unsigned integer to bytearray (but with a twist). """
+        array = bytearray()
+        while True:
+            array += bytes([value & 0xff])
+            value >>= 8
+            if value == 0: break
+        length = len(array)
+        """
+        Prepare for "int" encoding (1, 2, 4, 8). 
+        Only 3, 5, 6, and 7 need an action.
+        """
+        while length < 8 and length > 2 and length != 4:
+            array += bytes([0])
+            length += 1
+        """ Make big endian. """
+        array.reverse()
+        """ Does this number qualify as a "bigint"? """
+        if length <= 8:
+            """ Apparently not, encode it as "int". """
+            if length == 1 and array[0] <= 23:
+                return bytearray([array[0] | tag])
+            modifier = 24
+            while True:
+                length >>= 1
+                if length == 0: break  
+                modifier += 1
+            return bytearray([tag | modifier]) + array
+        """ True "bigint". """
+        return bytearray(([CBOR._TAG_BIG_UNSIGNED if tag == CBOR._MT_UNSIGNED
+                         else CBOR._TAG_BIG_NEGATIVE]) +
+                CBOR._encode_string(CBOR._MT_BYTES, array))
 
-  @staticmethod
-  def _int_range_check(value, min, max):
-    if (value < min or value > max):
-      CBOR._error("Value out of range: " + str(value))
-    return value
+    @staticmethod
+    def _int_range_check(value, min, max):
+        if (value < min or value > max):
+            CBOR._error("Value out of range: " + str(value))
+        return value
 
-  @staticmethod
-  def _check_argument_type(value, expected):
-    if type(value).__name__ != expected:
-      CBOR._error("Expected '" + expected + "', got '" + type(value).__name__ + "'")
-    return value
+    @staticmethod
+    def _check_argument_type(value, expected):
+        if type(value).__name__ != expected:
+            CBOR._error("Expected '" + expected +
+                        "', got '" + type(value).__name__ + "'")
+        return value
+        
+    @staticmethod
+    def _check_int_argument(value):
+        return CBOR._check_argument_type(value, 'int')
     
-  @staticmethod
-  def _check_int_argument(value):
-    return CBOR._check_argument_type(value, 'int')
-  
-  @staticmethod
-  def _check_bool_argument(value):
-    return CBOR._check_argument_type(value, 'bool')
+    @staticmethod
+    def _check_bool_argument(value):
+        return CBOR._check_argument_type(value, 'bool')
 
-  @staticmethod
-  def _check_bytes_argument(byte_string):  
-    if type(byte_string).__name__ not in ['bytes', 'bytearray']:
-      CBOR._error("Unexpected CBOR argument: " + type(byte_string).__name__)
-    return byte_string
-  
-  @staticmethod
-  def _encode_16_bits(uint16):
-    return bytes([uint16 >> 8, uint16 & 0xff])
-  
-  @staticmethod
-  def _reverse_payload(b51b0):
-    reversed = 0
-    bit_count = 0
-    while b51b0 > 0:
-      bit_count += 1
-      reversed <<= 1
-      if (b51b0 & 1) == 1:
-        reversed |= 1
-      b51b0 >>= 1
-    return reversed << (52 - bit_count)
-  
-  @staticmethod
-  def _create_int(value, min, max):
-    value = CBOR._check_int_argument(value)
-    cbor_int = CBOR.Int(value)
-    CBOR._int_range_check(value, min, max)
-    return cbor_int
+    @staticmethod
+    def _check_bytes_argument(byte_string):  
+        if type(byte_string).__name__ not in ['bytes', 'bytearray']:
+            CBOR._error("Unexpected CBOR argument: " +
+                        type(byte_string).__name__)
+        return byte_string
+    
+    @staticmethod
+    def _encode_16_bits(uint16):
+        return bytes([uint16 >> 8, uint16 & 0xff])
+    
+    @staticmethod
+    def _reverse_payload(b51b0):
+        reversed = 0
+        bit_count = 0
+        while b51b0 > 0:
+            bit_count += 1
+            reversed <<= 1
+            if (b51b0 & 1) == 1:
+                reversed |= 1
+            b51b0 >>= 1
+        return reversed << (52 - bit_count)
+    
+    @staticmethod
+    def _create_int(value, min, max):
+        value = CBOR._check_int_argument(value)
+        cbor_int = CBOR.Int(value)
+        CBOR._int_range_check(value, min, max)
+        return cbor_int
 
-  @staticmethod
-  def _bytes_to_int(byte_array):
-    value = 0
-    for v in byte_array:
-      value <<= 8
-      value += v
-    return value
+    @staticmethod
+    def _bytes_to_int(byte_array):
+        value = 0
+        for v in byte_array:
+            value <<= 8
+            value += v
+        return value
