@@ -65,6 +65,16 @@ class CBOR:
         def __str__(self):
             return self.to_string()
         
+        def equals(self, object):
+            if isinstance(object, CBOR._CborObject):
+                if not CBOR._compare_byte_arrays(self.encode(),
+                                                 object.encode()):
+                    return True
+            return False
+        
+        def __eq__(self, object):
+            return self.equals(object)
+        
         @property
         def length(self):
             if not hasattr(self, "_length"):
@@ -269,20 +279,20 @@ class CBOR:
                 """ Don't go into the non-finite space or underflow. """
                 if f32exp <= -23 or f32exp > 0xfe: break
                 f32signif = f64bin & 0xfffffffffffff
-                """ The 29 bits to be discarded must all be zero. """
-                if f32signif & 0x1fffffff: break
-                """
-                Put significand in position.
+                """ 
+                The bits to be discarded must all be zero.
                 Significand size difference: 52 - 23
                 """
+                if f32signif & 0x1fffffff: break
+                """ No bits dropped. Put significand in position. """
                 f32signif >>= 29
                 """ Finally, do we need to denormalize the number? """
                 if f32exp <= 0:
                     """ Losing significand bits is not an option. """
                     if f32signif & ((1 << (1 - f32exp)) - 1): break
                     """
-                    Denormalize. The implicit "1" becomes explicit using
-                    subnormal representation.
+                    No bits dropped. Denormalize. The implicit "1"
+                    becomes explicit using subnormal representation.
                     """
                     f32signif += 0x800000
                     """ Put significand in position. """
@@ -298,19 +308,19 @@ class CBOR:
                     f16exp = f32exp - 0x70
                     """ Don't go into the non-finite space or underflow. """
                     if f16exp <= -10 or f16exp > 0x1e: break
-                    """ The 13 bits to be discarded must all be zero. """
-                    if f32signif & 0x1fff: break
                     """
-                    Put significand in position.
+                    The bits to be discarded must all be zero.
                     Significand size difference: 23 - 10
                     """
+                    if f32signif & 0x1fff: break
+                    """ No bits dropped. Put significand in position. """
                     f16signif = f32signif >> 13
                     if f16exp <= 0:
                         """ Losing significand bits is not an option. """
                         if f16signif & ((1 << (1 - f16exp)) - 1): break
                         """
-                        Denormalize. The implicit "1" becomes explicit 
-                        using subnormal representation.
+                        No bits dropped. Denormalize. The implicit "1"
+                        becomes explicit using subnormal representation.
                         """
                         f16signif += 0x400
                         """ Put significand in position. """
@@ -323,8 +333,8 @@ class CBOR:
                     return
                 """ Exited inner loop  => float32. """
                 f32bin = ((f64b[0] & 0x80) << 24) + (f32exp << 23) + f32signif
-                self._encoded = (CBOR._encode_16_bits(f32bin >> 16) + 
-                                 CBOR._encode_16_bits(f32bin & 0xffff))
+                self._encoded = CBOR._encode_16_bits(f32bin >> 16) + \
+                                CBOR._encode_16_bits(f32bin & 0xffff)
                 return
             """ Exited outer loop => float64. """
             self._encoded = f64b
@@ -369,7 +379,7 @@ class CBOR:
 
         def _internal_encode(self):
             return CBOR._encode_string(
-                CBOR._MT_STRING, self._string.encode("utf8"))
+                CBOR._MT_STRING, self._string.encode())
         
         def _internal_to_string(self, cbor_printer):
             cbor_printer.append('"')
@@ -451,7 +461,8 @@ class CBOR:
             return self
         
         def get(self, index):
-            return self._objects[self._index_check(index, len(self._objects) - 1)]
+            return self._objects[self._index_check(
+                index, len(self._objects) - 1)]
 
         def _index_check(self, index, max):
             if CBOR._check_int_argument(index) > max or index < 0:
@@ -566,8 +577,8 @@ class CBOR:
             CBOR._check_int_argument(payload)
             if (payload & 0x1fffffffffffff) != payload:
                 CBOR._error("Payload out of range: " + payload)
-            left64 = (0xfff0000000000000 if (payload & 0x10000000000000)
-                                         else 0x7ff0000000000000)
+            left64 = 0xfff0000000000000 if (payload & 0x10000000000000) \
+                                        else 0x7ff0000000000000
             return CBOR.NonFinite(left64 + 
                 CBOR._reverse_payload(payload & 0xfffffffffffff))
 
@@ -751,9 +762,9 @@ class CBOR:
                 modifier += 1
             return bytearray([tag | modifier]) + array
         """ True "bigint". """
-        return bytearray(([CBOR._TAG_BIG_UNSIGNED if tag == CBOR._MT_UNSIGNED
-                         else CBOR._TAG_BIG_NEGATIVE]) +
-                CBOR._encode_string(CBOR._MT_BYTES, array))
+        return bytearray([CBOR._TAG_BIG_UNSIGNED if tag == CBOR._MT_UNSIGNED
+                          else CBOR._TAG_BIG_NEGATIVE]) + \
+                CBOR._encode_string(CBOR._MT_BYTES, array)
 
     @staticmethod
     def _int_range_check(value, min, max):
@@ -813,3 +824,13 @@ class CBOR:
             value <<= 8
             value += v
         return value
+    
+    @staticmethod
+    def _compare_byte_arrays(a, b):
+        min_index = min(len(a), len(b))
+        for i in range(min_index):
+            diff = a[i] - b[i]
+            if diff != 0:
+                return diff
+        return len(a) - len(b)
+  

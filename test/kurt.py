@@ -74,6 +74,8 @@ print(CBOR.Float(5e-324))
 print(CBOR.Float.create_extended_float(math.nan))
 
 print(CBOR.Bytes(bytes([0,1,2,3,9])))
+print(s == s)
+print(s == a)
 
 success()
 
