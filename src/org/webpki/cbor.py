@@ -10,7 +10,9 @@
 # version of cbor.py would be rewritten in C.                  #
 ################################################################
 
-import struct, math, io
+import struct
+import math
+import io
 
 class CBOR:
         
@@ -321,7 +323,8 @@ class CBOR:
                     return
                 """ Exited inner loop  => float32. """
                 f32bin = ((f64b[0] & 0x80) << 24) + (f32exp << 23) + f32signif
-                self._encoded = CBOR._encode_16_bits(f32bin >> 16) + CBOR._encode_16_bits(f32bin & 0xffff)
+                self._encoded = (CBOR._encode_16_bits(f32bin >> 16) + 
+                                 CBOR._encode_16_bits(f32bin & 0xffff))
                 return
             """ Exited outer loop => float64. """
             self._encoded = f64b
