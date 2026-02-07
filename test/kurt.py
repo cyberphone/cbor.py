@@ -73,5 +73,7 @@ print(CBOR.Float(1.401298464324817e-45).encode().hex())
 print(CBOR.Float(5e-324))
 print(CBOR.Float.create_extended_float(math.nan))
 
+print(CBOR.Bytes(bytes([0,1,2,3,9])))
+
 success()
 

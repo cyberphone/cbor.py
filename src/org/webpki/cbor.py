@@ -117,6 +117,15 @@ class CBOR:
     def get_string(self):
       return self._check_type_get_value('String')
     
+    def get_boolean(self):
+      return self._check_type_get_value('Boolean')
+
+    def is_null(self):
+      if type(self).__name__ == 'Null':
+        self.readFlag = True
+        return True
+      return False
+    
     def get_non_finite64(self):
       return self._check_type_get_value('NonFinite')
 
@@ -134,7 +143,7 @@ class CBOR:
       CBOR._error('get() not available in: CBOR.' + type(self).__name__)
 
     def to_diagnostic(self, pretty_print):
-      cbor_printer = CBOR._CborPrinter(CBOR._check_argument_type(pretty_print, 'bool'))
+      cbor_printer = CBOR._CborPrinter(CBOR._check_bool_argument(pretty_print))
       self._internal_to_string(cbor_printer)
       return cbor_printer.buffer
 
@@ -341,10 +350,43 @@ class CBOR:
 
     def _internal_encode(self):
       return CBOR._encode_string(CBOR._MT_BYTES, self._string)
+    
+    def _internal_to_string(self, cbor_printer):
+      cbor_printer.append("h'").append(self._string.hex()).append("'")
   
     def _get(self):
       return self._string
+
+  ##########################
+  #      CBOR.Boolean      #
+  ##########################
+  class Boolean(_CborObject):
+    def __init__(self, value):
+      super().__init__()
+      self._value = CBOR._check_bool_argument(value)
+
+    def _internal_encode(self):
+      return bytes([CBOR._SIMPLE_TRUE if self._value else CBOR._SIMPLE_FALSE])
     
+    def _internal_to_string(self, cbor_printer):
+      cbor_printer.append("true" if self._value else "false")
+  
+    def _get(self):
+      return self._value
+    
+  ##########################
+  #       CBOR.Null        #
+  ##########################
+  class Null(_CborObject):
+    def __init__(self):
+      super().__init__()
+
+    def _internal_encode(self):
+      return bytes([CBOR._SIMPLE_NULL])
+    
+    def _internal_to_string(self, cbor_printer):
+      cbor_printer.append("null")
+
   ##########################
   #       CBOR.Array       #
   ##########################
@@ -662,6 +704,10 @@ class CBOR:
   @staticmethod
   def _check_int_argument(value):
     return CBOR._check_argument_type(value, 'int')
+  
+  @staticmethod
+  def _check_bool_argument(value):
+    return CBOR._check_argument_type(value, 'bool')
 
   @staticmethod
   def _check_bytes_argument(byte_string):  
