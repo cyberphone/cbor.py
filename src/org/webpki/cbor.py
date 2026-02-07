@@ -498,6 +498,228 @@ class CBOR:
         
         def _length(self):
             return len(self._objects)
+ 
+    ##########################
+    #        CBOR.Map        #
+    ##########################
+    class Map(_CborObject):
+        def __init__(self):
+            super().__init__()
+            self._entries = list()
+            self._preSortedKeys = False
+            self._lastLookup = 0
+
+        def set(self, key, object):
+            # CBOR.#checkArgs(arguments, 2);
+            # self._immutableTest();
+            newEntry = CBOR._Entry(key, object)
+            # self.#makeImmutable(key);
+            insertIndex = len(self._entries)
+            if insertIndex:
+                endIndex = insertIndex - 1
+                if self._preSortedKeys:
+                    """ Normal case for deterministic decoding. """
+                    if (self._entries[endIndex].compareAndTest(newEntry)):
+                        CBOR._error("Non-deterministic order for key: " + str(key))
+                else:
+                    """
+                    Programmatically created key or the result of
+                    unconstrained decoding.  Then we need to test and
+                    sort (always produce deterministic CBOR).
+                    The algorithm is based on binary sort and insertion.
+                    """
+                    insertIndex = 0
+                    startIndex = 0
+                    while startIndex <= endIndex:
+                        midIndex = (endIndex + startIndex) >> 1
+                        if newEntry.compareAndTest(self._entries[midIndex]):
+                            """
+                            New key is bigger than the looked up entry.
+                            Preliminary assumption: this is the one,
+                            but continue.
+                            """
+                            insertIndex = startIndex = midIndex + 1
+                        else:
+                            """ 
+                            New key is smaller, search lower parts
+                            of the array.
+                            """
+                            endIndex = midIndex - 1
+            """
+            If insertIndex == len(self._entries), the key will be appended.
+            If insertIndex == 0, the key will be first in the list.
+            """
+            self._entries.insert(insertIndex, newEntry)
+            return self
+
+        """
+        setDynamic(dynamic):
+        return dynamic(this);
+        }
+        """
+
+        def _lookup(self, key, mustExist):
+            encodedKey = CBOR._cbor_argument_check(key).encode()
+            startIndex = 0
+            endIndex = len(self._entries) - 1
+            while startIndex <= endIndex:
+                midIndex = (endIndex + startIndex) >> 1
+                entry = self._entries[midIndex]
+                diff = entry.compare(encodedKey)
+                if diff == 0:
+                    self._lastLookup = midIndex
+                    return entry
+                if diff < 0:
+                    startIndex = midIndex + 1
+                else:
+                    endIndex = midIndex - 1
+            if mustExist:
+                CBOR._error("Missing key: " + str(key))
+            return None
+
+        """
+        update(key, object, existing):
+        CBOR.#checkArgs(arguments, 3);
+        self._immutableTest();
+        entry = self._lookup(key, existing);
+        previous;
+        if (entry):
+            previous = entry.object;
+            entry.object = CBOR.#cborArgumentCheck(object);
+        } else {
+            previous = null;
+            self.set(key, object);
+        }
+        return previous;
+        }
+        """
+
+        """
+        merge(map):
+        CBOR.#checkArgs(arguments, 1);
+        self._immutableTest();
+        if (!(map instanceof CBOR.Map)):
+            CBOR._error("Argument must be of type CBOR.Map");
+        }
+        map._entries.forEach(entry => {
+            self.set(entry.key, entry.object);
+        });
+        return self
+        }
+        """
+
+        def get(self, key):
+            # self._markAsRead()
+            return self._lookup(key, True).object
+
+        """
+        getConditionally(key, defaultObject):
+        CBOR.#checkArgs(arguments, 2);
+        entry = self._lookup(key, false);
+        // Note: defaultValue may be 'null'
+        defaultObject = defaultObject ? CBOR.#cborArgumentCheck(defaultObject) : null;
+        return entry ? entry.object : defaultObject;
+        }
+
+        getKeys():
+        keys = [];
+        self._entries.forEach(entry => {
+            keys.push(entry.key);
+        });
+        return keys;
+        }
+
+        remove(key):
+        CBOR.#checkArgs(arguments, 1);
+        self._immutableTest();
+        targetEntry = self._lookup(key, true);
+        self._entries.splice(self._lastLookup, 1);
+        return targetEntry.object;
+        }
+
+        _getLength():
+        return len(self._entries);
+        }
+
+        containsKey(key):
+        CBOR.#checkArgs(arguments, 1);
+        return self._lookup(key, false) != null;
+        }
+        """
+
+        def encode(self):
+            encoded = CBOR._generic_header(CBOR._MT_MAP, len(self._entries))
+            for entry in self._entries:
+                encoded += entry.encodedKey + entry.object.encode()
+            return encoded
+
+        def _internal_to_string(self, cbor_printer):
+            notFirst = False
+            cbor_printer.beginList("{")
+            for entry in self._entries:
+                if notFirst:
+                    cbor_printer.append(",")
+                notFirst = True
+                cbor_printer.newlineAndIndent()
+                entry.key._internal_to_string(cbor_printer)
+                cbor_printer.append(":").space()
+                entry.object._internal_to_string(cbor_printer)
+            cbor_printer.endList(notFirst, "}")
+
+        def setSortingMode(self, preSortedKeys):
+            # CBOR.#checkArgs(arguments, 1);
+            self._preSortedKeys = preSortedKeys
+            return self
+
+        """
+        #makeImmutable(object):
+        object._immutableFlag = true;
+        if (object instanceof CBOR.Map):
+            object.getKeys().forEach(key => {
+            self.#makeImmutable(object.get(key));
+            });
+        } else if (object instanceof CBOR.Array):
+            object.toArray().forEach(value => {
+            self.#makeImmutable(value);
+            });
+        }
+        }
+        """
+
+    """ Support class to CBOR.Map. """    
+    class _Entry:
+        def __init__(self, key, object):
+            self.key = CBOR._cbor_argument_check(key)
+            self.object = CBOR._cbor_argument_check(object)
+            self.encodedKey = key.encode()
+
+        def compare(self, encodedKey):
+            return CBOR._compare_byte_arrays(self.encodedKey, encodedKey)
+
+        def compareAndTest(self, entry):
+            diff = self.compare(entry.encodedKey)
+            if (diff == 0):
+                CBOR._error("Duplicate key: " + str(self.key))
+            return diff > 0
+
+    ##########################
+    #      CBOR.Simple       #
+    ##########################
+    class Simple(_CborObject):
+        def __init__(self, value):
+            super().__init__()
+            self._value = CBOR._check_int_argument(value)
+            if value < 0 or value > 255 or (value > 23 and value < 32):
+                CBOR._error("Simple value out of range: " + str(value))
+
+        def _internal_encode(self):
+            return CBOR._generic_header(CBOR._MT_SIMPLE, self._value)
+
+        def _internal_to_string(self, cbor_printer):
+            cbor_printer.append("simple(" + str(self._value) + ")")
+
+        def _get(self):
+            return self._value
 
     ##########################
     #     CBOR.NonFinite     #
@@ -790,9 +1012,15 @@ class CBOR:
     @staticmethod
     def _check_bytes_argument(byte_string):  
         if type(byte_string).__name__ not in ['bytes', 'bytearray']:
-            CBOR._error("Unexpected CBOR argument: " +
-                        type(byte_string).__name__)
+            CBOR._error("Expected 'bytes' or 'bytearray' argument, got '" +
+                        type(byte_string).__name__ + "'")
         return byte_string
+    
+    @staticmethod
+    def _cbor_argument_check(object):
+        if isinstance(object, CBOR._CborObject):
+            return object
+        CBOR._error("Expected CBOR.* argument, got '" + type(object).__name__ + "'")
     
     @staticmethod
     def _encode_16_bits(uint16):
