@@ -690,8 +690,8 @@ class CBOR:
     class _Entry:
         def __init__(self, key, object):
             self.key = CBOR._cbor_argument_check(key)
+            self.encodedKey = key.encode() # Yes, keys are immutable.
             self.object = CBOR._cbor_argument_check(object)
-            self.encodedKey = key.encode()
 
         def compare(self, encodedKey):
             return CBOR._compare_byte_arrays(self.encodedKey, encodedKey)
