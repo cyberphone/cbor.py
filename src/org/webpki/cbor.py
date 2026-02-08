@@ -99,40 +99,40 @@ class CBOR:
             return CBOR._int_range_check(self.get_big_integer(), -128, 127)
 
         def get_uint8(self):
-            return CBOR._int_range_check(self.get_big_integer(self), 0, 0xff)
+            return CBOR._int_range_check(self.get_big_integer(), 0, 0xff)
 
         def get_int16(self):
-            return CBOR._int_range_check(self.get_big_integer(self),
+            return CBOR._int_range_check(self.get_big_integer(),
                                          -0x8000, 0x7fff)
 
         def get_uint16(self):
-            return CBOR._int_range_check(self.get_big_integer(self),
+            return CBOR._int_range_check(self.get_big_integer(),
                                          0, 0xffff)
 
         def get_int32(self):
-            return CBOR._int_range_check(self.get_big_integer(self),
+            return CBOR._int_range_check(self.get_big_integer(),
                                          -0x80000000, 0x7fffffff)
 
         def get_uint32(self):
-            return CBOR._int_range_check(self.get_big_integer(self),
+            return CBOR._int_range_check(self.get_big_integer(),
                                          0, 0xffffffff)
 
         def get_int53(self):
-            return CBOR._int_range_check(self.get_big_integer(self),
+            return CBOR._int_range_check(self.get_big_integer(),
                                          -9007199254740991, 
                                          9007199254740991)
 
         def get_int64(self):
-            return CBOR._int_range_check(self.get_big_integer(self),
+            return CBOR._int_range_check(self.get_big_integer(),
                                          -0x8000000000000000, 
                                          0x7fffffffffffffff)
 
         def get_uint64(self):
-            return CBOR._int_range_check(self.get_big_integer(self), 
+            return CBOR._int_range_check(self.get_big_integer(), 
                                          0, 0xffffffffffffffff)
 
         def get_int128(self):
-            return CBOR._int_range_check(self.get_big_integer(self), 
+            return CBOR._int_range_check(self.get_big_integer(), 
                                          -0x80000000000000000000000000000000,
                                          0x7fffffffffffffffffffffffffffffff)
 
@@ -146,6 +146,9 @@ class CBOR:
         def get_string(self):
             return self._check_type_get_value('String')
         
+        def get_bytes(self):
+            return self._check_type_get_value('Bytes')
+
         def get_boolean(self):
             return self._check_type_get_value('Boolean')
 
@@ -674,6 +677,9 @@ class CBOR:
             });
         """
 
+        def _length(self):
+            return len(self._entries)
+
     """ Support class to CBOR.Map. """    
     class _Entry:
         def __init__(self, key, object):
@@ -977,11 +983,11 @@ class CBOR:
             """
             match tag:
                 case CBOR._TAG_BIG_NEGATIVE | CBOR._TAG_BIG_UNSIGNED:
-                    byteArray = self._get_object().get_bytes()
+                    byte_array = self._get_object().get_bytes()
                     if (self._strict_numbers and 
-                        (byteArray.length <= 8 or not byteArray[0])):
+                        (len(byte_array) <= 8 or not byte_array[0])):
                         CBOR._error("Non-deterministic bigint encoding")
-                    value = CBOR._bytes_to_int(byteArray)
+                    value = CBOR._bytes_to_int(byte_array)
                     return CBOR.Int(value if tag == CBOR._TAG_BIG_UNSIGNED
                                           else ~value)
 
