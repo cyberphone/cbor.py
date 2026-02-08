@@ -82,6 +82,7 @@ print(s == a)
 m = CBOR.Map().set(CBOR.Int(2), CBOR.String("two")).set(CBOR.Int(1), CBOR.String("one"))
 print(m.encode().hex())
 print(m.get(CBOR.Int(1)))
+print(CBOR.decode(bytes.fromhex("fa007fffff")))
 
 success()
 

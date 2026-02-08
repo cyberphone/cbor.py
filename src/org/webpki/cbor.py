@@ -555,7 +555,6 @@ class CBOR:
         """
         setDynamic(dynamic):
         return dynamic(this);
-        }
         """
 
         def _lookup(self, key, mustExist):
@@ -589,9 +588,7 @@ class CBOR:
         } else {
             previous = null;
             self.set(key, object);
-        }
         return previous;
-        }
         """
 
         """
@@ -600,12 +597,10 @@ class CBOR:
         self._immutableTest();
         if (!(map instanceof CBOR.Map)):
             CBOR._error("Argument must be of type CBOR.Map");
-        }
         map._entries.forEach(entry => {
             self.set(entry.key, entry.object);
         });
         return self
-        }
         """
 
         def get(self, key):
@@ -619,7 +614,6 @@ class CBOR:
         // Note: defaultValue may be 'null'
         defaultObject = defaultObject ? CBOR.#cborArgumentCheck(defaultObject) : null;
         return entry ? entry.object : defaultObject;
-        }
 
         getKeys():
         keys = [];
@@ -627,7 +621,6 @@ class CBOR:
             keys.push(entry.key);
         });
         return keys;
-        }
 
         remove(key):
         CBOR.#checkArgs(arguments, 1);
@@ -635,16 +628,13 @@ class CBOR:
         targetEntry = self._lookup(key, true);
         self._entries.splice(self._lastLookup, 1);
         return targetEntry.object;
-        }
 
         _getLength():
         return len(self._entries);
-        }
 
         containsKey(key):
         CBOR.#checkArgs(arguments, 1);
         return self._lookup(key, false) != null;
-        }
         """
 
         def encode(self):
@@ -682,8 +672,6 @@ class CBOR:
             object.toArray().forEach(value => {
             self.#makeImmutable(value);
             });
-        }
-        }
         """
 
     """ Support class to CBOR.Map. """    
@@ -867,20 +855,287 @@ class CBOR:
             self._max_length = max_length
             self.maxNestingLevel = 100
 
-            self._current = 0
+            self._byte_count = 0
             self._nestingLevel = 0
     
         def decode_with_options(self):
+            """
+        try {
+            atFirstByte = true;
+            CBORObject cborObject = getObject();
+            if (sequenceMode) {
+                if (atFirstByte) {
+                    return null;
+                }
+            } else if (inputStream.read() != -1) {
+                cborError(STDERR_UNEXPECTED_DATA);
+            }
+            return cborObject;
+        } catch (IOException e) {
+            throw new CBORException(e);
+        }
+            """
+            self.atFirstByte = True
+            cborObject = self.getObject()
+            if self.sequenceMode:
+                if self.atFirstByte:
+                    return None
+            elif self._cbor_stream.read(1):
+                CBOR._error("Unexpected data found")
+            """
             while (chunk := self._cbor_stream.read(1)):
-                self._current += 1
-            """ Right, the decoder is yet to be written :) """
-            print(str(self._current))
+                self._current += 
+            """
+            return cborObject
+        
+        def outOfLimitTest(self, length):
+            self._byte_count += length
+            # TODO
+    
+        def eofError(self):
+            CBOR._error("Reading past end of buffer")
+
+        def enterLevel(self):
+            self._nestingLevel += 1
+            if (self._nestingLevel > self.maxNestingLevel):
+                CBOR._error("Structure nesting level exceeding: " + self.maxNestingLevel)
+
+
+        def setMaxNestingLevel(self, maxLevel):
+            self.maxNestingLevel = CBOR._check_int_argument(maxLevel)
+            return self
+
+        def readByte(self):
+            """
+        int i = inputStream.read();
+        if (i < 0) {
+            if (sequenceMode && atFirstByte) {
+                return 0;
+            }
+            eofError();
+        }
+        outOfLimitTest(1);
+        atFirstByte = false;
+        return i;
+            """
+            one_byte = self._cbor_stream.read(1)
+            if not one_byte:
+                if self.sequenceMode and self.atFirstByte:
+                    return None
+                self.eofError()
+            self.atFirstByte = False
+            self.outOfLimitTest(1)
+            return one_byte[0]
+
+        def readBytes(self, length):
+            """
+        outOfLimitTest(length);
+        byte[] result = new byte[length];
+        int position = 0;
+        while (length != 0) {
+            int n = inputStream.read(result, position, length);
+            if (n == -1) {
+                eofError();
+            }
+            length -= n;
+            position += n;
+        }
+        return result;
+            """
+            self.outOfLimitTest(length)
+            byte_string = self._cbor_stream.read(length)
+            if not byte_string:
+                self.eofError()
+            return byte_string
+
+        def unsupportedTag(self, tag):
+            # TODO hex formatting
+            CBOR._error("Unsupported tag: " + str(tag))
+
+        def rangeLimitedBigInt(self, value):
+            if value > 0xffffffff:
+                CBOR._error("Length limited to 0xffffffff")
+            return value
+
+        def printFloatDetErr(self, decoded):
+            CBOR._error("Non-deterministic encoding of floating-point value: " +
+                # TODO
+                # CBOR.#twoHex((decoded.length >> 2) + CBOR._SIMPLE_FLOAT16) +
+                decoded.hex())
+
+        def returnFloat(self, decoded, f64):
+            cborFloat = CBOR.Float(f64)
+            if self.strictNumbers and cborFloat._encoded != decoded:
+                self.printFloatDetErr(decoded)
+            return cborFloat
+
+        def returnNonFinite(self, decoded, value):
+            nonFinite = CBOR.NonFinite(value)
+            if self.strictNumbers and nonFinite._value != value:
+                self.printFloatDetErr(decoded)
+            return nonFinite
+
+        """
+        Interesting algorithm...
+        1. Read the F16 byte string.
+        2. Convert the F16 byte string to its F64 IEEE 754 equivalent.
+        3. Create a CBOR.Float object using the F64 Number as input.
+           This causes CBOR.Float to create an '_encoded' byte string
+           holding the deterministic IEEE 754 representation.
+        4. Optionally verify that '_encoded' is equal to the byte string
+           read at step 1.  Maybe not the most performant solution, but hey,
+           this is a "Reference Implementation" :)
+        """
+        def decodeF16(self):
+            decoded = self.readBytes(2)
+            value = CBOR._bytes_to_int(decoded)
+            """ Is it a non-finite number? """
+            if (value & 0x7c00) == 0x7c00:
+                """ Yes, deal with it separately. """
+                return self.returnNonFinite(decoded, value)
+            """ It is a "regular" number. """
+            return self.returnFloat(decoded, struct.unpack('!e',decoded)[0])
+
+        def decodeF32(self):
+            decoded = self.readBytes(4)
+            value = CBOR._bytes_to_int(decoded)
+            """ Is it a non-finite number? """
+            if (value & 0x7f800000) == 0x7f800000:
+                """ Yes, deal with it separately. """
+                return self.returnNonFinite(decoded, value)
+            """ It is a "regular" number. """
+            return self.returnFloat(decoded, struct.unpack('!f',decoded)[0])
+
+        def decodeF64(self):
+            decoded = self.readBytes(8)
+            value = CBOR._bytes_to_int(decoded)
+            """ Is it a non-finite number? """
+            if (value & 0x7ff0000000000000) == 0x7ff0000000000000:
+                """ Yes, deal with it separately. """
+                return self.returnNonFinite(decoded, value)
+            """ It is a "regular" number. """
+            return self.returnFloat(decoded, struct.unpack('!d',decoded)[0])
+
+        def getObject(self):
+            tag = self.readByte()
+            """ 
+            Begin with CBOR types that are uniquely defined by the tag byte.
+            """
+            match tag:
+                case CBOR._TAG_BIG_NEGATIVE | CBOR._TAG_BIG_UNSIGNED:
+                    byteArray = self.getObject().get_bytes()
+                    if (self.strictNumbers and 
+                        (byteArray.length <= 8 or not byteArray[0])):
+                        CBOR._error("Non-deterministic bigint encoding")
+                    value = CBOR._bytes_to_int(byteArray)
+                    return CBOR.Int(value if tag == CBOR._TAG_BIG_UNSIGNED
+                                          else ~value)
+
+                case CBOR._SIMPLE_FLOAT16:
+                    return self.decodeF16()
+
+                case CBOR._SIMPLE_FLOAT32:
+                    return self.decodeF32()
+
+                case CBOR._SIMPLE_FLOAT64:
+                    return self.decodeF64()
+
+                case CBOR._SIMPLE_NULL:
+                    return CBOR.Null()
+
+                case CBOR._SIMPLE_TRUE | CBOR._SIMPLE_FALSE:
+                    return CBOR.Boolean(tag == CBOR._SIMPLE_TRUE)
+            """ 
+            Then decode CBOR types that blend length of data in the tag byte.
+            """
+            n = tag & 0x1f
+            if (n > 27):
+                self.unsupportedTag(tag)
+            if (n > 23):
+                """ For 1, 2, 4, and 8 byte N. """
+                q = 1 << (n - 24);
+                mask = 0xffffffff << ((q >> 1) * 8)
+                n = 0
+                while True:
+                    q -= 1
+                    if q < 0: break
+                    n <<= 8
+                    n += self.readByte()
+                """
+                If the upper half (for 2, 4, 8 byte N) of N or a single byte
+                N is zero, a shorter variant should have been used.
+                In addition, N must be > 23. 
+                """
+                if self.strictNumbers and (n < 24 or not (mask & n)):
+                    CBOR._error("Non-deterministic N encoding for tag: 0x" + str(tag))
+                # TODO
+                #                CBOR.#twoHex(tag));
+            """
+            N successfully decoded, now switch on major type
+            (upper three bits).
+            """
+            match tag & 0xe0:
+                case CBOR._MT_SIMPLE:
+                    return CBOR.Simple(self.rangeLimitedBigInt(n))
+
+                case CBOR._MT_TAG:
+                    self.enterLevel()
+                    cborTag = CBOR.Tag(n, self.getObject())
+                    self._nestingLevel -= 1
+                    return cborTag
+
+                case CBOR._MT_UNSIGNED:
+                    return CBOR.Int(n)
+
+                case CBOR._MT_NEGATIVE:
+                    return CBOR.Int(~n)
+
+                case CBOR._MT_BYTES:
+                    return CBOR.Bytes(self.readBytes(
+                        self.rangeLimitedBigInt(n)))
+
+                case CBOR._MT_STRING:
+                    return CBOR.String(
+                        self.readBytes(self.rangeLimitedBigInt(n)).decode())
+
+                case CBOR._MT_ARRAY:
+                    self.enterLevel()
+                    cborArray = CBOR.Array()
+                    for q in range(self.rangeLimitedBigInt(n)):
+                        cborArray.add(self.getObject())
+                    self._nestingLevel -= 1
+                    return cborArray
+
+                case CBOR._MT_MAP:
+                    self.enterLevel()
+                    cborMap = CBOR.Map().setSortingMode(self.strictMaps)
+                    for q in range(self.rangeLimitedBigInt(n)):
+                        cborMap.set(self.getObject(), self.getObject())
+                    self._nestingLevel -= 1
+                    """ Programmatically added elements sort automatically. """
+                    return cborMap.setSortingMode(False)
+
+                case _:
+                    self.unsupportedTag(tag)
+
+        def decodeWithOptions(self):
+            self.atFirstByte = True
+            object = self.getObject()
+            if (self.sequenceMode):
+                if (self.atFirstByte):
+                    return None
+            elif (self.byteCount < self.maxLength):
+                CBOR._error("Unexpected data encountered after CBOR object")
+            return object
+
+        def getByteCount(self):
+            return self._byte_count
 
     @classmethod
     def decode(cls, cbor_bytes):
         CBOR._check_bytes_argument(cbor_bytes)
-        CBOR.init_decoder(io.BytesIO(cbor_bytes), 
-                          0, len(cbor_bytes)).decode_with_options()
+        return CBOR.init_decoder(io.BytesIO(cbor_bytes), 
+                                 0, len(cbor_bytes)).decode_with_options()
 
     @classmethod
     def init_decoder(cls, cbor_stream, options, max_length):
