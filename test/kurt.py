@@ -36,16 +36,14 @@ k = CBOR.Int(7)
 k.get_int8()
 k.check_for_unread()
 
-CBOR.decode("DEC".encode("utf8"))
-
-"""
 import http.client
 conn = http.client.HTTPSConnection("cyberphone.github.io")
 conn.request("GET", "/javaapi/app-notes/large-payloads/metadata.cbor")
 response = conn.getresponse()
 print(response.status, response.reason)
-CBOR.init_decoder(response, 0, 10000).decode_with_options()
-"""
+decoder = CBOR.init_decoder(response, 0, 10000)
+decoder.decode_with_options()
+print(decoder.get_byte_count())
 
 print(CBOR.NonFinite(0x7ff0000000000000).encode().hex())
 print(CBOR.NonFinite.create_payload(0x1).encode().hex())
@@ -82,7 +80,7 @@ print(s == a)
 m = CBOR.Map().set(CBOR.Int(2), CBOR.String("two")).set(CBOR.Int(1), CBOR.String("one"))
 print(m.encode().hex())
 print(m.get(CBOR.Int(1)))
-print(CBOR.decode(bytes.fromhex("fa007fffff")))
+print(CBOR.decode(bytes.fromhex("1818")))
 
 success()
 
