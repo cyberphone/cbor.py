@@ -262,17 +262,25 @@ class CBOR:
             """
             if not math.isfinite(value):
                 CBOR._error("Not permitted: 'NaN/Infinity'")
-            """ Get the 8 bytes representing the IEEE-754 double. """
+            """ 
+            Get the 8 bytes representing the IEEE-754 double. 
+            """
             f64b = struct.pack('!d', value)
-            """ Deal with 0.0 and -0.0 separately. """
+            """ 
+            Deal with 0.0 and -0.0 separately.
+            """
             if value == 0:
                 self._encoded = f64b[0:2]
                 return
             while True:
                 f64bin = CBOR._bytes_to_int(f64b)
-                """ Exponent bias difference: 1023 - 127 """
+                """
+                Exponent bias difference: 1023 - 127
+                """
                 f32exp = ((f64bin & 0x7ff0000000000000) >> 52) - 0x380
-                """ Don't go into the non-finite space or underflow. """
+                """
+                Don't go into the non-finite space or underflow. 
+                """
                 if f32exp <= -23 or f32exp > 0xfe: break
                 f32signif = f64bin & 0xfffffffffffff
                 """ 
@@ -280,59 +288,85 @@ class CBOR:
                 Significand size difference: 52 - 23
                 """
                 if f32signif & 0x1fffffff: break
-                """ No bits dropped. Put significand in position. """
+                """
+                No bits dropped. Put significand in position.
+                """
                 f32signif >>= 29
                 """ Finally, do we need to denormalize the number? """
                 if f32exp <= 0:
-                    """ Losing significand bits is not an option. """
+                    """
+                    Losing significand bits is not an option.
+                    """
                     if f32signif & ((1 << (1 - f32exp)) - 1): break
                     """
                     No bits dropped. Denormalize. The implicit "1"
                     becomes explicit using subnormal representation.
                     """
                     f32signif += 0x800000
-                    """ Put significand in position. """
+                    """
+                    Put significand in position.
+                    """
                     f32signif >>= (1 - f32exp)
-                    """ Denormalized exponents are always zero. """
+                    """
+                    Denormalized exponents are always zero.
+                    """
                     f32exp = 0
                 """
                 Maybe we are done but we need to check
                 if float16 is possible as well.
                 """
                 while True:
-                    """ Exponent bias difference: 127 - 15 """
+                    """
+                    Exponent bias difference: 127 - 15
+                    """
                     f16exp = f32exp - 0x70
-                    """ Don't go into the non-finite space or underflow. """
+                    """
+                    Don't go into the non-finite space or underflow.
+                    """
                     if f16exp <= -10 or f16exp > 0x1e: break
                     """
                     The bits to be discarded must all be zero.
                     Significand size difference: 23 - 10
                     """
                     if f32signif & 0x1fff: break
-                    """ No bits dropped. Put significand in position. """
+                    """
+                    No bits dropped. Put significand in position.
+                    """
                     f16signif = f32signif >> 13
                     if f16exp <= 0:
-                        """ Losing significand bits is not an option. """
+                        """
+                        Losing significand bits is not an option.
+                        """
                         if f16signif & ((1 << (1 - f16exp)) - 1): break
                         """
                         No bits dropped. Denormalize. The implicit "1"
                         becomes explicit using subnormal representation.
                         """
                         f16signif += 0x400
-                        """ Put significand in position. """
+                        """
+                        Put significand in position.
+                        """
                         f16signif >>= (1 - f16exp)
-                        """ Denormalized exponents are always zero. """
+                        """
+                        Denormalized exponents are always zero.
+                        """
                         f16exp = 0
-                    """ Reached the end of the rope => float16. """
+                    """
+                    Reached the end of the rope => float16.
+                    """
                     self._encoded = CBOR._encode_16_bits(
                         ((f64b[0] & 0x80) << 8) + (f16exp << 10) + f16signif)
                     return
-                """ Exited inner loop  => float32. """
+                """
+                Exited inner loop  => float32.
+                """
                 f32bin = ((f64b[0] & 0x80) << 24) + (f32exp << 23) + f32signif
                 self._encoded = (CBOR._encode_16_bits(f32bin >> 16) + 
                                  CBOR._encode_16_bits(f32bin & 0xffff))
                 return
-            """ Exited outer loop => float64. """
+            """
+            Exited outer loop => float64.
+            """
             self._encoded = f64b
 
         @staticmethod
@@ -344,10 +378,17 @@ class CBOR:
             Handled as a separate data type.
             """
             nf = CBOR.NonFinite(CBOR._bytes_to_int(struct.pack('!d', value)))
-            if not nf.is_simple():
-                CBOR._error(
+            if not nf.is_simple(): CBOR._error(
                 "create_extended_float() does not support NaN with payloads")
             return nf
+
+        @staticmethod
+        def create_float32(value):
+            return CBOR._return_converted(False, value)
+
+        @staticmethod
+        def create_float16(value):
+            return CBOR._return_converted(True, value)
 
         def _internal_encode(self):
             return bytes([0xf9 + (len(self._encoded) >> 2)]) + self._encoded
@@ -647,9 +688,9 @@ class CBOR:
                     cbor_printer.append(",")
                 notFirst = True
                 cbor_printer.newlineAndIndent()
-                entry.key._internal_to_string(cbor_printer)
+                entry._key._internal_to_string(cbor_printer)
                 cbor_printer.append(":").space()
-                entry.object._internal_to_string(cbor_printer)
+                entry._object._internal_to_string(cbor_printer)
             cbor_printer.endList(notFirst, "}")
 
         def set_sorting_mode(self, pre_sorted_keys):
@@ -911,7 +952,9 @@ class CBOR:
         def _print_float_det_err(self, decoded):
             CBOR._error(
                 "Non-deterministic encoding of floating-point number: " +
-                decoded.hex())
+                "{:2x}{:s}".format(
+                    CBOR._SIMPLE_FLOAT16 + (len(decoded) >> 2),
+                    decoded.hex()))
 
         def _decode_float(self, length, mask, prefix):
             decoded = self._read_bytes(length)
@@ -936,7 +979,6 @@ class CBOR:
             return cbor_float
 
         def _get_object(self):
-            position = self._byte_count
             tag = self._read_byte()
             """ 
             Begin with CBOR types that are uniquely defined by the tag byte.
@@ -947,9 +989,9 @@ class CBOR:
                     byte_array = self._get_object().get_bytes()
                     if (self._strict_numbers and 
                         (len(byte_array) <= 8 or not byte_array[0])):
-                        CBOR._error("Non-deterministic \"bigint\" object: " +
-                                    "{:02x}{:s} at position: {:n}".format(
-                                    tag, byte_array.hex(), position))
+                        CBOR._error(
+                            "Non-deterministic \"bigint\" object: " +
+                            "{:02x}{:s}".format(tag, byte_array.hex()))
                     value = CBOR._bytes_to_int(byte_array)
                     return CBOR.Int(value if tag == CBOR._TAG_BIG_UNSIGNED
                                           else ~value)
@@ -976,7 +1018,7 @@ class CBOR:
                 self._unsupported_tag(tag)
             if (n > 23):
                 """ For 1, 2, 4, and 8 byte N. """
-                q = 1 << (n - 24);
+                q = 1 << (n - 24)
                 mask = 0xffffffff << ((q >> 1) * 8)
                 n = 0
                 while True:
@@ -990,7 +1032,7 @@ class CBOR:
                 In addition, N must be > 23. 
                 """
                 if self._strict_numbers and (n < 24 or not (mask & n)):
-                    CBOR._error("Non-deterministic N encoding " +
+                    CBOR._error("Non-deterministic length/count encoding " +
                                 "for tag: 0x{:02x}".format(tag))
             """
             N successfully decoded, now switch on major type
@@ -1164,6 +1206,22 @@ class CBOR:
                 CBOR._encode_string(CBOR._MT_BYTES, array))
 
     @staticmethod
+    def _return_converted(float16_flag, value):
+        type = "float16" if float16_flag else "float32"
+        if math.isfinite(CBOR._check_argument_type(value, 'float')):
+            try:
+                reduced = struct.unpack("!f", struct.pack("!f", value))[0]
+                if float16_flag:
+                    reduced = struct.unpack(
+                        "!e", struct.pack("!e", reduced))[0]
+            except OverflowError:
+                CBOR._error(
+                    "Not possible reducing {:g} into a \"{:s}\"".format(
+                        value, type))
+        else: reduced = value
+        return CBOR.Float(reduced)
+
+    @staticmethod
     def _int_range_check(value, min, max):
         if (value < min or value > max):
             if min < 0 and max != 9007199254740991: max += 1
@@ -1246,5 +1304,4 @@ class CBOR:
             if diff != 0:
                 return diff
         return len(a) - len(b)
-  
-# TODO more position
+
