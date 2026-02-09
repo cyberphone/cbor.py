@@ -94,51 +94,44 @@ class CBOR:
 
         def get_big_integer(self):
             return self._check_type_get_value('Int')
+        
+        def _get_checked_int(self, min, max):
+            return CBOR._int_range_check(self.get_big_integer(), min, max)
 
         def get_int8(self):
-            return CBOR._int_range_check(self.get_big_integer(), -0x80, 0x7f)
+            return self._get_checked_int(-0x80, 0x7f)
 
         def get_uint8(self):
-            return CBOR._int_range_check(self.get_big_integer(), 0, 0xff)
+            return self._get_checked_int(0, 0xff)
 
         def get_int16(self):
-            return CBOR._int_range_check(self.get_big_integer(),
-                                         -0x8000, 0x7fff)
+            return self._get_checked_int(-0x8000, 0x7fff)
 
         def get_uint16(self):
-            return CBOR._int_range_check(self.get_big_integer(),
-                                         0, 0xffff)
+            return self._get_checked_int(0, 0xffff)
 
         def get_int32(self):
-            return CBOR._int_range_check(self.get_big_integer(),
-                                         -0x80000000, 0x7fffffff)
+            return self._get_checked_int(-0x80000000, 0x7fffffff)
 
         def get_uint32(self):
-            return CBOR._int_range_check(self.get_big_integer(),
-                                         0, 0xffffffff)
+            return self._get_checked_int(0, 0xffffffff)
 
         def get_int53(self):
-            return CBOR._int_range_check(self.get_big_integer(),
-                                         -9007199254740991, 
-                                         9007199254740991)
+            return self._get_checked_int(-9007199254740991, 9007199254740991)
 
         def get_int64(self):
-            return CBOR._int_range_check(self.get_big_integer(),
-                                         -0x8000000000000000, 
+            return self._get_checked_int(-0x8000000000000000,
                                          0x7fffffffffffffff)
 
         def get_uint64(self):
-            return CBOR._int_range_check(self.get_big_integer(), 
-                                         0, 0xffffffffffffffff)
+            return self._get_checked_int(0, 0xffffffffffffffff)
 
         def get_int128(self):
-            return CBOR._int_range_check(self.get_big_integer(), 
-                                         -0x80000000000000000000000000000000,
+            return self._get_checked_int(-0x80000000000000000000000000000000,
                                          0x7fffffffffffffffffffffffffffffff)
 
         def get_uint128(self):
-            return CBOR._int_range_check(self.get_big_integer(),
-                                         0, 0xffffffffffffffffffffffffffffffff)
+            return self._get_checked_int(0, 0xffffffffffffffffffffffffffffffff)
         
         def get_float64(self):
             return self._check_type_get_value('Float')
