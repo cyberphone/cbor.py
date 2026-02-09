@@ -12,7 +12,7 @@ def one_turn(value, expected):
     got = '***=' + got
   else:
     got = ''
-  # assert_true("Failed decoding: " + value, CBOR.decode(cbor).get_big_integer() == value)
+  assert_true("Failed decoding: " + str(value), CBOR.decode(cbor).get_big_integer() == value)
   while len(expected) < 20:
     expected += ' '
   if len(got):
@@ -32,31 +32,23 @@ one_turn(18446744073709551616, 'c249010000000000000000')
 one_turn(-18446744073709551616, '3bffffffffffffffff')
 one_turn(-18446744073709551617, 'c349010000000000000000')
 
-"""
-try {
+try:
   CBOR.Int(1.1)
   fail("Should not")
-} catch (error) {
-  assert_true("msg1", error.toString().includes("Invalid integer: 1.1"))
-}
-try {
-  CBOR.Int(Number.MAX_SAFE_INTEGER + 1)
-  fail("Should not")
-} catch (error) {
-  assert_true("msg1", error.toString().includes("Invalid integer: " + (Number.MAX_SAFE_INTEGER + 1)))
-}
-try {
+except Exception as error:
+  assert_true("msg1" + repr(error), repr(error).find("Expected 'int', got 'float'") >= 0)
+
+try:
   CBOR.Int("10")
   fail("Should not")
-} catch (error) {
-  assert_true("msg2", error.toString().includes("Argument is not a 'number'"))
-}
-try {
+except Exception as error:
+  assert_true("msg2" + repr(error), repr(error).find("Expected 'int', got 'str'") >= 0)
+
+try:
   CBOR.Int(1, 7)
   fail("Should not")
-} catch (error) {
-  assert_true("msg4", error.toString().includes("CBOR.Int expects 1 argument(s)"))
-}
-"""
+except TypeError as error:
+  pass
+
 success()
 

@@ -34,7 +34,9 @@ public class BuildSystem {
     template = UTF8.decode(IO.readFile(templateFileName));
     this.testFileDirectory = testFileDirectory;
     addFile("integer.py");
-    addFile("kurt.py");
+    addFile("int-ranges.py");
+    addFile("xyz-encoder.py");
+    addFile("xyz-decoder.py");
     IO.writeFile(testFileName, template);
   }
   public static void main(String[] args) {

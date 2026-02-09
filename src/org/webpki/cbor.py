@@ -96,7 +96,7 @@ class CBOR:
             return self._check_type_get_value('Int')
 
         def get_int8(self):
-            return CBOR._int_range_check(self.get_big_integer(), -128, 127)
+            return CBOR._int_range_check(self.get_big_integer(), -0x80, 0x7f)
 
         def get_uint8(self):
             return CBOR._int_range_check(self.get_big_integer(), 0, 0xff)
@@ -336,8 +336,8 @@ class CBOR:
                     return
                 """ Exited inner loop  => float32. """
                 f32bin = ((f64b[0] & 0x80) << 24) + (f32exp << 23) + f32signif
-                self._encoded = CBOR._encode_16_bits(f32bin >> 16) + \
-                                CBOR._encode_16_bits(f32bin & 0xffff)
+                self._encoded = (CBOR._encode_16_bits(f32bin >> 16) + 
+                                 CBOR._encode_16_bits(f32bin & 0xffff))
                 return
             """ Exited outer loop => float64. """
             self._encoded = f64b
@@ -793,8 +793,8 @@ class CBOR:
             CBOR._check_int_argument(payload)
             if (payload & 0x1fffffffffffff) != payload:
                 CBOR._error("Payload out of range: " + payload)
-            left64 = 0xfff0000000000000 if (payload & 0x10000000000000) \
-                                        else 0x7ff0000000000000
+            left64 = (0xfff0000000000000 if (payload & 0x10000000000000)
+                                         else 0x7ff0000000000000)
             return CBOR.NonFinite(left64 + 
                 CBOR._reverse_payload(payload & 0xfffffffffffff))
 
@@ -918,63 +918,31 @@ class CBOR:
             return value
 
         def _print_float_det_err(self, decoded):
-            CBOR._error("Non-deterministic encoding of floating-point value: " +
-                # TODO
-                # CBOR.#twoHex((decoded.length >> 2) + CBOR._SIMPLE_FLOAT16) +
+            CBOR._error(
+                "Non-deterministic encoding of floating-point number: " +
                 decoded.hex())
 
-        def _return_float(self, decoded, f64):
-            cbor_float = CBOR.Float(f64)
+        def _decode_float(self, length, mask, prefix):
+            decoded = self._read_bytes(length)
+            value = CBOR._bytes_to_int(decoded)
+            """
+            Is it a non-finite number?
+            """
+            if (value & mask) == mask:
+                """
+                Yes, deal with it as a distinct data type.
+                """
+                non_finite = CBOR.NonFinite(value)
+                if self._strict_numbers and non_finite._value != value:
+                    self._print_float_det_err(decoded)
+                return non_finite
+            """
+            No, it is a "regular" number.
+            """
+            cbor_float = CBOR.Float(struct.unpack(prefix, decoded)[0])
             if self._strict_numbers and cbor_float._encoded != decoded:
                 self._print_float_det_err(decoded)
             return cbor_float
-
-        def _return_non_finite(self, decoded, value):
-            non_finite = CBOR.NonFinite(value)
-            if self._strict_numbers and non_finite._value != value:
-                self._print_float_det_err(decoded)
-            return non_finite
-
-        """
-        Interesting algorithm...
-        1. Read the F16 byte string.
-        2. Convert the F16 byte string to its F64 IEEE 754 equivalent.
-        3. Create a CBOR.Float object using the F64 Number as input.
-           This causes CBOR.Float to create an '_encoded' byte string
-           holding the deterministic IEEE 754 representation.
-        4. Optionally verify that '_encoded' is equal to the byte string
-           read at step 1.  Maybe not the most performant solution, but hey,
-           this is a "Reference Implementation" :)
-        """
-        def _decode_f16(self):
-            decoded = self._read_bytes(2)
-            value = CBOR._bytes_to_int(decoded)
-            """ Is it a non-finite number? """
-            if (value & 0x7c00) == 0x7c00:
-                """ Yes, deal with it separately. """
-                return self._return_non_finite(decoded, value)
-            """ It is a "regular" number. """
-            return self._return_float(decoded, struct.unpack('!e',decoded)[0])
-
-        def _decode_f32(self):
-            decoded = self._read_bytes(4)
-            value = CBOR._bytes_to_int(decoded)
-            """ Is it a non-finite number? """
-            if (value & 0x7f800000) == 0x7f800000:
-                """ Yes, deal with it separately. """
-                return self._return_non_finite(decoded, value)
-            """ It is a "regular" number. """
-            return self._return_float(decoded, struct.unpack('!f',decoded)[0])
-
-        def _decode_f64(self):
-            decoded = self._read_bytes(8)
-            value = CBOR._bytes_to_int(decoded)
-            """ Is it a non-finite number? """
-            if (value & 0x7ff0000000000000) == 0x7ff0000000000000:
-                """ Yes, deal with it separately. """
-                return self._return_non_finite(decoded, value)
-            """ It is a "regular" number. """
-            return self._return_float(decoded, struct.unpack('!d',decoded)[0])
 
         def _get_object(self):
             tag = self._read_byte()
@@ -992,13 +960,13 @@ class CBOR:
                                           else ~value)
 
                 case CBOR._SIMPLE_FLOAT16:
-                    return self._decode_f16()
+                    return self._decode_float(2, 0x7c00, "!e")
 
                 case CBOR._SIMPLE_FLOAT32:
-                    return self._decode_f32()
+                    return self._decode_float(4, 0x7f800000, "!f")
 
                 case CBOR._SIMPLE_FLOAT64:
-                    return self._decode_f64()
+                    return self._decode_float(8, 0x7ff0000000000000, "!d")
 
                 case CBOR._SIMPLE_NULL:
                     return CBOR.Null()
@@ -1199,13 +1167,14 @@ class CBOR:
                 modifier += 1
             return bytearray([tag | modifier]) + array
         """ True "bigint". """
-        return bytearray([CBOR._TAG_BIG_UNSIGNED if tag == CBOR._MT_UNSIGNED
-                          else CBOR._TAG_BIG_NEGATIVE]) + \
-                CBOR._encode_string(CBOR._MT_BYTES, array)
+        return (bytearray([CBOR._TAG_BIG_UNSIGNED if tag == CBOR._MT_UNSIGNED
+                          else CBOR._TAG_BIG_NEGATIVE]) + 
+                CBOR._encode_string(CBOR._MT_BYTES, array))
 
     @staticmethod
     def _int_range_check(value, min, max):
         if (value < min or value > max):
+            # TODO type derivition
             CBOR._error("Value out of range: " + str(value))
         return value
 
