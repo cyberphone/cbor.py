@@ -133,6 +133,18 @@ class CBOR:
         def get_uint128(self):
             return self._get_checked_int(0, 0xffffffffffffffffffffffffffffffff)
         
+        def _range_float(self, max):
+            value = self.get_float64()
+            if self.length > max:
+                CBOR._range_error('float' + str(max * 8), str(value))
+            return value
+
+        def get_float16(self):
+            return self._range_float(2)
+
+        def get_float32(self):
+            return self._range_float(4)
+
         def get_float64(self):
             return self._check_type_get_value('Float')
         
