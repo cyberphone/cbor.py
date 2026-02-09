@@ -1174,9 +1174,18 @@ class CBOR:
     @staticmethod
     def _int_range_check(value, min, max):
         if (value < min or value > max):
-            # TODO type derivition
-            CBOR._error("Value out of range: " + str(value))
+            if min < 0 and max != 9007199254740991: max += 1
+            bits = 0
+            while max:
+                max >>= 1
+                bits += 1
+            CBOR._range_error(("int" if min else "uint") + str(bits),
+                              str(value))
         return value
+
+    @staticmethod
+    def _range_error(type, valueString):
+        CBOR._error('Value out of range for "' + type + '": ' + valueString)
 
     @staticmethod
     def _check_argument_type(value, expected):
