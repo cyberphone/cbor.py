@@ -386,7 +386,7 @@ class CBOR:
                     if escaped_character:
                         cbor_printer.append('\\')
                         if escaped_character == 1:
-                            cbor_printer.append('u00').append(bytes([c]).hex())
+                            cbor_printer.append("u00{:02x}".format(c))
                         else:
                             cbor_printer.append(chr(escaped_character))
                         continue;
@@ -844,6 +844,7 @@ class CBOR:
     class _Decoder:
         def __init__(self, cbor_stream, options, max_length):
             CBOR._check_int_argument(max_length)
+            CBOR._check_int_argument(options)
             if not isinstance(cbor_stream, io.BufferedIOBase):
                 CBOR._error("Unexpected stream type: " + 
                             type(cbor_stream).__name__)
@@ -869,7 +870,8 @@ class CBOR:
         
         def _out_of_limit_test(self, length):
             self._byte_count += length
-            # TODO
+            if self._byte_count > self._max_length:
+                CBOR._error("Exceeded set limit: max_length={:n}".format(self._max_length))
     
         def _eof_error(self):
             CBOR._error("Malformed CBOR, trying to read past EOF")
@@ -895,6 +897,8 @@ class CBOR:
             return one_byte[0]
 
         def _read_bytes(self, length):
+            if not length:
+                return bytes([0]) # Python fix
             self._out_of_limit_test(length)
             byte_string = self._cbor_stream.read(length)
             if not byte_string or len(byte_string) < length:
@@ -902,13 +906,7 @@ class CBOR:
             return byte_string
 
         def _unsupported_tag(self, tag):
-            # TODO hex formatting
-            CBOR._error("Unsupported tag: " + str(tag))
-
-        def _range_limited_int(self, value):
-            if value > 0xffffffff:
-                CBOR._error("Length limited to 0xffffffff")
-            return value
+            CBOR._error("Unsupported tag: 0x{:02x}".format(tag))
 
         def _print_float_det_err(self, decoded):
             CBOR._error(
@@ -938,16 +936,20 @@ class CBOR:
             return cbor_float
 
         def _get_object(self):
+            position = self._byte_count
             tag = self._read_byte()
             """ 
             Begin with CBOR types that are uniquely defined by the tag byte.
             """
             match tag:
                 case CBOR._TAG_BIG_NEGATIVE | CBOR._TAG_BIG_UNSIGNED:
+                    position = self._byte_count
                     byte_array = self._get_object().get_bytes()
                     if (self._strict_numbers and 
                         (len(byte_array) <= 8 or not byte_array[0])):
-                        CBOR._error("Non-deterministic bigint encoding")
+                        CBOR._error("Non-deterministic \"bigint\" object: " +
+                                    "{:02x}{:s} at position: {:n}".format(
+                                    tag, byte_array.hex(), position))
                     value = CBOR._bytes_to_int(byte_array)
                     return CBOR.Int(value if tag == CBOR._TAG_BIG_UNSIGNED
                                           else ~value)
@@ -988,16 +990,15 @@ class CBOR:
                 In addition, N must be > 23. 
                 """
                 if self._strict_numbers and (n < 24 or not (mask & n)):
-                    CBOR._error("Non-deterministic N encoding for tag: 0x" + str(tag))
-                # TODO
-                #                CBOR.#twoHex(tag));
+                    CBOR._error("Non-deterministic N encoding " +
+                                "for tag: 0x{:02x}".format(tag))
             """
             N successfully decoded, now switch on major type
             (upper three bits).
             """
             match tag & 0xe0:
                 case CBOR._MT_SIMPLE:
-                    return CBOR.Simple(self._range_limited_int(n))
+                    return CBOR.Simple(n)
 
                 case CBOR._MT_TAG:
                     self.enter_level()
@@ -1012,17 +1013,15 @@ class CBOR:
                     return CBOR.Int(~n)
 
                 case CBOR._MT_BYTES:
-                    return CBOR.Bytes(self._read_bytes(
-                        self._range_limited_int(n)))
+                    return CBOR.Bytes(self._read_bytes(n))
 
                 case CBOR._MT_STRING:
-                    return CBOR.String(
-                        self._read_bytes(self._range_limited_int(n)).decode())
+                    return CBOR.String(self._read_bytes(n).decode())
 
                 case CBOR._MT_ARRAY:
                     self.enter_level()
                     cborArray = CBOR.Array()
-                    for q in range(self._range_limited_int(n)):
+                    for q in range(n):
                         cborArray.add(self._get_object())
                     self._nesting_level -= 1
                     return cborArray
@@ -1030,7 +1029,7 @@ class CBOR:
                 case CBOR._MT_MAP:
                     self.enter_level()
                     cborMap = CBOR.Map().set_sorting_mode(self._strict_maps)
-                    for q in range(self._range_limited_int(n)):
+                    for q in range(n):
                         cborMap.set(self._get_object(), self._get_object())
                     self._nesting_level -= 1
                     """ Programmatically added elements sort automatically. """
@@ -1248,3 +1247,4 @@ class CBOR:
                 return diff
         return len(a) - len(b)
   
+# TODO more position

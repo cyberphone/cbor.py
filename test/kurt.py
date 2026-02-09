@@ -10,7 +10,7 @@ CBOR.Int.create_int16(32767)
 
 print(i.get_int8())
 
-s = CBOR.String("kurt0€\"\r\x00")
+s = CBOR.String("kurt0€\"\r\x01")
 print(s.encode().hex())
 
 # print(s.get_int8())
@@ -41,7 +41,7 @@ conn = http.client.HTTPSConnection("cyberphone.github.io")
 conn.request("GET", "/javaapi/app-notes/large-payloads/metadata.cbor")
 response = conn.getresponse()
 print(response.status, response.reason)
-decoder = CBOR.init_decoder(response, 0, 10000)
+decoder = CBOR.init_decoder(response, 0, 66)
 decoder.decode_with_options()
 print(decoder.get_byte_count())
 
