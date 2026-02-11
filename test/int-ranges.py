@@ -1,6 +1,6 @@
 # Testing range-constrained integers
 from org.webpki.cbor import CBOR
-from assertions import assert_true, assert_false, fail, success
+from assertions import assert_true, assert_false, fail, success, check_exception
 
 
 def goodRun(type, value):
@@ -20,17 +20,15 @@ def badRun(type, value):
   test = 'wrapper.get' + type + '()'
   try:
     eval(test)
-    fail("Should fail");
+    fail("Should fail")
   except Exception as error:
-    if repr(error).find('Value out of range') < 0:
-      raise Exception(error)
+    check_exception(error, "Value out of range")
   test = 'CBOR.Int.create' + type + '(' + str(value) + ')'
   try:
     eval(test)
     fail("Should fail")
   except Exception as error:
-    if repr(error).find('Value out of range') < 0:
-      raise Exception(error)
+    check_exception(error, "Value out of range")
 
 def innerTurn(type, signed, size):
   min_val = -(1 << size - 1) if signed else 0

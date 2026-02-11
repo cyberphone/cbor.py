@@ -1,6 +1,6 @@
 # Test program for floating-point "edge cases"
 from org.webpki.cbor import CBOR
-from assertions import assert_true, assert_false, fail, success
+from assertions import assert_true, assert_false, fail, success, check_exception
 import math
 import struct
 
@@ -10,8 +10,7 @@ def overflow(decodedValue, length):
     eval(test)
     fail("Should fail")
   except Exception as error:
-    if not repr(error).find("Value out of range for 'Float'"):
-      raise Exception(repr(error))
+    check_exception(error, "Value out of range for 'Float'")
 
 def shouldpass(decodedValue, value, length, valueText):
   assert_true("p1", decodedValue.toString() == valueText)
@@ -67,8 +66,8 @@ def oneTurn(valueText, expected):
     assert_true("nf4", cbor.hex() == expected)
     assert_true("nf5", CBOR.decode(cbor) == decodedValue)
     buf = struct.pack("!d", value)
-    assert_true("nf6", decodedValue.get_non_finite64() == CBOR._bytes_to_int(buf))
-  assert_true("d10", CBOR.Float.createExtendedFloat(value).encode().hex() == expected)
+    assert_true("nf6", decodedValue.get_non_finite64() == CBOR._bytes_to_uint(buf))
+  assert_true("d10", CBOR.Float.create_extended_float(value).encode().hex() == expected)
 
 def payloadOneTurn(payload, hex, dn):
   dn = ("float'" + hex[2] + "'") if dn == None else dn
@@ -76,28 +75,28 @@ def payloadOneTurn(payload, hex, dn):
   object = CBOR.decode(cbor)
   assert_true("plo1", isinstance(object, CBOR.NonFinite)
   nonFinite = object
-  assert_true("plo2", nonFinite.getPayload() == payload)
+  assert_true("plo2", nonFinite.get_payload() == payload)
   assert_true("plo3", cborhex() == hex)
   assert_true("plo4", nonFinite.to_string() == dn)
   assert_true("plo5", nonFinite.get_non_finite() == 
-              CBOR._bytes_to_int(bytes.fromhex(hex.substring(2))))
-  assert_false("plo6", nonFinite.getSign() ^ (hex.substring(2,3) == "f"))
-  signedHex = hex.substring(0, 2) + "f" +hex.substring(3)
+              CBOR._bytes_to_uint(bytes.fromhex(hex[2])))
+  assert_false("plo6", nonFinite.getSign() ^ (hex[2,3] == "f"))
+  signedHex = hex[0: 2] + "f" +hex[3]
   nonFinite.set_sign(True)
-  assert_true("plo7", nonFinite.getSign())
+  assert_true("plo7", nonFinite.get_sign())
   assert_true("plo8", nonFinite.encode().hex() == signedHex)
-  nonFinite = CBOR.NonFinite.createPayload(payload).set_sign(False)
+  nonFinite = CBOR.NonFinite.create_payload(payload).set_sign(False)
   assert_true("plo9", nonFinite.encode().hex() == hex.substring(0, 2) + "7" +hex.substring(3))
 
 def oneNonFiniteTurn(value, binexpect, textexpect):
   nonfinite = CBOR.NonFinite(value)
-  text = nonfinite.toString()
-  returnValue = nonfinite.getNonFinite()
-  returnValue64 = nonfinite.getNonFinite64()
+  text = nonfinite.to_string()
+  returnValue = nonfinite.get_non_finite()
+  returnValue64 = nonfinite.get_non_finite64()
   textdecode = CBOR.fromDiagnostic(textexpect)
   cbor = nonfinite.encode()
-  refcbor = CBOR. binexpect)
-  hexbin = CBOR.toHex(cbor)
+  refcbor = bytes.fromhex(binexpect)
+  hexbin = cbor.hex()
   assert_true("eq1", text == textexpect)
   assert_true("eq2", hexbin == binexpect)
   assert_true("eq3", returnValue == CBOR.decode(cbor).getNonFinite())
@@ -105,20 +104,18 @@ def oneNonFiniteTurn(value, binexpect, textexpect):
   assert_true("eq5", CBOR.fromBigInt(returnValue).length == nonfinite.length)
   assert_true("eq7", CBOR.fromBigInt(returnValue64).length == 8)
   assert_true("eq8", nonfinite.equals(CBOR.decode(cbor)))
-  rawcbor = CBOR.fromBigInt(value)
-  rawcbor = CBOR.addArrays(new Uint8Array([0xf9 + (rawcbor.length >> 2)]), rawcbor)
-  if (rawcbor.length > refcbor.length) {
-    try {
+  rawcbor = struct.pack("!d", value)
+  rawcbor = bytes([0xf9 + (len(rawcbor) >> 2)]) + rawcbor
+  if len(rawcbor) > len(refcbor):
+    try:
       CBOR.decode(rawcbor)
       fail("d1")
-    } catch(error) {
-      assert_true("d2", error.toString().includes("Non-deterministic"))
-    }
-  } else {
+    except Exception as error:
+      check_exception(error, "Non-deterministic")
+  else:
     CBOR.decode(rawcbor)
-  }
-  assert_true("d3", CBOR.initDecoder(rawcbor, CBOR.LENIENT_NUMBER_DECODING)
-    .decodeWithOptions().equals(nonfinite))
+  assert_true("d3", CBOR.init_decoder(rawcbor, 
+                    CBOR.LENIENT_NUMBER_DECODING).decode_with_options().equals(nonfinite))
   object = CBOR.decode(refcbor)
   if (textexpect.includes("NaN") || textexpect.includes("Infinity")) {
     assert_true("d4", object.getExtendedFloat64().toString() == textexpect)

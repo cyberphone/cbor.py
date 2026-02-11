@@ -285,7 +285,7 @@ class CBOR:
                 self._encoded = f64b[0:2]
                 return
             while True:
-                f64bin = CBOR._bytes_to_int(f64b)
+                f64bin = CBOR._bytes_to_uint(f64b)
                 """
                 Exponent bias difference: 1023 - 127
                 """
@@ -389,7 +389,7 @@ class CBOR:
             Not a "genuine" floating-point number.
             Handled as a separate data type.
             """
-            nf = CBOR.NonFinite(CBOR._bytes_to_int(struct.pack('!d', value)))
+            nf = CBOR.NonFinite(CBOR._bytes_to_uint(struct.pack('!d', value)))
             if not nf.is_simple(): CBOR._error(
                 "create_extended_float() does not support NaN with payloads")
             return nf
@@ -954,7 +954,7 @@ class CBOR:
                 return bytes([0]) # Python fix
             self._out_of_limit_test(length)
             byte_string = self._cbor_stream.read(length)
-            if not byte_string or len(byte_string) < length:
+            if not byte_string or len(byte_string) < length: # Python fix
                 self._eof_error()
             return byte_string
 
@@ -963,14 +963,14 @@ class CBOR:
 
         def _print_float_det_err(self, decoded):
             CBOR._error(
-                "Non-deterministic encoding of floating-point number: " +
+                "Non-deterministically encoded \"float\": " +
                 "{:2x}{:s}".format(
                     CBOR._SIMPLE_FLOAT16 + (len(decoded) >> 2),
                     decoded.hex()))
 
         def _decode_float(self, length, mask, prefix):
             decoded = self._read_bytes(length)
-            value = CBOR._bytes_to_int(decoded)
+            value = CBOR._bytes_to_uint(decoded)
             """
             Is it a non-finite number?
             """
@@ -1002,9 +1002,10 @@ class CBOR:
                     if (self._strict_numbers and 
                         (len(byte_array) <= 8 or not byte_array[0])):
                         CBOR._error(
-                            "Non-deterministic \"bigint\" object: " +
-                            "{:02x}{:s}".format(tag, byte_array.hex()))
-                    value = CBOR._bytes_to_int(byte_array)
+                            "Non-deterministically encoded \"bigint\" ()" +
+                            "tag={:02x}, argument={:s})".format(
+                                tag, byte_array.hex()))
+                    value = CBOR._bytes_to_uint(byte_array)
                     return CBOR.Int(value if tag == CBOR._TAG_BIG_UNSIGNED
                                           else ~value)
 
@@ -1044,8 +1045,8 @@ class CBOR:
                 In addition, N must be > 23. 
                 """
                 if self._strict_numbers and (n < 24 or not (mask & n)):
-                    CBOR._error("Non-deterministic length/count encoding " +
-                                "for tag: 0x{:02x}".format(tag))
+                    CBOR._error("Non-deterministically encoded primitive. " +
+                                "Initial byte: 0x{:02x}".format(tag))
             """
             N successfully decoded, now switch on major type
             (upper three bits).
@@ -1301,7 +1302,7 @@ class CBOR:
         return cbor_int
 
     @staticmethod
-    def _bytes_to_int(byte_array):
+    def _bytes_to_uint(byte_array):
         value = 0
         for v in byte_array:
             value <<= 8
