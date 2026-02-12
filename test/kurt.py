@@ -82,5 +82,7 @@ print(m.encode().hex())
 print(m.get(CBOR.Int(1)))
 print(CBOR.decode(bytes.fromhex("1818")))
 
+print(CBOR.from_diagnostic('[{"h":78.0} , false, NaN, float\'7e0\''))
+
 success()
 

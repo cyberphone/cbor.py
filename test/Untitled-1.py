@@ -2,425 +2,410 @@
 #  Diagnostic Notation Parser  #
 #==============================#
 
-class DiagnosticNotation:
-    def __init__(self, cborText, sequenceMode):
-        self.cborText = cborText
-        self.sequenceMode = sequenceMode
-        self.index = 0
+    class _DiagnosticNotation:
+        def __init__(self, cbor_text, sequence_mode):
+            self.cbor_text = cbor_text
+            self.sequence_mode = sequence_mode
+            self.index = 0
 
-    class ParserError(Exception):
-        def __init__(self, msg):
-            super().__init__(msg)
- 
-    def parserError(self, error):
-        """ Unsurprisingly, error handling turned out 
-        to be the most complex part...
-        """
-"""
-        start = self.index - 100
-        if (start < 0):
-            start = 0
-        linePos = 0
-        while (start < self.index - 1):
-            if (self.cborText[start++] == '\n'):
-                linePos = start
-        complete = ''
-        if (self.index > 0 && self.cborText[self.index - 1] == '\n'):
-            self.index--
-        endLine = self.index
-        while (endLine < self.cborText.length):
-            if (self.cborText[endLine] == '\n'):
-                break
-        endLine++
-        for (let q = linePos; q < endLine; q++):
-            complete += self.cborText[q]
-        complete += '\n'
-        for (let q = linePos; q < self.index; q++):
-            complete += '-'
-        lineNumber = 1
-        for (let q = 0; q < self.index - 1; q++):
-            if (self.cborText[q] == '\n'):
-                lineNumber++
-        throw new CBOR.DiagnosticNotation.ParserError("\n" + complete +
-            "^\n\nError in line " + lineNumber + ". " + error)
+        class ParserError(Exception):
+            def __init__(self, msg):
+                super().__init__(msg)
+    
+        def parser_error(self, error):
+            pass
+            """ Unsurprisingly, error handling turned out 
+            to be the most complex part...
+            """
+            start = self.index - 100
+            if (start < 0):
+                start = 0
+            line_pos = 0
+            while (start < self.index - 1):
+                temp = start
+                start += 1
+                if (self.cbor_text[temp] == '\n'):
+                    line_pos = start
+            complete = ''
+            if self.index > 0 and self.cbor_text[self.index - 1] == '\n':
+                self.index -= 1
+            end_line = self.index
+            while end_line < len(self.cbor_text):
+                if (self.cbor_text[end_line] == '\n'):
+                    break
+            end_line += 1
+            q = line_pos
+            while q < end_line:
+                complete += self.cbor_text[q]
+                q += 1
+            complete += '\n'
+            q = line_pos
+            while q < self.index:
+                complete += '-'
+                q += 1
+            line_number = 1
+            q = 0
+            while q < self.index - 1:
+                if (self.cbor_text[q] == '\n'):
+                    line_number += 1
+                q += 1
+            raise CBOR.DiagnosticNotation.ParserError("\n" + complete +
+                "^\n\nError in line " + line_number + ". " + error)
         
-            def def readSequenceToEOF():
-        try {
-            sequence = []
-            self.scanNonSignficantData()
-            while (self.index < self.cborText.length):
-                if (sequence.length):
-                    if (self.sequenceMode):
-                        self.scanFor(",")
-        } else {
-            self.readChar()
-            self.parserError("Unexpected data after token")
-        }
-                }
-        sequence.push(self.getObject())
-        if (!sequence.length && !self.sequenceMode):
-            self.readChar()
-        return sequence catch (e):
-        if (e instanceof CBOR.DiagnosticNotation.ParserError):
-            throw e
-        // The exception apparently came from a deeper layer.
-        // Make it a parser error and remove the original error name.
-        self.parserError(e.toString().replace(/.*Error\: ?/g, ''))
-"""
+        def read_sequence_to_eof(self):
+            try:
+                sequence = []
+                self.scan_non_signficant_data()
+                while self.index < len(self.cbor_text):
+                    if len(sequence):
+                        if (self.sequence_mode):
+                            self.scan_for(",")
+                    else:
+                        self.read_char()
+                        self.parser_error("Unexpected data after token")
+                    sequence.push(self.get_object())
+                if not len(sequence) and not self.sequence_mode:
+                    self.read_char()
+                return sequence 
+            except CBOR.DiagnosticNotation.ParserError as e:
+                CBOR._error(repr(e))
+            # The exception apparently came from a deeper layer.
+            # Make it a parser error and remove the original error name.
+            # self.parser_error(repr(e).replace(/.*Error\: ?/g, ''))
+            self.parser_error(repr(e))
 
-    def getObject(self):
-        self.scanNonSignficantData()
-        cborObject = self.getRawObject()
-        self.scanNonSignficantData()
-        return cborObject
-  
-    def continueList(self, validStop):
-        if (self.nextChar() == ','):
-            self.readChar()
-        return True
-        actual = self.readChar()
-        if (actual != validStop):
-            self.parserError(
-                "Expected: ',' or '" + validStop + "' actual: " + self.toReadableChar(actual))
-        self.index--
-        return False
-  
-    def getRawObject(self):
-        match self.readChar():
+        def get_object(self):
+            self.scan_non_signficant_data()
+            cbor_bbject = self.get_raw_object()
+            self.scan_non_signficant_data()
+            return cbor_bbject
+    
+        def continue_list(self, valid_stop):
+            if (self.next_char() == ','):
+                self.read_char()
+                return True
+            actual = self.read_char()
+            if (actual != valid_stop):
+                self.parser_error(
+                    "Expected: ',' or '" + valid_stop + 
+                    "' actual: " + self.to_readable_char(actual))
+            self.index -= 1
+            return False
+    
+        def get_raw_object(self):
+            match self.read_char():
 
-            case '<':
-                self.scanFor("<")
-                sequence = bytearray()
-                self.scanNonSignficantData()
-                while (self.readChar() != '>'):
-                    self.index -= 1
-                while True:
-                    sequence = CBOR.addArrays(sequence, self.getObject().encode())
-                    if not self.continueList('>'): break
-                self.scanFor(">")
-                return CBOR.Bytes(sequence)
-        
-            case '[':
-                array = CBOR.Array()
-                self.scanNonSignficantData()
-                while self.readChar() != ']':
-                    self.index -= 1
-                do {
-                    array.add(self.getObject()) while (self.continueList(']'))
-                        }
-                return array
-        
-            case '{':
-                map = CBOR.Map()
-                self.scanNonSignficantData()
-                while self.readChar() != '}':
-                    self.index -= 1
-                do {
-                    key = self.getObject()
-                    self.scanFor(":")
-                    map.set(key, self.getObject()) while (self.continueList('}'))
-
-                return map
+                case '<':
+                    self.scan_for("<")
+                    sequence = bytearray()
+                    self.scan_non_signficant_data()
+                    while (self.read_char() != '>'):
+                        self.index -= 1
+                        while True:
+                            sequence += self.get_object().encode()
+                            if self.continue_list('>'): break
+                    self.scan_for(">")
+                    return CBOR.Bytes(sequence)
             
-            case '\'':
-                return self.getString(True)
+                case '[':
+                    array = CBOR.Array()
+                    self.scan_non_signficant_data()
+                    while self.read_char() != ']':
+                        self.index -= 1
+                        while True:
+                            array.add(self.get_object())
+                            if self.continue_list(']'): break
+                    return array
+            
+                case '{':
+                    map = CBOR.Map()
+                    self.scan_non_signficant_data()
+                    while self.read_char() != '}':
+                        self.index -= 1
+                        while True:
+                            key = self.get_object()
+                            self.scan_for(":")
+                            map.set(key, self.get_object())
+                            if self.continue_list('}'): break
+                    return map
                 
-            case '"':
-                return self.getString(False)
+                case '\'':
+                    return self.get_string(True)
+                    
+                case '"':
+                    return self.get_string(False)
 
-            case 'h':
-            return self.getBytes(false)
+                case 'h':
+                    return self.get_bytes(False)
 
                 case 'b':
-        if (self.nextChar() == '3'):
-            self.scanFor("32'")
-        self.parserError("b32 not implemented")
-                }
-        self.scanFor("64")
-        return self.getBytes(true)
-                
+                    if self.next_char() == '3':
+                        self.scan_for("32'")
+                        self.parser_error("b32 not implemented")
+                    self.scan_for("64")
+                    return self.get_bytes(True)
+                    
                 case 't':
-        self.scanFor("rue")
-        return CBOR.Boolean(true)
-            
+                    self.scan_for("rue")
+                    return CBOR.Boolean(True)
+                
                 case 'f':
-        if (self.nextChar() == 'a'):
-            self.scanFor("alse")
-        return CBOR.Boolean(false)
-                }
-        self.scanFor('loat')
-        floatBytes = self.getBytes(false).getBytes()
-        switch (floatBytes.length):
-            case 2:
-            case 4:
-            case 8:
-                break
-            default:
-                self.parserError("Argument must be a 16, 32, or 64-bit floating-point number")
-        return CBOR.initDecoder(
-            CBOR.addArrays(new Uint8Array([0xf9 + (floatBytes.length >> 2)]), floatBytes),
-            CBOR.LENIENT_NUMBER_DECODING).decodeWithOptions()
-            
+                    if (self.next_char() == 'a'):
+                        self.scan_for("alse")
+                        return CBOR.Boolean(False)
+                    self.scan_for('loat')
+                    float_bytes = self.get_bytes(False).get_bytes()
+                    if len(float_bytes) not in [2, 4, 8]:
+                        self.parser_error(
+                            "Argument must be a 16, 32, or 64-bit floating-point number")
+                    return CBOR.init_decoder(
+                        IObytes(bytes([0xf9 + (float_bytes.length >> 2)]) + float_bytes,
+                        CBOR.LENIENT_NUMBER_DECODING,
+                        100)).decode_with_options()
+                
                 case 'n':
-        self.scanFor("ull")
-        return CBOR.Null()
+                    self.scan_for("ull")
+                    return CBOR.Null()
 
                 case 's':
-        self.scanFor("imple(")
-        return self.simpleType()
+                    self.scan_for("imple(")
+                    return self.simple_type()
 
                 case '-':
-        if (self.readChar() == 'I'):
-            self.scanFor("nfinity")
-        return CBOR.NonFinite(0xfc00)
-                }
-        return self.getNumberOrTag(true)
+                    if (self.read_char() == 'I'):
+                        self.scan_for("nfinity")
+                        return CBOR.NonFinite(0xfc00)
+                
+                    return self.get_number_or_tag(True)
 
-    case '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9':
-        return self.getNumberOrTag(false)
+                case '0' | '1' | '2' | '3' | '4' |\
+                    '5' | '6' | '7' | '8' | '9':
+                    return self.get_number_or_tag(False)
 
                 case 'N':
-        self.scanFor("aN")
-        return CBOR.NonFinite(0x7e00n)
+                    self.scan_for("aN")
+                    return CBOR.NonFinite(0x7e00)
 
                 case 'I':
-        self.scanFor("nfinity")
-        return CBOR.NonFinite(0x7c00n)
-                
-                default:
-        self.index--
-        self.parserError("Unexpected character: " + self.toReadableChar(self.readChar()))
-
-    def simpleType():
-token = ''
-while True:
-    switch (self.nextChar()):
-        case ')':
-            break
-
-        case '+':
-        case '-':
-        case 'e':
-        case '.':
-            self.parserError("Syntax error")
-
-        default:
-            token += self.readChar()
-            continue
-    }
-    break
-    self.readChar()
-    // clone() converts a numerical Simple into Boolean etc. if applicable. 
-    return CBOR.Simple(Number(token.trim())).clone()
-
-    def getNumberOrTag(negative):
-    token = ''
-    self.index -= 1
-    prefix = null
-    if self.readChar() == '0':
-        match self.nextChar():
-            case 'b' | 'o' | 'x':
-                prefix = '0' + self.readChar()
-                break
-                if (prefix == null):
+                    self.scan_for("nfinity")
+                    return CBOR.NonFinite(0x7c00)
+                    
+                case _:
                     self.index -= 1
-                floatingPoint = false
-                while True:
-                    token += self.readChar()
-                    match self.nextChar():
-                        case '\u0000' | ' ' | '\n' | '\r' | '\t' | ',' | ':' | '>' | ']' | '}' | '/' | '#' | '(' | ')':
-                            break
+                    self.parser_error(
+                        "Unexpected character: " + 
+                        self.to_readable_char(self.read_char()))
 
-                        case '.' | 'e':
-                            if not prefix:
-                                floatingPoint = True
-                    continue
-            
-          case '_':
-                if not prefix:
-                    self.parserError("'_' is only permitted for 0b, 0o, and 0x numbers")
-    self.readChar()
+        def simple_type(self):
+            token = ''
+            while True:
+                match self.next_char():
+                    case ')':
+                        break
 
-          case _:
-    continue
-    break
-    if (floatingPoint):
-        self.testForNonDecimal(prefix)
-    value = Number(token)
-    # Implicit overflow is not permitted
-    if (not math.isfinite(value)):
-        self.parserError("Floating point value out of range")
-    return CBOR.Float(-value if negative else value)
-    if self.nextChar() == '(':
-        # Do not accept '-', 0xhhh, or leading zeros
-        self.testForNonDecimal(prefix)
-    if negative or (token.length > 1 and token.charAt(0) == '0'):
-        self.parserError("Tag syntax error")
-    self.readChar()
-    tagNumber = BigInt(token)
-    cborTag = CBOR.Tag(tagNumber, self.getObject())
-    self.scanFor(")")
-    return cborTag
-    bigInt = int(('' if prefix == null else prefix) + token)
-    return CBOR.Int(-bigInt if negative else bigInt)
+                    case '+' | '-' | 'e' | '.':
+                        self.parser_error("Syntax error")
 
-    def testForNonDecimal(nonDecimal):
-        if nonDecimal:
-            self.parserError("0b, 0o, and 0x prefixes are only permited for integers")
+                    case _:
+                        token += self.read_char()
+                        continue
 
-    def nextChar(self):
-        if self.index == self.cborText.length: return String.fromCharCode(0)
-        c = self.readChar()
-        self.index -= 1
-        return c
+            self.read_char()
+            # clone() converts a numerical Simple into Boolean etc. if applicable. 
+            return CBOR.Simple(int(token.trim())).clone()
 
-    def toReadableChar(self, c):
-        charCode = c.charCodeAt(0);
-        return charCode < 0x20 ? "\\u00" + CBOR.#twoHex(charCode) : "'" + c + "'"
+        def get_number_or_tag(self, negative):
+            token = ''
+            self.index -= 1
+            prefix = None
+            if self.read_char() == '0' and self.next_char() in ['b' , 'o' , 'x']:
+                prefix = '0' + self.read_char()
+            if not prefix:
+                self.index -= 1
+            floating_point = False
+            while True:
+                token += self.read_char()
+                match self.next_char():
+                    case '\h00' | ' ' | '\n' | '\r' | '\t' | ',' | ':' |\
+                        '>' | ']' | '}' | '/' | '#' | '(' | ')':
+                        break
 
-    def scanFor(expected):
-    [...expected].forEach(c => {
-        actual = self.readChar();
-        if (c != actual):
-            self.parserError("Expected: '" + c + "' actual: " + self.toReadableChar(actual)))
+                    case '.' | 'e':
+                        if not prefix:
+                            floating_point = True
+                    
+                    case '_':
+                        if not prefix:
+                            self.parser_error("'_' is only permitted for 0b, 0o, and 0x numbers")
+                        self.read_char()
 
-    def getString(byteString):
-    s = ''
-    while (true):
-        c
-    switch (c = self.readChar()):
-        // Control character handling
-        case '\r':
-            if (self.nextChar() == '\n'):
-                continue
-    }
-    c = '\n'
-    break
+                if (floating_point):
+                    self.test_for_non_decimal(prefix)
+                    value = float(token)
+                    # Implicit overflow is not permitted
+                    if not math.isfinite(value):
+                        self.parser_error("Floating point value out of range")
+                    return CBOR.Float(-value if negative else value)
+                if self.next_char() == '(':
+                    # Do not accept '-', 0xhhh, or leading zeros
+                    self.test_for_non_decimal(prefix)
+                    if negative or (token.length > 1 and token.charAt(0) == '0'):
+                        self.parser_error("Tag syntax error")
+                    self.read_char()
+                    tag_number = int(token)
+                    cbor_tag = CBOR.Tag(tag_number, self.get_object())
+                    self.scan_for(")")
+                    return cbor_tag
+                bigInt = int(('' if prefix == null else prefix) + token)
+                return CBOR.Int(-bigInt if negative else bigInt)
 
-          case '\n':
-    break
+        def test_for_non_decimal(self, non_decimal):
+            if non_decimal:
+                self.parser_error("0b, 0o, and 0x prefixes are only permited for integers")
 
-          case '\\':
-    switch (c = self.readChar()):
-        case '\n':
-            continue
+        def next_char(self):
+            if self.index == len(self.cbor_text): return chr(0)
+            c = self.read_char()
+            self.index -= 1
+            return c
 
-        case '\'':
-        case '"':
-        case '\\':
-            break
+        def to_readable_char(self, c):
+            char_code = ord(c[0]);
+            return ("\\u00{:2x}".format(char_code) 
+                    if char_code < 0x20 else ("'" + c + "'"))
 
-        case 'b':
-            c = '\b'
-            break
+        def scan_for(self, expected):
+            for i in range(len(expected)):
+                c = expected[i]
+            actual = self.read_char()
+            if (c != actual):
+                self.parser_error("Expected: '" + c + "' actual: " + 
+                                self.to_readable_char(actual))
 
-        case 'f':
-            c = '\f'
-            break
+        def get_string(self, byteString):
+            s = ''
+            while True:
+                c = self.read_char()
+                match c:
+                    # Control character handling
+                    case '\r':
+                        if (self.next_char() == '\n'):
+                            continue
+                        c = '\n'
 
-        case 'n':
-            c = '\n'
-            break
+                    case '\n':
+                        pass
 
-        case 'r':
-            c = '\r'
-            break
+                    case '\\':
+                        c = self.read_char()
+                        match c:
+                            case '\n':
+                                continue
 
-        case 't':
-            c = '\t'
-            break
+                            case '\'' | '"' | '\\':
+                                pass
 
-        case 'u':
-            u16 = 0
-            for (let i = 0; i < 4; i++):
-                u16 = (u16 << 4) + CBOR.#decodeOneHex(self.readChar().charCodeAt(0))
-    }
-    c = String.fromCharCode(u16)
-    break
-  
-              default:
-    self.parserError("Invalid escape character " + self.toReadableChar(c))
-break
- 
-          case '"':
-if (!byteString):
-    return CBOR.String(s)
-            }
-break
+                            case 'b':
+                                c = '\b'
 
-          case '\'':
-if (byteString):
-    return CBOR.Bytes(new TextEncoder().encode(s))
-            }
-break
-          
-          default:
-if (c.charCodeAt(0) < 0x20):
-    self.parserError("Unexpected control character: " + self.toReadableChar(c))
-            }
-s += c
-  
-    def getBytes(b64):
-token = ''
-self.scanFor("'")
-while (true):
-    c
-switch (c = self.readChar()):
-    case '\'':
-        break
+                            case 'f':
+                                c = '\f'
 
-    case ' ':
-    case '\r':
-    case '\n':
-    case '\t':
-        continue
+                            case 'n':
+                                c = '\n'
 
-    default:
-        token += c
-        continue
-        break
-        return CBOR.Bytes(b64 ? CBOR.fromBase64Url(token) : CBOR.fromHex(token))
+                            case 'r':
+                                c = '\r'
 
-    def readChar():
-        if (self.index >= self.cborText.length):
-            self.parserError("Unexpected EOF")
-        return self.cborText[self.index++]
+                            case 't':
+                                c = '\t'
 
-    def scanNonSignficantData():
-        while (self.index < self.cborText.length):
-            switch (self.nextChar()):
-                case ' ':
-                case '\n':
-                case '\r':
-                case '\t':
-                    self.readChar()
-                    continue
+                            case 'u':
+                                u16 = 0
+                                for i in range(4):
+                                    u16 = (u16 << 4) + int(self.read_char(), 16)
+                                c = chr(u16)
+                    
+                            case _:
+                                self.parser_error(
+                                    "Invalid escape character " + 
+                                    self.to_readable_char(c))
+                    
+                    case '"':
+                        if not byteString:
+                            return CBOR.String(s)
+                        
 
-                case '/':
-                    self.readChar()
-                    while (self.readChar() != '/'):
-            }
-        continue
+                    case '\'':
+                        if byteString:
+                            return CBOR.Bytes(s.encode())
+                    
+                    case _:
+                        if ord(c[0]) < 0x20:
+                            self.parser_error(
+                                "Unexpected control character: " + 
+                                self.to_readable_char(c))
 
-    case '#':
-        self.readChar()
-        while (self.index < self.cborText.length && self.readChar() != '\n'):
-            }
-continue
+                s += c
+    
+        def get_bytes(self, b64):
+            token = ''
+            self.scan_for("'")
+            while (True):
+                c = self.read_char()
+                match c:
+                    case '\'':
+                        return CBOR.Bytes(
+                            base64.urlsafe_b64decode(token) if
+                                b64 else bytes.fromHex(token))
 
-          default:
-return
-  }
+                    case ' ' | '\r' | '\n' | '\t':
+                        continue
 
-//////////////////////////////////
-//    CBOR.fromDiagnostic()     //
-//   CBOR.fromDiagnosticSeq()   //
-//////////////////////////////////
+                    case _:
+                        token += c
+                        continue
 
-  static fromDiagnostic(cborText):
-    def return new CBOR.DiagnosticNotation(cborText, false).readSequenceToEOF()[0]
-  }
+        def read_char(self):
+            if self.index >= len(self.cbor_text):
+                self.parser_error("Unexpected EOF")
+            self.index += 1
+            return self.cbor_text[self.index]
 
-  static fromDiagnosticSeq(cborText):
-    def return new CBOR.DiagnosticNotation(cborText, true).readSequenceToEOF()
-  }
+        def scan_non_signficant_data(self):
+            while (self.index < self.cbor_text.length):
+                match (self.next_char()):
+                    case ' ' | '\n' | '\r' | '\t':
+                        self.read_char()
+                        continue
+
+                    case '/':
+                        self.read_char()
+                        while (self.read_char() != '/'):
+                            """ No-Op """
+                        continue
+
+                    case '#':
+                        self.read_char()
+                        while (self.index < self.cbor_text.length and self.read_char() != '\n'):
+                            """ No-Op """
+                        continue
+
+                    case _:
+                        return
+
+    #################################
+    #     CBOR.fromDiagnostic()     #
+    #    CBOR.fromDiagnosticSeq()   #
+    #################################
+
+    @staticmethod
+    def from_diagnostic(cborText):
+        return CBOR.DiagnosticNotation(cborText, 
+                                       False).readSequenceToEOF()[0]
+
+    @staticmethod
+    def from_diagnostic_seq(cborText):
+        return CBOR.DiagnosticNotation(cborText, 
+                                       True).readSequenceToEOF()
+
