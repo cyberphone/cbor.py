@@ -14,7 +14,8 @@ import struct
 import math
 import io
 import base64
-import re
+import sys
+import traceback
 
 class CBOR:
         
@@ -149,6 +150,22 @@ class CBOR:
 
         def get_float64(self):
             return self._check_type_get_value('Float')
+        
+        def get_Non_finite64(self):
+            return self._check_type_get_value('NonFinite')
+
+        def get_extended_float64(self):
+            if isinstance(self, CBOR.NonFinite):
+                match self.get_non_finite():
+                    case 0x7e00:
+                        return math.nan
+                    case 0x7c00:
+                        return math.inf
+                    case 0xfc00:
+                        return -math.inf
+                CBOR._error('get_extended_float64() only supports ' +
+                            'simple" NaN (7e00)')
+            return self.get_float64()
         
         def get_string(self):
             return self._check_type_get_value('String')
@@ -840,7 +857,7 @@ class CBOR:
         def create_payload(cls, payload):
             CBOR._check_int_argument(payload)
             if (payload & 0x1fffffffffffff) != payload:
-                CBOR._error("Payload out of range: " + payload)
+                CBOR._error("Payload out of range: " + str(payload))
             left64 = (0xfff0000000000000 if (payload & 0x10000000000000)
                                          else 0x7ff0000000000000)
             return CBOR.NonFinite(left64 + 
@@ -874,7 +891,7 @@ class CBOR:
                 cbor_printer.append("float'").append(
                     self._ieee754.hex()).append("'")
     
-        def _getLength(self):
+        def _length(self):
             return len(self._ieee754)
     
         def _get(self):
@@ -882,11 +899,6 @@ class CBOR:
                 case 2: return self._to_non_finite64(10)
                 case 4: return self._to_non_finite64(23)
             return self._value
-
-        """
-        def _getValue():
-            return self._value
-        """
 
 #======================#  
 #       Decoding       #
@@ -1131,8 +1143,10 @@ class CBOR:
         class ParserError(Exception):
             def __init__(self, msg):
                 super().__init__(msg)
+ #               self.__suppress_context__ = True
+ #               sys.tracebacklimit = 0
     
-        def parser_error(self, error):
+        def build_error(self, error):
             pass
             """ Unsurprisingly, error handling turned out 
             to be the most complex part...
@@ -1153,7 +1167,7 @@ class CBOR:
             while end_line < len(self.cbor_text):
                 if (self.cbor_text[end_line] == '\n'):
                     break
-            end_line += 1
+                end_line += 1
             q = line_pos
             while q < end_line:
                 complete += self.cbor_text[q]
@@ -1169,9 +1183,12 @@ class CBOR:
                 if (self.cbor_text[q] == '\n'):
                     line_number += 1
                 q += 1
-            raise CBOR.DiagnosticNotation.ParserError("\n" + complete +
-                "^\n\nError in line " + line_number + ". " + error)
+            return ("\n" + complete + "^\n\nError in line " +
+                    str(line_number) + ". " + error)
         
+        def parser_error(self, error):
+            raise CBOR._DiagnosticNotation.ParserError(error)
+
         def read_sequence_to_eof(self):
             try:
                 sequence = list()
@@ -1186,17 +1203,9 @@ class CBOR:
                     sequence.append(self.get_object())
                 if not len(sequence) and not self.sequence_mode:
                     self.read_char()
-                return sequence 
+                return sequence
             except Exception as e:
-                CBOR._error(repr(e))
-                # CBOR._error(re.sub(r"([a-z,A-Z]*\(')(.*)'\)", r"\2", msg))
-
-            #    CBOR._error(repr(e))
-            # The exception apparently came from a deeper layer.
-            # Make it a parser error and remove the original error name.
-            # self.parser_error(repr(e).replace(/.*Error\: ?/g, ''))
-           # print(re.sub(r"(.*Error\:\ )(.*)", r"\2", "alueError: fromhex() arg must contain an even number of hexadecimal digits"))
-         #   self.parser_error(re.sub(r"(.*Error\\:\\ )(\\.*)", r"\\2", repr(e)))
+                raise CBOR.Exception(self.build_error(repr(e))) from None
 
         def get_object(self):
             self.scan_non_signficant_data()

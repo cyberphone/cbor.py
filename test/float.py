@@ -3,18 +3,19 @@ from org.webpki.cbor import CBOR
 from assertions import assert_true, assert_false, fail, success, check_exception
 import math
 import struct
+import io
 
 def overflow(decodedValue, length):
   test = 'decodedValue.get_float' + length + '()'
   try:
     eval(test)
     fail("Should fail")
-  except Exception as error:
-    check_exception(error, "Value out of range for 'Float'")
+  except Exception as e:
+    check_exception(e, "Value out of range for \"float")
 
 def shouldpass(decodedValue, value, length, valueText):
-  assert_true("p1", decodedValue.toString() == valueText)
-  test = 'decodedValue.getFloat' + length + '()'
+  assert_true("p1", float(decodedValue.to_string()) == float(valueText))
+  test = 'decodedValue.get_float' + length + '()'
   float_value = eval(test)
   assert_true("p2", float_value == value)
   if length == "64":
@@ -23,13 +24,13 @@ def shouldpass(decodedValue, value, length, valueText):
     assert_true("p3", float_value == value)
 
 def oneTurn(valueText, expected):
-  value = int(valueText)
+  value = float(valueText)
   if math.isfinite(value):
     try:
       CBOR.NonFinite(value)
       fail("f1")
-    except Exception as error:
-      assert_true("f2", error.toString().includes("bigint"))
+    except Exception as e:
+      check_exception(e, "float")
   
     cbor = CBOR.Float(value).encode()
     assert_true("f3", cbor.hex() == expected)
@@ -56,81 +57,88 @@ def oneTurn(valueText, expected):
     try:
       CBOR.Float(value)
       fail('Should not execute')
-    except Exception as error:
-        assert_true("nf1", repr(error).find("Not permitted: 'NaN/Infinity'") >= 0)
+    except Exception as e:
+      check_exception(e, "Not permitted: 'NaN/Infinity'")
 
     decodedValue = CBOR.Float.create_extended_float(value)
-    assert_true("nf2", decodedValue.get_extended_float64() == value)
-    assert_true("nf3", decodedValue.toString() == str(value))
+    assert_true("nf2", str(decodedValue.get_extended_float64()) == str(value))
+    assert_true("nf3", decodedValue.to_string() == valueText)
     cbor = decodedValue.encode()
     assert_true("nf4", cbor.hex() == expected)
     assert_true("nf5", CBOR.decode(cbor) == decodedValue)
     buf = struct.pack("!d", value)
     assert_true("nf6", decodedValue.get_non_finite64() == CBOR._bytes_to_uint(buf))
-  assert_true("d10", CBOR.Float.create_extended_float(value).encode().hex() == expected)
+    assert_true("d10", CBOR.Float.create_extended_float(value).encode().hex() == expected)
 
 def payloadOneTurn(payload, hex, dn):
-  dn = ("float'" + hex[2] + "'") if dn == None else dn
+  dn = ("float'" + hex[2:] + "'") if dn == None else dn
   cbor = CBOR.NonFinite.create_payload(payload).encode()
   object = CBOR.decode(cbor)
-  assert_true("plo1", isinstance(object, CBOR.NonFinite)
+  assert_true("plo1", isinstance(object, CBOR.NonFinite))
   nonFinite = object
   assert_true("plo2", nonFinite.get_payload() == payload)
-  assert_true("plo3", cborhex() == hex)
+  assert_true("plo3", cbor.hex() == hex)
   assert_true("plo4", nonFinite.to_string() == dn)
   assert_true("plo5", nonFinite.get_non_finite() == 
-              CBOR._bytes_to_uint(bytes.fromhex(hex[2])))
-  assert_false("plo6", nonFinite.getSign() ^ (hex[2,3] == "f"))
-  signedHex = hex[0: 2] + "f" +hex[3]
+              CBOR._bytes_to_uint(bytes.fromhex(hex[2:])))
+  assert_false("plo6", nonFinite.get_sign() ^ (hex[2] == "f"))
+  signedHex = hex[0:2] + "f" +hex[3:]
   nonFinite.set_sign(True)
   assert_true("plo7", nonFinite.get_sign())
   assert_true("plo8", nonFinite.encode().hex() == signedHex)
   nonFinite = CBOR.NonFinite.create_payload(payload).set_sign(False)
-  assert_true("plo9", nonFinite.encode().hex() == hex.substring(0, 2) + "7" +hex.substring(3))
+  assert_true("plo9", nonFinite.encode().hex() == hex[0:2] + "7" +hex[3:])
+
+def int2bytes(value):
+  res = bytearray()
+  while True:
+      res += bytes([value & 0xff])
+      value >>= 8
+      if value == 0: break
+  res.reverse()
+  return res
 
 def oneNonFiniteTurn(value, binexpect, textexpect):
   nonfinite = CBOR.NonFinite(value)
   text = nonfinite.to_string()
   returnValue = nonfinite.get_non_finite()
   returnValue64 = nonfinite.get_non_finite64()
-  textdecode = CBOR.fromDiagnostic(textexpect)
+  textdecode = CBOR.from_diagnostic(textexpect)
   cbor = nonfinite.encode()
   refcbor = bytes.fromhex(binexpect)
   hexbin = cbor.hex()
   assert_true("eq1", text == textexpect)
   assert_true("eq2", hexbin == binexpect)
-  assert_true("eq3", returnValue == CBOR.decode(cbor).getNonFinite())
-  assert_true("eq4", returnValue == textdecode.getNonFinite())
-  assert_true("eq5", CBOR.fromBigInt(returnValue).length == nonfinite.length)
-  assert_true("eq7", CBOR.fromBigInt(returnValue64).length == 8)
+  assert_true("eq3", returnValue == CBOR.decode(cbor).get_non_finite())
+  assert_true("eq4", returnValue == textdecode.get_non_finite())
+  assert_true("eq5", len(int2bytes(returnValue)) == nonfinite.length)
+  assert_true("eq7", len(int2bytes(returnValue64)) == 8)
   assert_true("eq8", nonfinite.equals(CBOR.decode(cbor)))
-  rawcbor = struct.pack("!d", value)
+  rawcbor = int2bytes(value)
   rawcbor = bytes([0xf9 + (len(rawcbor) >> 2)]) + rawcbor
   if len(rawcbor) > len(refcbor):
     try:
       CBOR.decode(rawcbor)
       fail("d1")
-    except Exception as error:
-      check_exception(error, "Non-deterministic")
+    except Exception as e:
+      check_exception(e, "Non-deterministic")
   else:
     CBOR.decode(rawcbor)
-  assert_true("d3", CBOR.init_decoder(rawcbor, 
-                    CBOR.LENIENT_NUMBER_DECODING).decode_with_options().equals(nonfinite))
+  assert_true("d3", CBOR.init_decoder(io.BytesIO(rawcbor),
+                    CBOR.LENIENT_NUMBER_DECODING,
+                    1000).decode_with_options().equals(nonfinite))
   object = CBOR.decode(refcbor)
-  if (textexpect.includes("NaN") || textexpect.includes("Infinity")) {
-    assert_true("d4", object.getExtendedFloat64().toString() == textexpect)
-    assert_true("d5", object.isSimple())
-    assert_true("d6", textexpect.includes("Infinity") ^ object.isNaN())
-  } else {
-    try {
-      object.getExtendedFloat64()
+  if textexpect.find("NaN") >= 0 or textexpect.find("Infinity") >= 0:
+    assert_true("d4", object.to_string() == textexpect)
+    assert_true("d5", object.is_simple())
+    assert_true("d6", (textexpect.find("Infinity") >= 0) ^ object.is_nan())
+  else:
+    try:
+      object.get_extended_float64()
       fail("d7")
-    } catch (error) {
-      assert_true("d8", error.toString().includes("7e00"))
-    }
-    assertFalse("d9", object.isSimple())
-  }
-}
+    except Exception as e:
+      check_exception(e, "7e00")
+    assert_false("d9", object.is_simple())
 
 oneTurn("0.0",                      "f90000")
 oneTurn("-0.0",                     "f98000")
@@ -200,77 +208,72 @@ oneNonFiniteTurn(0x7ff0040000000000, "f97c01",             "float'7c01'")
 oneNonFiniteTurn(0x7ff0000000000000, "f97c00",             "Infinity")
 oneNonFiniteTurn(0xfff0000000000000, "f9fc00",             "-Infinity")
 
-nonFinite = CBOR.Float.createExtendedFloat(math.nan)
-assert_true("conv", nonFinite instanceof CBOR.NonFinite)
-assert_true("truncated", nonFinite.getNonFinite64() == 0x7ff8000000000000)  # Returns "quiet" NaN
-assert_true("cbor", nonFinite.encode().hex() == "f97e00")             # Encoded as it should
-assert_true("combined", Number.isNaN(nonFinite.getExtendedFloat64()))       # Returns "Number"
-assert_true("nan", nonFinite.isNaN(false))                                  # Indeed it is
+nonFinite = CBOR.Float.create_extended_float(math.nan)
+assert_true("conv", isinstance(nonFinite, CBOR.NonFinite))
+assert_true("truncated", nonFinite.get_non_finite64() == 0x7ff8000000000000)  # Returns "quiet" NaN
+assert_true("cbor", nonFinite.encode().hex() == "f97e00")                     # Encoded as it should
+assert_true("combined", math.isnan(nonFinite.get_extended_float64()))         # Returns "Number"
+assert_true("nan", nonFinite.is_nan())                                        # Indeed it is
 
 payloadOneTurn(0,             "f97c00",              "Infinity")
 payloadOneTurn(1,             "f97e00",                   "NaN")
-payloadOneTurn(2,             "f97d00",                    null)
-payloadOneTurn((1 << 10) - 1, "f97fff",                    null)
-payloadOneTurn(1 << 10,       "fa7f801000",                null)
-payloadOneTurn((1 << 23) - 1, "fa7fffffff",                null)
-payloadOneTurn(1 << 23,       "fb7ff0000010000000",        null)
-payloadOneTurn((1 << 52) - 1, "fb7fffffffffffffff",        null)
+payloadOneTurn(2,             "f97d00",                    None)
+payloadOneTurn((1 << 10) - 1, "f97fff",                    None)
+payloadOneTurn(1 << 10,       "fa7f801000",                None)
+payloadOneTurn((1 << 23) - 1, "fa7fffffff",                None)
+payloadOneTurn(1 << 23,       "fb7ff0000010000000",        None)
+payloadOneTurn((1 << 52) - 1, "fb7fffffffffffffff",        None)
 payloadOneTurn(1 << 52,       "f9fc00",             "-Infinity")
-payloadOneTurn((1 << 52) + 1, "f9fe00",                    null)
+payloadOneTurn((1 << 52) + 1, "f9fe00",                    None)
 
 for payload in [-1, 1 << 53]:
-  try {
-    CBOR.NonFinite.createPayload(payload).encode()
+  try:
+    CBOR.NonFinite.create_payload(payload).encode()
     fail("pl8")
-  } catch(error) {
-    assert_true("p18a", error.toString().includes("Payload out of range"))
-  }
-})
+  except Exception as e:
+    check_exception(e, "Payload out of range")
 
 def reducedOneTurn(f16, length, value, result):
   ok = length != None
-  reduced;
-  try {
-    reduced = f16 ? CBOR.Float.createFloat16(value) : CBOR.Float.createFloat32(value)
+  try:
+    reduced = CBOR.Float.create_float16(value) if f16 else CBOR.Float.create_float32(value)
     assert_true("Should not", ok)
-    assert_true("Compare=" + reduced + " r=" + result, reduced.getFloat64() == result)
+    assert_true("Compare=" + reduced + " r=" + result, reduced.get_float64() == result)
     assert_true("len", reduced.length == length)
     assert_true("equi", CBOR.decode(reduced.encode()).equals(reduced))
-//    console.log("Hi=" + result + " j=" + reduced + " l=" + reduced.length)
-  } catch (error) {
-//    console.log("EHi=" + result + " r=" + reduced + " v=" + value)
-//    console.log(error.toString())
-    assertFalse("should" + error.toString(), ok)
-    assert_true("errtype", error.toString().includes( Number.isFinite(value) ? "out of range" : "NaN/"))
-  }
-}
-"""
-reducedOneTurn(true, None, math.nan,                                0)
-reducedOneTurn(true, 2,    60000,                               60000)
-reducedOneTurn(true, 2,    5.960464477539063e-8, 5.960464477539063e-8)
-reducedOneTurn(true, 2,    3.0e-8,               5.960464477539063e-8)
-reducedOneTurn(true, 2,    2.0e-8,                                  0)
-reducedOneTurn(true, 2,    65504.0,                           65504.0)
-reducedOneTurn(true, 2,    65519.99,                          65504.0)
-reducedOneTurn(true, 2,    -2.0e-9,                              -0.0)
-reducedOneTurn(true, None, 65520,                             65504.0)
-reducedOneTurn(true, 2,    10,                                     10)
-reducedOneTurn(true, 2,    10.003906,                              10)
-reducedOneTurn(true, 2,    10.003907,                      10.0078125)
-reducedOneTurn(true, 2,    6.097555160522461e-5, 6.097555160522461e-5)
-reducedOneTurn(true, 2,    6.097e-5,             6.097555160522461e-5)
-reducedOneTurn(true, 2,    6.09e-5,              6.091594696044922e-5)
+##    console.log("Hi=" + result + " j=" + reduced + " l=" + reduced.length)
+  except Exception as e:
+#    console.log("EHi=" + result + " r=" + reduced + " v=" + value)
+#    console.log(error.toString())
+    assert_false("should" + repr(e), ok)
+    check_exception(e, "out of range" if math.isfinite(value) else "NaN/")
 
-reducedOneTurn(false, None, Number.Na, 0)
-reducedOneTurn(false, 2, 2.5, 2.5)
-reducedOneTurn(false, 2, 65504.0, 65504.0)
-reducedOneTurn(false, 2, 5.960464477539063e-8, 5.960464477539063e-8)
-reducedOneTurn(false, 4, 2.0e-8, 1.999999987845058e-8)
-reducedOneTurn(false, 2, 5.960464477539063e-8, 5.960464477539063e-8)
-reducedOneTurn(false, 4, 1.401298464324817e-45, 1.401298464324817e-45)
-reducedOneTurn(false, 4, 3.4028234663852886e+38, 3.4028234663852886e+38)
-reducedOneTurn(false, 4, 3.4028235e+38, 3.4028234663852886e+38)
-reducedOneTurn(false, None, 3.40282358e+38, 3.4028234663852886e+38)
-"""
+reducedOneTurn(True, None, math.nan,                                0)
+reducedOneTurn(True, 2,    60000,                               60000)
+reducedOneTurn(True, 2,    5.960464477539063e-8, 5.960464477539063e-8)
+reducedOneTurn(True, 2,    3.0e-8,               5.960464477539063e-8)
+reducedOneTurn(True, 2,    2.0e-8,                                  0)
+reducedOneTurn(True, 2,    65504.0,                           65504.0)
+reducedOneTurn(True, 2,    65519.99,                          65504.0)
+reducedOneTurn(True, 2,    -2.0e-9,                              -0.0)
+reducedOneTurn(True, None, 65520,                             65504.0)
+reducedOneTurn(True, 2,    10,                                     10)
+reducedOneTurn(True, 2,    10.003906,                              10)
+reducedOneTurn(True, 2,    10.003907,                      10.0078125)
+reducedOneTurn(True, 2,    6.097555160522461e-5, 6.097555160522461e-5)
+reducedOneTurn(True, 2,    6.097e-5,             6.097555160522461e-5)
+reducedOneTurn(True, 2,    6.09e-5,              6.091594696044922e-5)
+
+reducedOneTurn(False, None, math.nan, 0)
+reducedOneTurn(False, 2, 2.5, 2.5)
+reducedOneTurn(False, 2, 65504.0, 65504.0)
+reducedOneTurn(False, 2, 5.960464477539063e-8, 5.960464477539063e-8)
+reducedOneTurn(False, 4, 2.0e-8, 1.999999987845058e-8)
+reducedOneTurn(False, 2, 5.960464477539063e-8, 5.960464477539063e-8)
+reducedOneTurn(False, 4, 1.401298464324817e-45, 1.401298464324817e-45)
+reducedOneTurn(False, 4, 3.4028234663852886e+38, 3.4028234663852886e+38)
+reducedOneTurn(False, 4, 3.4028235e+38, 3.4028234663852886e+38)
+reducedOneTurn(False, None, 3.40282358e+38, 3.4028234663852886e+38)
+
 
 success()

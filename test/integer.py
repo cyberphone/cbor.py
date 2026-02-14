@@ -1,6 +1,6 @@
 # Test program for integer "edge cases"
 from org.webpki.cbor import CBOR
-from assertions import assert_true, assert_false, fail, success
+from assertions import assert_true, assert_false, fail, success, check_exception
 
 def one_turn(value, expected):
   text = str(value)
@@ -35,14 +35,14 @@ one_turn(-18446744073709551617, 'c349010000000000000000')
 try:
   CBOR.Int(1.1)
   fail("Should not")
-except Exception as error:
-  assert_true("msg1" + repr(error), repr(error).find("Expected 'int', got 'float'") >= 0)
+except Exception as e:
+  check_exception(e, "Expected 'int', got 'float'")
 
 try:
   CBOR.Int("10")
   fail("Should not")
-except Exception as error:
-  assert_true("msg2" + repr(error), repr(error).find("Expected 'int', got 'str'") >= 0)
+except Exception as e:
+  check_exception(e, "Expected 'int', got 'str'")
 
 try:
   CBOR.Int(1, 7)
