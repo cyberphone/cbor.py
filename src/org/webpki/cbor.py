@@ -3,19 +3,17 @@
 #                 CBOR::Core API for Python3                   #
 #                                                              #
 # Author: Anders Rundgren (anders.rundgren.net@gmail.com)      #
-# Repository: https://github.com/cyberphone/cbor.py.           #
+# Repository: https://github.com/cyberphone/CBOR.py.           #
 #                                                              #
 # Note: this is a "Reference Implementation", not optimized    #
 # for maximum performance.  It is assumed that a productified  #
-# version of cbor.py would be rewritten in C.                  #
+# version of CBOR.py would be rewritten in C.                  #
 ################################################################
 
 import struct
 import math
 import io
 import base64
-import sys
-import traceback
 
 class CBOR:
         
@@ -644,66 +642,51 @@ class CBOR:
                 CBOR._error("Missing key: " + str(key))
             return None
 
-        """
-        update(key, object, existing):
-        CBOR.#checkArgs(arguments, 3);
-        self._immutableTest();
-        entry = self._lookup(key, existing);
-        previous;
-        if (entry):
-            previous = entry.object;
-            entry.object = CBOR.#cborArgumentCheck(object);
-        } else {
-            previous = null;
-            self.set(key, object);
-        return previous;
-        """
+        def update(self, key, object, existing=True):
+#            self._immutableTest();
+            entry = self._lookup(key, existing)
+            if entry:
+                previous = entry._object
+                entry._object = CBOR._cbor_argument_check(object)
+            else:
+                previous = None
+                self.set(key, object)
+            return previous
 
-        """
-        merge(map):
-        CBOR.#checkArgs(arguments, 1);
-        self._immutableTest();
-        if (!(map instanceof CBOR.Map)):
-            CBOR._error("Argument must be of type CBOR.Map");
-        map._entries.forEach(entry => {
-            self.set(entry.key, entry.object);
-        });
-        return self
-        """
+        def merge(self, map):
+#            self._immutableTest();
+            if not isinstance(map, CBOR.Map):
+                CBOR._error("Argument must be of type CBOR.Map")
+            for i in range(len(map._entries)):
+                entry = map._entries[i]
+                self.set(entry._key, entry._object)
+            return self
 
         def get(self, key):
             self._read_flag = True
             return self._lookup(key, True)._object
+   
+        def get_conditionally(self, key, default_object=None):
+            entry = self._lookup(key, False)
+            # Note: default_object may be 'None'
+            default_object = (CBOR._cbor_argument_check(default_object)
+                              if default_object else None)
+            return entry._object  if entry else default_object
 
-        """
-        getConditionally(key, defaultObject):
-        CBOR.#checkArgs(arguments, 2);
-        entry = self._lookup(key, false);
-        // Note: defaultValue may be 'null'
-        defaultObject = defaultObject ? CBOR.#cborArgumentCheck(defaultObject) : null;
-        return entry ? entry.object : defaultObject;
+        def get_keys(self):
+            keys = list()
+            for i in range(len(self._entries)):
+                keys.append(self._entries[i]._key)
+            return keys
 
-        getKeys():
-        keys = [];
-        self._entries.forEach(entry => {
-            keys.push(entry.key);
-        });
-        return keys;
+        def remove(self, key):
+#            self._immutableTest();
+            target_entry = self._lookup(key, True)
+            self._entries.pop(self._last_lookup)
+            return target_entry._object
 
-        remove(key):
-        CBOR.#checkArgs(arguments, 1);
-        self._immutableTest();
-        targetEntry = self._lookup(key, true);
-        self._entries.splice(self._lastLookup, 1);
-        return targetEntry.object;
-
-        _getLength():
-        return len(self._entries);
-
-        containsKey(key):
-        CBOR.#checkArgs(arguments, 1);
-        return self._lookup(key, false) != null;
-        """
+        def contains_key(self, key):
+            return self._lookup(key, False) != None
 
         def encode(self):
             encoded = CBOR._generic_header(CBOR._MT_MAP, len(self._entries))
@@ -725,7 +708,6 @@ class CBOR:
             cbor_printer.endList(notFirst, "}")
 
         def set_sorting_mode(self, pre_sorted_keys):
-            # CBOR.#checkArgs(arguments, 1);
             self._pre_sorted_keys = pre_sorted_keys
             return self
 
@@ -1205,7 +1187,11 @@ class CBOR:
                     self.read_char()
                 return sequence
             except Exception as e:
-                raise CBOR.Exception(self.build_error(repr(e))) from None
+                message = repr(e)
+                i = message.find("Error('")
+                if i >= 0:
+                    message = message[i + 7:len(message) - 2]
+                raise CBOR.Exception(self.build_error(message)) from None
 
         def get_object(self):
             self.scan_non_signficant_data()
