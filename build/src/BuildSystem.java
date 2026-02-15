@@ -33,8 +33,11 @@ public class BuildSystem {
   BuildSystem(String templateFileName, String testFileName, String testFileDirectory) {
     template = UTF8.decode(IO.readFile(templateFileName));
     this.testFileDirectory = testFileDirectory;
+    addFile("arrays.py");
+    addFile("float.py");
     addFile("integer.py");
     addFile("int-ranges.py");
+    addFile("nondeterministic.py");
     addFile("xyz-encoder.py");
     addFile("xyz-decoder.py");
     IO.writeFile(testFileName, template);

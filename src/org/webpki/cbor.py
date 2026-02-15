@@ -100,39 +100,47 @@ class CBOR:
             return CBOR._int_range_check(self.get_big_integer(), min, max)
 
         def get_int8(self):
-            return self._get_checked_int(-0x80, 0x7f)
+            return self._get_checked_int(-0x80, 
+                                         0x7f)
 
         def get_uint8(self):
-            return self._get_checked_int(0, 0xff)
+            return self._get_checked_int(0, 
+                                         0xff)
 
         def get_int16(self):
-            return self._get_checked_int(-0x8000, 0x7fff)
+            return self._get_checked_int(-0x8000, 
+                                         0x7fff)
 
         def get_uint16(self):
-            return self._get_checked_int(0, 0xffff)
+            return self._get_checked_int(0, 
+                                         0xffff)
 
         def get_int32(self):
-            return self._get_checked_int(-0x80000000, 0x7fffffff)
+            return self._get_checked_int(-0x80000000, 
+                                         0x7fffffff)
 
         def get_uint32(self):
             return self._get_checked_int(0, 0xffffffff)
 
         def get_int53(self):
-            return self._get_checked_int(-9007199254740991, 9007199254740991)
+            return self._get_checked_int(-9007199254740991, 
+                                         9007199254740991)
 
         def get_int64(self):
             return self._get_checked_int(-0x8000000000000000,
                                          0x7fffffffffffffff)
 
         def get_uint64(self):
-            return self._get_checked_int(0, 0xffffffffffffffff)
+            return self._get_checked_int(0, 
+                                         0xffffffffffffffff)
 
         def get_int128(self):
             return self._get_checked_int(-0x80000000000000000000000000000000,
                                          0x7fffffffffffffffffffffffffffffff)
 
         def get_uint128(self):
-            return self._get_checked_int(0, 0xffffffffffffffffffffffffffffffff)
+            return self._get_checked_int(0, 
+                                         0xffffffffffffffffffffffffffffffff)
         
         def _range_float(self, max):
             value = self.get_float64()
@@ -212,27 +220,39 @@ class CBOR:
 
         @classmethod
         def create_int8(cls, value):
-            return CBOR._create_int(value, -0x80, 0x7f)
+            return CBOR._create_int(value, 
+                                    -0x80, 
+                                    0x7f)
 
         @classmethod
         def create_uint8(cls, value):
-            return CBOR._create_int(value, 0, 0xff)
+            return CBOR._create_int(value, 
+                                    0, 
+                                    0xff)
 
         @classmethod
         def create_int16(cls, value):
-            return CBOR._create_int(value, -0x8000, 0x7fff)
+            return CBOR._create_int(value,
+                                    -0x8000, 
+                                    0x7fff)
 
         @classmethod
         def create_uint16(cls, value):
-            return CBOR._create_int(value, 0, 0xffff)
+            return CBOR._create_int(value, 
+                                    0, 
+                                    0xffff)
 
         @classmethod
         def create_int32(cls, value):
-            return CBOR._create_int(value, -0x80000000, 0x7fffffff)
+            return CBOR._create_int(value,
+                                    -0x80000000, 
+                                    0x7fffffff)
 
         @classmethod
         def create_uint32(cls, value):
-            return CBOR._create_int(value, 0, 0xffffffff)
+            return CBOR._create_int(value, 
+                                    0, 
+                                    0xffffffff)
 
         @classmethod
         def create_int53(cls, value):
@@ -248,7 +268,9 @@ class CBOR:
 
         @classmethod
         def create_uint64(cls, value):
-            return CBOR._create_int(value, 0, 0xffffffffffffffff)
+            return CBOR._create_int(value, 
+                                    0,
+                                    0xffffffffffffffff)
             
         @classmethod
         def create_int128(cls, value):
@@ -259,7 +281,8 @@ class CBOR:
         @classmethod
         def create_uint128(cls, value):
             return CBOR._create_int(value,
-                                    0, 0xffffffffffffffffffffffffffffffff)
+                                    0, 
+                                    0xffffffffffffffffffffffffffffffff)
 
         def _internal_encode(self):
             tag = CBOR._MT_UNSIGNED
@@ -520,23 +543,54 @@ class CBOR:
             self._objects = list()
 
         def add(self, object):
-            self._objects.append(object)
+            self._objects.append(CBOR._cbor_argument_check(object))
             return self
         
         def get(self, index):
             return self._objects[self._index_check(
                 index, len(self._objects) - 1)]
+        
+        def insert(self, index, object):
+#            this._immutableTest();
+            self._objects.insert(
+                self._index_check(index, len(self._objects)),
+                CBOR._cbor_argument_check(object))
+            return self
+
+        def update(self, index, object):
+#            this._immutableTest();
+            self._index_check(index, len(self._objects) - 1)
+            previous = self._objects[index]
+            self._objects[index] = CBOR._cbor_argument_check(object)
+            return previous
+
+        def remove(self, index):
+#            this._immutableTest();
+            return self._objects.pop(
+                self._index_check(index, len(self._objects) - 1))
+
+        def to_array(self):
+            array = list()
+            for object in self._objects:
+                array.append(object)
+            return array
 
         def _index_check(self, index, max):
             if CBOR._check_int_argument(index) > max or index < 0:
                 CBOR._error("Index out of range: " + str(index))
             return index
         
-        def _internal_encode(self):
-            encoded = CBOR._generic_header(CBOR._MT_ARRAY, len(self._objects))
+        def _encode_body(self, header):
             for object in self._objects:
-                encoded += object._internal_encode()
-            return encoded
+                header += object._internal_encode()
+            return header
+
+        def encode_as_sequence(self):
+            return self._encode_body(bytearray())
+                
+        def _internal_encode(self):
+            return self._encode_body(
+                CBOR._generic_header(CBOR._MT_ARRAY, len(self._objects)))
         
         def _internal_to_string(self, cbor_printer):
             if cbor_printer.arrayFolding(self):
@@ -654,8 +708,7 @@ class CBOR:
 #            self._immutableTest();
             if not isinstance(map, CBOR.Map):
                 CBOR._error("Argument must be of type CBOR.Map")
-            for i in range(len(map._entries)):
-                entry = map._entries[i]
+            for entry in map._entries:
                 self.set(entry._key, entry._object)
             return self
 
@@ -672,8 +725,8 @@ class CBOR:
 
         def get_keys(self):
             keys = list()
-            for i in range(len(self._entries)):
-                keys.append(self._entries[i]._key)
+            for entry in self._entries:
+                keys.append(entry._key)
             return keys
 
         def remove(self, key):
@@ -917,7 +970,8 @@ class CBOR:
         def _out_of_limit_test(self, length):
             self._byte_count += length
             if self._byte_count > self._max_length:
-                CBOR._error("Exceeded set limit: max_length={:n}".format(self._max_length))
+                CBOR._error("Exceeded set limit: max_length={:n}".format(
+                    self._max_length))
     
         def _eof_error(self):
             CBOR._error("Malformed CBOR, trying to read past EOF")
@@ -925,8 +979,8 @@ class CBOR:
         def enter_level(self):
             self._nesting_level += 1
             if (self._nesting_level > self._max_nesting_level):
-                CBOR._error("Structure nesting level exceeding: " + self._max_nesting_level)
-
+                CBOR._error("Structure nesting level exceeding: " + 
+                            self._max_nesting_level)
 
         def set_max_nesting_level(self, max_level):
             self._max_nesting_level = CBOR._check_int_argument(max_level)
@@ -1023,7 +1077,9 @@ class CBOR:
             if (n > 27):
                 self._unsupported_tag(tag)
             if (n > 23):
-                """ For 1, 2, 4, and 8 byte N. """
+                """ 
+                For 1, 2, 4, and 8 byte N.
+                """
                 q = 1 << (n - 24)
                 mask = 0xffffffff << ((q >> 1) * 8)
                 n = 0
@@ -1080,7 +1136,9 @@ class CBOR:
                     for q in range(n):
                         cborMap.set(self._get_object(), self._get_object())
                     self._nesting_level -= 1
-                    """ Programmatically added elements sort automatically. """
+                    """ 
+                    Programmatically added elements sort automatically. 
+                    """
                     return cborMap.set_sorting_mode(False)
 
                 case _:
@@ -1354,7 +1412,8 @@ class CBOR:
                     
                     case '_':
                         if not prefix:
-                            self.parser_error("'_' is only permitted for 0b, 0o, and 0x numbers")
+                            self.parser_error("'_' is only permitted for " +
+                                              "0b, 0o, and 0x numbers")
                         self.read_char()
 
             if (floating_point):
@@ -1379,7 +1438,8 @@ class CBOR:
 
         def test_for_non_decimal(self, non_decimal):
             if non_decimal:
-                self.parser_error("0b, 0o, and 0x prefixes are only permited for integers")
+                self.parser_error("0b, 0o, and 0x prefixes " +
+                                  "are only permited for integers")
 
         def next_char(self):
             if self.index == len(self.cbor_text): return chr(0)
@@ -1688,7 +1748,8 @@ class CBOR:
     def _cbor_argument_check(object):
         if isinstance(object, CBOR._CborObject):
             return object
-        CBOR._error("Expected CBOR.* argument, got '" + type(object).__name__ + "'")
+        CBOR._error("Expected CBOR.* argument, got '" + 
+                    type(object).__name__ + "'")
     
     @staticmethod
     def _encode_16_bits(uint16):
