@@ -234,11 +234,13 @@ for payload in [-1, 1 << 53]:
     check_exception(e, "Payload out of range")
 
 def reducedOneTurn(f16, length, value, result):
+  if isinstance(value, int): value = float(value)
+  if isinstance(result, int): result = float(result)
   ok = length != None
   try:
     reduced = CBOR.Float.create_float16(value) if f16 else CBOR.Float.create_float32(value)
     assert_true("Should not", ok)
-    assert_true("Compare=" + reduced + " r=" + result, reduced.get_float64() == result)
+    assert_true("Compare", reduced.get_float64() == result)
     assert_true("len", reduced.length == length)
     assert_true("equi", CBOR.decode(reduced.encode()).equals(reduced))
 ##    console.log("Hi=" + result + " j=" + reduced + " l=" + reduced.length)
@@ -246,7 +248,7 @@ def reducedOneTurn(f16, length, value, result):
 #    console.log("EHi=" + result + " r=" + reduced + " v=" + value)
 #    console.log(error.toString())
     assert_false("should" + repr(e), ok)
-    check_exception(e, "out of range" if math.isfinite(value) else "NaN/")
+    check_exception(e, "Not possible reducing" if math.isfinite(value) else "NaN/")
 
 reducedOneTurn(True, None, math.nan,                                0)
 reducedOneTurn(True, 2,    60000,                               60000)

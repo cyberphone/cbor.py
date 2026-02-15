@@ -155,12 +155,9 @@ class CBOR:
         def get_extended_float64(self):
             if isinstance(self, CBOR.NonFinite):
                 match self.get_non_finite():
-                    case 0x7e00:
-                        return math.nan
-                    case 0x7c00:
-                        return math.inf
-                    case 0xfc00:
-                        return -math.inf
+                    case 0x7e00: return math.nan
+                    case 0x7c00: return math.inf
+                    case 0xfc00: return -math.inf
                 CBOR._error('get_extended_float64() only supports ' +
                             'simple" NaN (7e00)')
             return self.get_float64()
@@ -782,14 +779,18 @@ class CBOR:
                     i >>= 8
                     if i == 0: break
                 self._ieee754.reverse()
-                """ Check that the syntax matches a non-finite number. """
+                """
+                Check that the syntax matches a non-finite number.
+                """
                 match len(self._ieee754):
                     case 2: exponent = 0x7c00
                     case 4: exponent = 0x7f800000
                     case 8: exponent = 0x7ff0000000000000
                     case _: self._bad_value()
                 if (value & exponent) != exponent: self._bad_value()
-                """ All is good, now apply "preferred serialization". """
+                """
+                All is good, now apply "preferred serialization".
+                """
                 sign = self._ieee754[0] > 0x7f
                 match len(self._ieee754):
                     case 2: break
@@ -797,16 +798,12 @@ class CBOR:
                         if value & ((1 << 13) - 1): break
                         value >>= 13
                         value &= 0x7fff
-                        if (sign):
-                            value |= 0x8000
-                        continue
+                        if (sign): value |= 0x8000
                     case 8:
                         if value & ((1 << 29) - 1): break
                         value >>= 29
                         value &= 0x7fffffff
-                        if (sign):
-                            value |= 0x80000000
-                        continue
+                        if (sign): value |= 0x80000000
             """ 
             Exited loop => the perfect ("preferred")
             serialization has been found.
@@ -1636,7 +1633,6 @@ class CBOR:
 
     @staticmethod
     def _return_converted(float16_flag, value):
-        type = "float16" if float16_flag else "float32"
         if math.isfinite(CBOR._check_argument_type(value, 'float')):
             try:
                 reduced = struct.unpack("!f", struct.pack("!f", value))[0]
@@ -1646,7 +1642,7 @@ class CBOR:
             except OverflowError:
                 CBOR._error(
                     "Not possible reducing {:g} into a \"{:s}\"".format(
-                        value, type))
+                        value, "float16" if float16_flag else "float32"))
         else: reduced = value
         return CBOR.Float(reduced)
 
