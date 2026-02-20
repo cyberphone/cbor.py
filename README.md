@@ -56,7 +56,7 @@ print(map.to_string())  # Diagnostic notation
   2: "Hi there!"
 }
 
-print('Value=' + map.get(CBOR.Int(1)).get_float64())
+print('Value={:g}'.format(map.get(CBOR.Int(1)).get_float64()))
 ----------------------------------------------------------
 Value=45.7
 ```
@@ -109,6 +109,7 @@ while remaining faithful to the native CBOR representation.
 |Android/Java|https://github.com/cyberphone/android-cbor|
 
 Updated: 2025-12-18
+
 
 
 
