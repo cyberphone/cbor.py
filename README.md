@@ -38,7 +38,7 @@ cbor = CBOR.Map()\
            .set(CBOR.Int(2), CBOR.String("Hi there!")).encode()
 
 print(cbor.hex())
-------------------------------
+--------------------------------------------
 a201fb4046d9999999999a0269486920746865726521
 ```
 Note: there are no requirements "chaining" objects as shown above; items
@@ -50,14 +50,14 @@ and [CBOR.Array](https://cyberphone.github.io/CBOR.js/doc/#wrapper.cbor.array) o
 ```python
 map = CBOR.decode(cbor)
 print(map.to_string())  # Diagnostic notation
-----------------------------------------------------
+---------------------------------------------
 {
   1: 45.7,
   2: "Hi there!"
 }
 
 print('Value={:g}'.format(map.get(CBOR.Int(1)).get_float64()))
-----------------------------------------------------------
+--------------------------------------------------------------
 Value=45.7
 ```
 
@@ -107,8 +107,10 @@ while remaining faithful to the native CBOR representation.
 |-|-|
 |JDK&nbsp;21+|https://github.com/cyberphone/openkeystore|
 |Android/Java|https://github.com/cyberphone/android-cbor|
+|Python 3|https://github.com/cyberphone/CBOR.py|
 
-Updated: 2025-12-18
+Updated: 2026-02-20
+
 
 
 
