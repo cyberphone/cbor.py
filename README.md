@@ -95,7 +95,7 @@ cbor = CBOR.from_diagnostic("""{
 }""").encode()
 
 print(cbor.hex())
-------------------------------
+--------------------------------------------
 a201fb4046d9999999999a0269486920746865726521
 ```
 Aided by the model used for deterministic encoding, diagnostic notation becomes _bidirectional,_
@@ -107,9 +107,10 @@ while remaining faithful to the native CBOR representation.
 |-|-|
 |JDK&nbsp;21+|https://github.com/cyberphone/openkeystore|
 |Android/Java|https://github.com/cyberphone/android-cbor|
-|JavaScript|https://github.com/cyberphone/CBOR.js|
+|JavaScript|https://github.com/cyberphone/CBOR.js#cborjs|
 
 Updated: 2026-02-20
+
 
 
 
