@@ -7,8 +7,6 @@
   <img alt="Text changing depending on mode. Light: 'So light!' Dark: 'So dark!'" src="doc/cbor.py.svg">
 </picture>
 
-&nbsp;
-
 This repository contains a
 [Python API for CBOR](https://cyberphone.github.io/CBOR.py/doc/)
 and an associated _reference implementation_.
@@ -119,6 +117,7 @@ while remaining faithful to the native CBOR representation.
 |JavaScript|https://github.com/cyberphone/CBOR.js#cborjs|
 
 Updated: 2026-02-20
+
 
 
 
