@@ -1,4 +1,5 @@
 <a id="cborpy"></a>
+&nbsp;
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="doc/cbor.py.dark.svg">
@@ -115,6 +116,7 @@ while remaining faithful to the native CBOR representation.
 |JavaScript|https://github.com/cyberphone/CBOR.js#cborjs|
 
 Updated: 2026-02-20
+
 
 
 
