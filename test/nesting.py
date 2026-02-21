@@ -17,7 +17,7 @@ def nest(setMax, level, ok):
     cborDecoder.decode_with_options()
     assert_true("mustnot", ok)
   except Exception:
-#    console.log(error.toString())
+#    console.log(error.to_string())
     assert_false("bad", ok)
 
 nest(None, 100, True)

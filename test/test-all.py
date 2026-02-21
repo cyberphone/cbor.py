@@ -365,7 +365,7 @@ def reducedOneTurn(f16, length, value, result):
 ##    console.log("Hi=" + result + " j=" + reduced + " l=" + reduced.length)
   except Exception as e:
 #    console.log("EHi=" + result + " r=" + reduced + " v=" + value)
-#    console.log(error.toString())
+#    console.log(error.to_string())
     assert_false("should" + repr(e), ok)
     check_exception(e, "Not possible reducing" if math.isfinite(value) else "NaN/")
 
@@ -840,7 +840,7 @@ def nest(setMax, level, ok):
     cborDecoder.decode_with_options()
     assert_true("mustnot", ok)
   except Exception:
-#    console.log(error.toString())
+#    console.log(error.to_string())
     assert_false("bad", ok)
 
 nest(None, 100, True)

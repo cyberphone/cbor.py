@@ -1,0 +1,91 @@
+1.0.0 - 1.0.1:
+Beta version
+
+2023-10-14 - 1.0.2:
+First release
+
+2023-12-05 - 1.0.3:
+Improved map key handling through binary search and insert
+Added CBOR.Map.set_sorting_mode(flag) to cope with huge maps
+
+2024-07-21 - 1.0.4:
+Signed and unsigned 8, 16, 32, and 64-bit integer get() methods added
+CBOR.Float.getFloat() renamed to get_float64()
+CBOR.Float.get_float32() method added
+
+2024-08-19 - 1.0.5
+Completely refactored CBOR.init_decoder() and added a flag for "outlawing"
+NaN/Infinity as well as a Decoder.get_byte_count() method
+Improved checking of CBOR items requirements against input buffer length
+
+2024-08-20 - 1.0.6
+Updated documentation
+
+2024-08-30 - 1.0.7
+Improved code
+
+2024-09-25 - 1.0.8
+get_float16() and CBOR.version added
+
+2024-10-17 - 1.0.9
+Simplification: removed getMap(), getArray(), and getTag()
+
+2025-01-02 - 1.0.10
+Added methods: CBOR.Array.update(), CBOR.Map.update(), CBOR.Map.merge(). CBOR.Tag.update()
+Changed method: CBOR.Tag.getTaggedObject() => CBOR.Tag.get()
+Changed method: Decoder.setNaNSupport() => Decoder.setFloatSupport()
+
+2025-01-30 1.0.11
+"Outlawing" mutating key objects.  See CBOR.Map().set()
+
+2025-04-10 1.0.12
+Simplifying decoder options solution.  See CBOR.init_decoder()
+Added get_date_time() and get_epoch_time methods including in their tagged format
+Added argument number tests to core methods
+Added CBOR.Map.setDynamic() method
+
+2025-06-29 1.0.13
+getInt() => get_int53()
+CBOR.REJECT_INVALID_FLOATS => CBOR.REJECT_NON_FINITE_FLOATS
+Added method: CBOR.Array.encode_as_sequence()
+
+2025-07-18 1.0.14
+Added method: CBOR.nonFiniteFloatsMode()
+
+2025-09-10 1.0.15
+Elimininated CBOR.REJECT_NON_FINITE_FLOATS and CBOR.nonFiniteFloatsMode()
+through the new wrapper object CBOR.NonFinite().
+Major update for non-finite numbers
+Dropped Tag.update()
+Added COTX properties to Tag 
+Added remove() and insert() to Array
+
+2025-12-05 1.0.16
+Added utility methods CBOR.create_epoch_time() and CBOR.create_date_time()
+
+2025-12-16 1.0.18
+Added methods CBOR.Float.create_float16() and CBOR.Float.create_float32()
+
+2025-12-18 1.0.18
+Renamed CBOR.diagDecode() to CBOR.from_diagnostic()
+
+2025-12-28 1.0.19
+Revised CBOR.Int to hold the entire "int" range modulo values < -2^63
+
+2026-01-02 1.0.20
+Added CBOR.Int.create_int8() and CBOR.Int.create_uint8()
+Added CBOR.Int.create_int16() and CBOR.Int.create_uint16()
+Added CBOR.Int.create_int32() and CBOR.Int.create_uint32()
+Added CBOR.Int.create_int53()
+Added CBOR.Int.create_int64() and CBOR.Int.create_uint64()
+Added CBOR.BigInt.get_int128() and CBOR.BigInt.get_uint128()
+Added CBOR.BigInt.create_int128() and CBOR.BigInt.create_uint128()
+
+2026-02-16 1.0.21
+
+cbor-object renamed to cbor-core
+
+CBOR.Int and CBOR.BigInt merged into CBOR.Int
+Changed CBOR.NonFinite.create_payload() to use 53 bits
+Decoder.set_max_nesting_level() added
+Lowest time set to epoch 0 (1970-01-01T00:00:00Z) for both DateTime and EpochTime

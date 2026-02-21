@@ -1120,6 +1120,9 @@ class CBOR:
             elif self._cbor_stream.read(1):
                 CBOR._error("Unexpected data found after CBOR object")
             return cbor_object
+
+        def get_byte_count(self):
+            return self._byte_count
         
         def _out_of_limit_test(self, length):
             self._byte_count += length
@@ -1297,19 +1300,6 @@ class CBOR:
 
                 case _:
                     self._unsupported_tag(tag)
-
-        def decodeWithOptions(self):
-            self._at_first_byte = True
-            object = self._get_object()
-            if self._sequence_mode:
-                if self._at_first_byte:
-                    return None
-            elif self._byte_count < self.maxLength:
-                CBOR._error("Unexpected data encountered after CBOR object")
-            return object
-
-        def get_byte_count(self):
-            return self._byte_count
 
     
     #==============================#
@@ -1611,7 +1601,7 @@ class CBOR:
                     self.parser_error("Expected: '" + c + "' actual: " + 
                                       self.to_readable_char(actual))
 
-        def get_string(self, byteString):
+        def get_string(self, byte_string):
             s = ''
             while True:
                 c = self.read_char()
@@ -1675,12 +1665,12 @@ class CBOR:
                                     self.to_readable_char(c))
                     
                     case '"':
-                        if not byteString:
+                        if not byte_string:
                             return CBOR.String(s)
                         
 
                     case '\'':
-                        if byteString:
+                        if byte_string:
                             return CBOR.Bytes(s.encode())
                     
                     case _:
@@ -1768,13 +1758,13 @@ class CBOR:
     ###################################
 
     @staticmethod
-    def from_diagnostic(cborText):
-        return CBOR._DiagnosticNotation(cborText, 
+    def from_diagnostic(cbor_text):
+        return CBOR._DiagnosticNotation(cbor_text, 
                                         False).read_sequence_to_eof()[0]
 
     @staticmethod
-    def from_diagnostic_seq(cborText):
-        return CBOR._DiagnosticNotation(cborText, 
+    def from_diagnostic_seq(cbor_text):
+        return CBOR._DiagnosticNotation(cbor_text, 
                                         True).read_sequence_to_eof()
 
     ####################################
