@@ -24,74 +24,55 @@ The concatnation of `metadata.cbor` and `shanty-the-cat.jpg` is subsequently sto
 ```
 
 The sample code below shows how `payload.bin` could be processed by a receiver:
-```javascript
-// largefile.mjs
+```python
+# largefile.py
 
-import CBOR from 'cbor-core';
-const crypto = await import('node:crypto');
+from org.webpki.cbor import CBOR
+from cryptography.hazmat.primitives import hashes
+import http.client
 
-const FILE_KEY = CBOR.String("file");
-const SHA256_KEY = CBOR.String("sha256");
-const BYOB_LENGTH = 1000;
-const CBOR_MAX_LENGTH = 500;
-const hashFunction = crypto.createHash('sha256');
+FILE_KEY = CBOR.String("file")
+SHA256_KEY = CBOR.String("sha256")
+CBOR_MAX_LENGTH = 1000
+CHUNK_SIZE = 1000
 
-const response = await fetch('https://cyberphone.github.io/CBOR.js/doc/app-notes/large-payloads/payload.bin');
-if (!response.ok) {
-  throw new Error("Failed request, status=" + response.status);
-}
-const reader = response.body.getReader({ mode: "byob" });
+# Initiate the hash method
+digest = hashes.Hash(hashes.SHA256())
 
-// read the response
-let byobBuffer = new ArrayBuffer(BYOB_LENGTH);
-let metaData = null;
-let cborBuffer;
-let fileSze = 0;
-let outputBuffer = null;
+# Perform an HTTP request
+conn = http.client.HTTPSConnection("cyberphone.github.io")
+conn.request("GET", "/javaapi/app-notes/large-payloads/payload.bin")
+response = conn.getresponse()
 
-reader.read(new Uint8Array(byobBuffer))
-      .then(function processBytes({ done, value }) {
+# Show the response status
+print(response.status, response.reason)
 
-  if (done) {
-    let sha256 = hashFunction.digest();
-    if (CBOR.compareArrays(metaData.get(SHA256_KEY).getBytes(), sha256)) {
-      throw new Error("Failed on SHA256");
-    }
-    console.log(`Successfully received: ${metaData.get(FILE_KEY).getString()} (${fileSze})`);
-    return;
-  }
+# Decode CBOR using the received stream handle
+decoder = CBOR.init_decoder(response, CBOR.SEQUENCE_MODE, CBOR_MAX_LENGTH)
+metadata = decoder.decode_with_options()
 
-  // Have we already processed CBOR?
-  if (metaData) {
-    outputBuffer = Buffer.from(value);
-  } else {
-    // No, but we may still lack some needed input.
-    if (cborBuffer) {
-      cborBuffer = Buffer.concat([cborBuffer, Buffer.from(value)]);
-    } else {
-      cborBuffer = Buffer.from(value);
-    }
-    if (cborBuffer.length > CBOR_MAX_LENGTH) {
-      // The buffer is now sufficient for our meta-data.
-      let decoder = CBOR.initDecoder(cborBuffer, CBOR.SEQUENCE_MODE);
-      metaData = decoder.decodeWithOptions();
-      let bc = decoder.getByteCount();
+# Print CBOR object
+print(metadata)
+print("CBOR bytes: " + str(decoder.get_byte_count()))
 
-      // The part of the buffer that is not CBOR holds the beginning of the attached file.
-      outputBuffer = Buffer.copyBytesFrom(cborBuffer, bc, cborBuffer.length - bc);
-    }
-  }
-  if (outputBuffer) {
-    fileSze += outputBuffer.length;
-    hashFunction.update(outputBuffer);
-    /////////////////////////////////////////////////////
-    // Store the chunk in an application-specific way. //
-    /////////////////////////////////////////////////////
-  }
-
-  return reader.read(new Uint8Array(value.buffer))
-               .then(processBytes);
-});
+# The rest of the stream is supposed to be the file.
+# Read data in moderately-sized chunks.
+total_bytes = 0
+while True:
+    chunk = response.read(CHUNK_SIZE)
+    if chunk:
+        # Hash the chunk.
+        digest.update(chunk)
+        total_bytes += len(chunk)
+        ###################################################
+        # Store the chunk in an application-specific way. #
+        ###################################################
+    else: break
+if digest.finalize() != metadata.get(SHA256_KEY).get_bytes():
+    print("Failed at SHA256")
+else:
+    print("Succesfully received: {:s} ({:n}))"
+          .format(metadata.get(FILE_KEY).get_string(), total_bytes))
 ```
 If all is good the result should be:
 ```
