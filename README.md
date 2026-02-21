@@ -1,4 +1,8 @@
-<a id="cborpy"></a><br>![CBOR is great](https://cyberphone.github.io/CBOR.py/doc/cbor.py.svg)
+<a id="cborpy"></a><br>
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://cyberphone.github.io/CBOR.py/doc/cbor.py.dark.svg">
+  <img alt="CBOR.py" src="https://cyberphone.github.io/CBOR.py/doc/cbor.py.svg">
+</picture>
 
 This repository contains a
 [Python API for CBOR](https://cyberphone.github.io/CBOR.py/doc/)
@@ -110,6 +114,7 @@ while remaining faithful to the native CBOR representation.
 |JavaScript|https://github.com/cyberphone/CBOR.js#cborjs|
 
 Updated: 2026-02-20
+
 
 
 
