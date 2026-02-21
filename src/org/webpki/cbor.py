@@ -1110,19 +1110,6 @@ class CBOR:
 
             self._byte_count = 0
             self._nesting_level = 0
-    
-        def decode_with_options(self):
-            self._at_first_byte = True
-            cbor_object = self._get_object()
-            if self._sequence_mode:
-                if self._at_first_byte:
-                    return None
-            elif self._cbor_stream.read(1):
-                CBOR._error("Unexpected data found after CBOR object")
-            return cbor_object
-
-        def get_byte_count(self):
-            return self._byte_count
         
         def _out_of_limit_test(self, length):
             self._byte_count += length
@@ -1133,15 +1120,11 @@ class CBOR:
         def _eof_error(self):
             CBOR._error("Malformed CBOR, trying to read past EOF")
 
-        def enter_level(self):
+        def _enter_level(self):
             self._nesting_level += 1
             if self._nesting_level > self._max_nesting_level:
                 CBOR._error("Structure nesting level exceeding: " + 
                             self._max_nesting_level)
-
-        def set_max_nesting_level(self, max_level):
-            self._max_nesting_level = CBOR._check_int_argument(max_level)
-            return self
 
         def _read_byte(self):
             one_byte = self._cbor_stream.read(1)
@@ -1260,7 +1243,7 @@ class CBOR:
                     return CBOR.Simple(n)
 
                 case CBOR._MT_TAG:
-                    self.enter_level()
+                    self._enter_level()
                     cborTag = CBOR.Tag(n, self._get_object())
                     self._nesting_level -= 1
                     return cborTag
@@ -1278,7 +1261,7 @@ class CBOR:
                     return CBOR.String(self._read_bytes(n).decode())
 
                 case CBOR._MT_ARRAY:
-                    self.enter_level()
+                    self._enter_level()
                     cborArray = CBOR.Array()
                     for q in range(n):
                         cborArray.add(self._get_object())
@@ -1286,7 +1269,7 @@ class CBOR:
                     return cborArray
 
                 case CBOR._MT_MAP:
-                    self.enter_level()
+                    self._enter_level()
                     cborMap = CBOR.Map().set_sorting_mode(self._strict_maps)
                     for q in range(n):
                         cborMap.set(self._get_object(), self._get_object())
@@ -1299,7 +1282,28 @@ class CBOR:
                 case _:
                     self._unsupported_tag(tag)
 
-    
+        #====================================#
+        #  Public _Decoder instance methods  #
+        #====================================#
+
+        def decode_with_options(self):
+            self._at_first_byte = True
+            cbor_object = self._get_object()
+            if self._sequence_mode:
+                if self._at_first_byte:
+                    return None
+            elif self._cbor_stream.read(1):
+                CBOR._error("Unexpected data found after CBOR object")
+            return cbor_object
+
+        def get_byte_count(self):
+            return self._byte_count
+        
+        def set_max_nesting_level(self, max_level):
+            self._max_nesting_level = CBOR._check_int_argument(max_level)
+            return self
+
+
     #==============================#
     #  Diagnostic Notation Parser  #
     #==============================#
