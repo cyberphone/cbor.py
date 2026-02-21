@@ -36,24 +36,25 @@ SHA256_LABEL = CBOR.String("sha256")
 CBOR_MAX_LENGTH = 1000
 CHUNK_SIZE = 1000
 
-# Initiate the hash method
+# Initiate the hash method.
 digest = hashes.Hash(hashes.SHA256())
 
-# Perform an HTTP request
+# Perform an HTTP request.
 conn = http.client.HTTPSConnection("cyberphone.github.io")
 conn.request("GET", "/CBOR.py/doc/app-notes/large-payloads/payload.bin")
 response = conn.getresponse()
 
-# Show the response status
+# Show the response status.
 print(response.status, response.reason)
 
-# Decode CBOR using the received stream handle
-decoder = CBOR.init_decoder(response, CBOR.SEQUENCE_MODE, CBOR_MAX_LENGTH)
-metadata = decoder.decode_with_options()
+# Decode CBOR using the received stream handle.
+# CBOR sequence mode: read one CBOR object at a time.
+# In this case, we read a single CBOR object.
+metadata = CBOR.init_decoder(response, 
+    CBOR.SEQUENCE_MODE, CBOR_MAX_LENGTH).decode_with_options()
 
-# Print CBOR object
+# Print CBOR object.
 print(metadata)
-print("CBOR bytes: " + str(decoder.get_byte_count()))
 
 # The rest of the stream is supposed to contain the file.
 # Read data in moderately-sized chunks until EOF.
