@@ -1,7 +1,7 @@
 <a id="cborpy"></a><br>
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="doc/cbor.py.dark.svg">
-  <img alt="" src="doc/cbor.py.svg">
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/cyberphone/CBOR.py/main/doc/cbor.py.dark.svg">
+  <img alt="" src="https://raw.githubusercontent.com/cyberphone/CBOR.py/main/doc/cbor.py.svg">
 </picture>
 
 This repository contains a
@@ -114,6 +114,7 @@ while remaining faithful to the native CBOR representation.
 |JavaScript|https://github.com/cyberphone/CBOR.js#cborjs|
 
 Updated: 2026-02-20
+
 
 
 
