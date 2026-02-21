@@ -4,7 +4,7 @@
   <link rel='icon' href='webpkiorg.png' sizes='192x192'>
   <meta name='viewport' content='initial-scale=1.0'>
   <meta charset='UTF-8'>
-  <title>CBOR JavaScript API</title>
+  <title>Python API for CBOR</title>
   <link rel='stylesheet' type='text/css' href='style.css'>
   <script>
     function tocSwitch(ip) {
@@ -20,37 +20,37 @@
   </script>
 </head>
 <body>
-  <a href='https://github.com/cyberphone/CBOR.js#cborjs'>
-  <img style="max-width:30%" src="cbor.js.svg" alt="logo" title="CBOR.js logotype"></a>
-  <div style="text-align:center;font-weight:normal;font-size:1.8em;margin-top:0.5em">CBOR.js - JavaScript API for CBOR</div>
+  <a href='https://github.com/cyberphone/CBOR.py#cborpy'>
+  <img style="max-width:30%" src="cbor.py.svg" alt="logo" title="CBOR.py logotype"></a>
+  <div style="text-align:center;font-weight:normal;font-size:1.8em;margin-top:0.5em">CBOR.py - Python API for CBOR</div>
   <h3 id='toc'>Table of Contents</h3>
   <div style='margin:0 0 0.4em 2em'><img alt='n/a' src='empty.svg' style='height:1em;margin-right:1em'><a href='#main.intro'>1.&nbsp;&nbsp;Introduction</a></div>
 <div style='margin:0 0 0.4em 2em'><img alt='n/a' src='closed.svg' onclick='tocSwitch(this)' style='height:1em;margin-right:1em;cursor:pointer'><a href='#main.wrappers'>2.&nbsp;&nbsp;CBOR Wrapper Objects</a></div><div style='display:none'>
 <div style='margin:0 0 0.4em 4em'><img alt='n/a' src='closed.svg' onclick='tocSwitch(this)' style='height:1em;margin-right:1em;cursor:pointer'><a href='#wrapper.cbor.int'>2.1.&nbsp;&nbsp;CBOR.Int</a></div><div style='display:none'>
 <div style='margin:0 0 0.4em 6em'><img alt='n/a' src='empty.svg' style='height:1em;margin-right:1em'><a href='#methods.cbor.int'>2.1.1.&nbsp;&nbsp;CBOR.Int Methods</a></div>
-<div style='margin:0 0 0.4em 8em'><img alt='n/a' src='empty.svg' style='height:1em;margin-right:1em'><a href='#cbor.int.getint8'>2.1.1.1.&nbsp;&nbsp;getInt8()</a></div>
-<div style='margin:0 0 0.4em 8em'><img alt='n/a' src='empty.svg' style='height:1em;margin-right:1em'><a href='#cbor.int.getuint8'>2.1.1.2.&nbsp;&nbsp;getUint8()</a></div>
-<div style='margin:0 0 0.4em 8em'><img alt='n/a' src='empty.svg' style='height:1em;margin-right:1em'><a href='#cbor.int.getint16'>2.1.1.3.&nbsp;&nbsp;getInt16()</a></div>
-<div style='margin:0 0 0.4em 8em'><img alt='n/a' src='empty.svg' style='height:1em;margin-right:1em'><a href='#cbor.int.getuint16'>2.1.1.4.&nbsp;&nbsp;getUint16()</a></div>
-<div style='margin:0 0 0.4em 8em'><img alt='n/a' src='empty.svg' style='height:1em;margin-right:1em'><a href='#cbor.int.getint32'>2.1.1.5.&nbsp;&nbsp;getInt32()</a></div>
-<div style='margin:0 0 0.4em 8em'><img alt='n/a' src='empty.svg' style='height:1em;margin-right:1em'><a href='#cbor.int.getuint32'>2.1.1.6.&nbsp;&nbsp;getUint32()</a></div>
-<div style='margin:0 0 0.4em 8em'><img alt='n/a' src='empty.svg' style='height:1em;margin-right:1em'><a href='#cbor.int.getint53'>2.1.1.7.&nbsp;&nbsp;getInt53()</a></div>
-<div style='margin:0 0 0.4em 8em'><img alt='n/a' src='empty.svg' style='height:1em;margin-right:1em'><a href='#cbor.int.getint64'>2.1.1.8.&nbsp;&nbsp;getInt64()</a></div>
-<div style='margin:0 0 0.4em 8em'><img alt='n/a' src='empty.svg' style='height:1em;margin-right:1em'><a href='#cbor.int.getuint64'>2.1.1.9.&nbsp;&nbsp;getUint64()</a></div>
-<div style='margin:0 0 0.4em 8em'><img alt='n/a' src='empty.svg' style='height:1em;margin-right:1em'><a href='#cbor.int.getint128'>2.1.1.10.&nbsp;&nbsp;getInt128()</a></div>
-<div style='margin:0 0 0.4em 8em'><img alt='n/a' src='empty.svg' style='height:1em;margin-right:1em'><a href='#cbor.int.getuint128'>2.1.1.11.&nbsp;&nbsp;getUint128()</a></div>
+<div style='margin:0 0 0.4em 8em'><img alt='n/a' src='empty.svg' style='height:1em;margin-right:1em'><a href='#cbor.int.get_int8'>2.1.1.1.&nbsp;&nbsp;get_int8()</a></div>
+<div style='margin:0 0 0.4em 8em'><img alt='n/a' src='empty.svg' style='height:1em;margin-right:1em'><a href='#cbor.int.get_uint8'>2.1.1.2.&nbsp;&nbsp;get_uint8()</a></div>
+<div style='margin:0 0 0.4em 8em'><img alt='n/a' src='empty.svg' style='height:1em;margin-right:1em'><a href='#cbor.int.get_int16'>2.1.1.3.&nbsp;&nbsp;get_int16()</a></div>
+<div style='margin:0 0 0.4em 8em'><img alt='n/a' src='empty.svg' style='height:1em;margin-right:1em'><a href='#cbor.int.get_uint16'>2.1.1.4.&nbsp;&nbsp;get_uint16()</a></div>
+<div style='margin:0 0 0.4em 8em'><img alt='n/a' src='empty.svg' style='height:1em;margin-right:1em'><a href='#cbor.int.get_int32'>2.1.1.5.&nbsp;&nbsp;get_int32()</a></div>
+<div style='margin:0 0 0.4em 8em'><img alt='n/a' src='empty.svg' style='height:1em;margin-right:1em'><a href='#cbor.int.get_uint32'>2.1.1.6.&nbsp;&nbsp;get_uint32()</a></div>
+<div style='margin:0 0 0.4em 8em'><img alt='n/a' src='empty.svg' style='height:1em;margin-right:1em'><a href='#cbor.int.get_int53'>2.1.1.7.&nbsp;&nbsp;get_int53()</a></div>
+<div style='margin:0 0 0.4em 8em'><img alt='n/a' src='empty.svg' style='height:1em;margin-right:1em'><a href='#cbor.int.get_int64'>2.1.1.8.&nbsp;&nbsp;get_int64()</a></div>
+<div style='margin:0 0 0.4em 8em'><img alt='n/a' src='empty.svg' style='height:1em;margin-right:1em'><a href='#cbor.int.get_uint64'>2.1.1.9.&nbsp;&nbsp;get_uint64()</a></div>
+<div style='margin:0 0 0.4em 8em'><img alt='n/a' src='empty.svg' style='height:1em;margin-right:1em'><a href='#cbor.int.get_int128'>2.1.1.10.&nbsp;&nbsp;get_int128()</a></div>
+<div style='margin:0 0 0.4em 8em'><img alt='n/a' src='empty.svg' style='height:1em;margin-right:1em'><a href='#cbor.int.get_uint128'>2.1.1.11.&nbsp;&nbsp;get_uint128()</a></div>
 <div style='margin:0 0 0.4em 8em'><img alt='n/a' src='empty.svg' style='height:1em;margin-right:1em'><a href='#cbor.int.get_big_int'>2.1.1.12.&nbsp;&nbsp;get_big_int()</a></div>
-<div style='margin:0 0 0.4em 8em'><img alt='n/a' src='empty.svg' style='height:1em;margin-right:1em'><a href='#cbor.int.createint8'>2.1.1.13.&nbsp;&nbsp;CBOR.Int.createInt8()</a></div>
-<div style='margin:0 0 0.4em 8em'><img alt='n/a' src='empty.svg' style='height:1em;margin-right:1em'><a href='#cbor.int.createuint8'>2.1.1.14.&nbsp;&nbsp;CBOR.Int.createUint8()</a></div>
-<div style='margin:0 0 0.4em 8em'><img alt='n/a' src='empty.svg' style='height:1em;margin-right:1em'><a href='#cbor.int.createint16'>2.1.1.15.&nbsp;&nbsp;CBOR.Int.createInt16()</a></div>
-<div style='margin:0 0 0.4em 8em'><img alt='n/a' src='empty.svg' style='height:1em;margin-right:1em'><a href='#cbor.int.createuint16'>2.1.1.16.&nbsp;&nbsp;CBOR.Int.createUint16()</a></div>
-<div style='margin:0 0 0.4em 8em'><img alt='n/a' src='empty.svg' style='height:1em;margin-right:1em'><a href='#cbor.int.createint32'>2.1.1.17.&nbsp;&nbsp;CBOR.Int.createInt32()</a></div>
-<div style='margin:0 0 0.4em 8em'><img alt='n/a' src='empty.svg' style='height:1em;margin-right:1em'><a href='#cbor.int.createuint32'>2.1.1.18.&nbsp;&nbsp;CBOR.Int.createUint32()</a></div>
-<div style='margin:0 0 0.4em 8em'><img alt='n/a' src='empty.svg' style='height:1em;margin-right:1em'><a href='#cbor.int.createint53'>2.1.1.19.&nbsp;&nbsp;CBOR.Int.createInt53()</a></div>
-<div style='margin:0 0 0.4em 8em'><img alt='n/a' src='empty.svg' style='height:1em;margin-right:1em'><a href='#cbor.int.createint64'>2.1.1.20.&nbsp;&nbsp;CBOR.Int.createInt64()</a></div>
-<div style='margin:0 0 0.4em 8em'><img alt='n/a' src='empty.svg' style='height:1em;margin-right:1em'><a href='#cbor.int.createuint64'>2.1.1.21.&nbsp;&nbsp;CBOR.Int.createUint64()</a></div>
-<div style='margin:0 0 0.4em 8em'><img alt='n/a' src='empty.svg' style='height:1em;margin-right:1em'><a href='#cbor.int.createint128'>2.1.1.22.&nbsp;&nbsp;CBOR.Int.createInt128()</a></div>
-<div style='margin:0 0 0.4em 8em'><img alt='n/a' src='empty.svg' style='height:1em;margin-right:1em'><a href='#cbor.int.createuint128'>2.1.1.23.&nbsp;&nbsp;CBOR.Int.createUint128()</a></div>
+<div style='margin:0 0 0.4em 8em'><img alt='n/a' src='empty.svg' style='height:1em;margin-right:1em'><a href='#cbor.int.create_int8'>2.1.1.13.&nbsp;&nbsp;CBOR.Int.create_int8()</a></div>
+<div style='margin:0 0 0.4em 8em'><img alt='n/a' src='empty.svg' style='height:1em;margin-right:1em'><a href='#cbor.int.create_uint8'>2.1.1.14.&nbsp;&nbsp;CBOR.Int.create_uint8()</a></div>
+<div style='margin:0 0 0.4em 8em'><img alt='n/a' src='empty.svg' style='height:1em;margin-right:1em'><a href='#cbor.int.create_int16'>2.1.1.15.&nbsp;&nbsp;CBOR.Int.create_int16()</a></div>
+<div style='margin:0 0 0.4em 8em'><img alt='n/a' src='empty.svg' style='height:1em;margin-right:1em'><a href='#cbor.int.create_uint16'>2.1.1.16.&nbsp;&nbsp;CBOR.Int.create_uint16()</a></div>
+<div style='margin:0 0 0.4em 8em'><img alt='n/a' src='empty.svg' style='height:1em;margin-right:1em'><a href='#cbor.int.create_int32'>2.1.1.17.&nbsp;&nbsp;CBOR.Int.create_int32()</a></div>
+<div style='margin:0 0 0.4em 8em'><img alt='n/a' src='empty.svg' style='height:1em;margin-right:1em'><a href='#cbor.int.create_uint32'>2.1.1.18.&nbsp;&nbsp;CBOR.Int.create_uint32()</a></div>
+<div style='margin:0 0 0.4em 8em'><img alt='n/a' src='empty.svg' style='height:1em;margin-right:1em'><a href='#cbor.int.create_int53'>2.1.1.19.&nbsp;&nbsp;CBOR.Int.create_int53()</a></div>
+<div style='margin:0 0 0.4em 8em'><img alt='n/a' src='empty.svg' style='height:1em;margin-right:1em'><a href='#cbor.int.create_int64'>2.1.1.20.&nbsp;&nbsp;CBOR.Int.create_int64()</a></div>
+<div style='margin:0 0 0.4em 8em'><img alt='n/a' src='empty.svg' style='height:1em;margin-right:1em'><a href='#cbor.int.create_uint64'>2.1.1.21.&nbsp;&nbsp;CBOR.Int.create_uint64()</a></div>
+<div style='margin:0 0 0.4em 8em'><img alt='n/a' src='empty.svg' style='height:1em;margin-right:1em'><a href='#cbor.int.create_int128'>2.1.1.22.&nbsp;&nbsp;CBOR.Int.create_int128()</a></div>
+<div style='margin:0 0 0.4em 8em'><img alt='n/a' src='empty.svg' style='height:1em;margin-right:1em'><a href='#cbor.int.create_uint128'>2.1.1.23.&nbsp;&nbsp;CBOR.Int.create_uint128()</a></div>
 </div>
 <div style='margin:0 0 0.4em 4em'><img alt='n/a' src='closed.svg' onclick='tocSwitch(this)' style='height:1em;margin-right:1em;cursor:pointer'><a href='#wrapper.cbor.float'>2.2.&nbsp;&nbsp;CBOR.Float</a></div><div style='display:none'>
 <div style='margin:0 0 0.4em 6em'><img alt='n/a' src='empty.svg' style='height:1em;margin-right:1em'><a href='#methods.cbor.float'>2.2.1.&nbsp;&nbsp;CBOR.Float Methods</a></div>
@@ -154,16 +154,8 @@
 <div style='margin:0 0 0.4em 4em'><img alt='n/a' src='empty.svg' style='height:1em;margin-right:1em'><a href='#decoder.cbor.from_diagnostic_seq'>5.7.&nbsp;&nbsp;CBOR.from_diagnostic_seq()</a></div>
 </div>
 <div style='margin:0 0 0.4em 2em'><img alt='n/a' src='closed.svg' onclick='tocSwitch(this)' style='height:1em;margin-right:1em;cursor:pointer'><a href='#main.utility'>6.&nbsp;&nbsp;Utility Methods</a></div><div style='display:none'>
-<div style='margin:0 0 0.4em 4em'><img alt='n/a' src='empty.svg' style='height:1em;margin-right:1em'><a href='#utility.cbor.addarrays'>6.1.&nbsp;&nbsp;CBOR.addArrays()</a></div>
-<div style='margin:0 0 0.4em 4em'><img alt='n/a' src='empty.svg' style='height:1em;margin-right:1em'><a href='#utility.cbor.comparearrays'>6.2.&nbsp;&nbsp;CBOR.compareArrays()</a></div>
-<div style='margin:0 0 0.4em 4em'><img alt='n/a' src='empty.svg' style='height:1em;margin-right:1em'><a href='#utility.cbor.tohex'>6.3.&nbsp;&nbsp;CBOR.toHex()</a></div>
-<div style='margin:0 0 0.4em 4em'><img alt='n/a' src='empty.svg' style='height:1em;margin-right:1em'><a href='#utility.cbor.fromhex'>6.4.&nbsp;&nbsp;CBOR.fromHex()</a></div>
-<div style='margin:0 0 0.4em 4em'><img alt='n/a' src='empty.svg' style='height:1em;margin-right:1em'><a href='#utility.cbor.tobase64url'>6.5.&nbsp;&nbsp;CBOR.toBase64Url()</a></div>
-<div style='margin:0 0 0.4em 4em'><img alt='n/a' src='empty.svg' style='height:1em;margin-right:1em'><a href='#utility.cbor.frombase64url'>6.6.&nbsp;&nbsp;CBOR.fromBase64Url()</a></div>
-<div style='margin:0 0 0.4em 4em'><img alt='n/a' src='empty.svg' style='height:1em;margin-right:1em'><a href='#utility.cbor.tobigint'>6.7.&nbsp;&nbsp;CBOR.toBigInt()</a></div>
-<div style='margin:0 0 0.4em 4em'><img alt='n/a' src='empty.svg' style='height:1em;margin-right:1em'><a href='#utility.cbor.frombigint'>6.8.&nbsp;&nbsp;CBOR.fromBigInt()</a></div>
-<div style='margin:0 0 0.4em 4em'><img alt='n/a' src='empty.svg' style='height:1em;margin-right:1em'><a href='#utility.cbor.create_date_time'>6.9.&nbsp;&nbsp;CBOR.create_date_time()</a></div>
-<div style='margin:0 0 0.4em 4em'><img alt='n/a' src='empty.svg' style='height:1em;margin-right:1em'><a href='#utility.cbor.create_epoch_time'>6.10.&nbsp;&nbsp;CBOR.create_epoch_time()</a></div>
+<div style='margin:0 0 0.4em 4em'><img alt='n/a' src='empty.svg' style='height:1em;margin-right:1em'><a href='#utility.cbor.create_date_time'>6.1.&nbsp;&nbsp;CBOR.create_date_time()</a></div>
+<div style='margin:0 0 0.4em 4em'><img alt='n/a' src='empty.svg' style='height:1em;margin-right:1em'><a href='#utility.cbor.create_epoch_time'>6.2.&nbsp;&nbsp;CBOR.create_epoch_time()</a></div>
 </div>
 <div style='margin:0 0 0.4em 2em'><img alt='n/a' src='closed.svg' onclick='tocSwitch(this)' style='height:1em;margin-right:1em;cursor:pointer'><a href='#main.numbers'>7.&nbsp;&nbsp;CBOR Numbers</a></div><div style='display:none'>
 <div style='margin:0 0 0.4em 4em'><img alt='n/a' src='empty.svg' style='height:1em;margin-right:1em'><a href='#numbers.integers'>7.1.&nbsp;&nbsp;Integers</a></div>
@@ -184,18 +176,18 @@
 
   <h3 id='main.intro'>1.&nbsp;&nbsp;Introduction</h3>
 
-  This document describes a JavaScript API for encoding and decoding CBOR&nbsp;<span style='white-space:nowrap'>[<a href='https://www.rfc-editor.org/rfc/rfc8949.html' title='RFC8949'>RFC8949<img src='xtl.svg' alt='link'></a>]</span> data using the
+  This document describes a Python API for encoding and decoding CBOR&nbsp;<span style='white-space:nowrap'>[<a href='https://www.rfc-editor.org/rfc/rfc8949.html' title='RFC8949'>RFC8949<img src='xtl.svg' alt='link'></a>]</span> data using the
   <span style='white-space:nowrap'>[<a href='https://www.ietf.org/archive/id/draft-rundgren-cbor-core-25.html' title='CBOR::Core'>CBOR::Core<img src='xtl.svg' alt='link'></a>]</span> cross platform profile.
   The API loosely mimics the &quot;JSON&quot; object by exposing a <i>single global object</i>,
   unsurprisingly named &quot;CBOR&quot;.
 
   To minimize the need for application developers having detailed knowledge of CBOR,
-  the CBOR.js API provides a set of high-level wrapper objects.
+  the CBOR.py API provides a set of high-level wrapper objects.
 
   The wrapper objects are used for encoding CBOR data items,
   as well as being the result of CBOR decoding.
 
-  The CBOR.js API provides some specific features including:
+  The CBOR.py API provides some specific features including:
   <ul style='margin-block-start:0.3em'>
     <li><a href='#main.deterministic'>Deterministic Encoding</a></li>
     <li><a href='#main.diagnostic'>Diagnostic Notation</a> encoder and decoder</li>
@@ -205,7 +197,7 @@
   <p>
   Note: in this specification CBOR data items are subsequently referred to as "CBOR objects".
 </p>
-  Although this document describes a JavaScript API, it may also serve
+  Although this document describes a Python API, it may also serve
   as a guide for <code>CBOR::Core</code> implementations for other software platforms.
   <h3 id='main.wrappers'>2.&nbsp;&nbsp;CBOR Wrapper Objects</h3>
 
@@ -217,40 +209,40 @@
   CDDL&nbsp;<span style='white-space:nowrap'>[<a href='https://www.rfc-editor.org/rfc/rfc8610.html' title='RFC8610'>RFC8610<img src='xtl.svg' alt='link'></a>]</span> notation) supported by this specification:
   <div class='webpkifloat'>
     <table class='webpkitable' style='margin-left:2em'>
-      <tr><th>CDDL</th><th>Wrapper&nbsp;Object</th><th>JavaScript</th><th>Notes</th></tr>
+      <tr><th>CDDL</th><th>Wrapper&nbsp;Object</th><th>Python</th><th>Notes</th></tr>
       <tr style='text-align:center'>
         <td><code>integer</code></td>
         <td><a href='#wrapper.cbor.int'>CBOR.Int</a></td>
-        <td><kbd>Number</kbd>&nbsp;<code>/</code>&nbsp;<kbd>BigInt</kbd></td>
+        <td><kbd>int</kbd></td>
         <td>1</td>
       </tr>
       <tr style='text-align:center'>
         <td rowspan='2'><code>float</code></td>
         <td><a href='#wrapper.cbor.float'>CBOR.Float</a></td>
-        <td><kbd>Number</kbd></td>
+        <td><kbd>float</kbd></td>
         <td><code>2</code>, <code>3</code></td>
       </tr>
       <tr style='text-align:center'>
         <td><a href='#wrapper.cbor.nonfinite'>CBOR.NonFinite</a></td>
-        <td><kbd>BigInt</kbd></td>
+        <td><kbd>int</kbd></td>
         <td><code>3</code></td>
       </tr>
       <tr style='text-align:center'>
         <td><code>bstr</code></td>
         <td><a href='#wrapper.cbor.bytes'>CBOR.Bytes</a></td>
-        <td><kbd>Uint8Array</kbd></td>
+        <td><kbd>bytes</kbd></td>
         <td></td>
       </tr>
       <tr style='text-align:center'>
         <td><code>tstr</code></td>
         <td><a href='#wrapper.cbor.string'>CBOR.String</a></td>
-        <td><kbd>String</kbd></td>
+        <td><kbd>str</kbd></td>
         <td></td>
       </tr>
       <tr style='text-align:center'>
         <td><code>bool</code></td>
         <td><a href='#wrapper.cbor.boolean'>CBOR.Boolean</a></td>
-        <td><kbd>Boolean</kbd></td>
+        <td><kbd>bool</kbd></td>
         <td></td>
       </tr>
       <tr style='text-align:center'>
@@ -315,110 +307,110 @@ only verify that data is within expected limits, and if that is the case,
 finish the operation using the standard constructor.</div></td></tr>
 <tr><td colspan='3' class='webpkidiv'></td></tr>
 <tr><th>Parameter</th><th>Type</th><th>Description</th></tr>
-<tr><td style='text-align:center'><kbd><i>value</i></kbd></td><td style='text-align:center'><kbd>Number</kbd>&nbsp;<code>/</code>&nbsp;<kbd>BigInt</kbd></td><td style='width:100%'>Integer to be wrapped.</td></tr>
+<tr><td style='text-align:center'><kbd><i>value</i></kbd></td><td style='text-align:center'><kbd>int</kbd></td><td style='width:100%'>Integer to be wrapped.</td></tr>
 <tr><td colspan='3' class='webpkidiv'></td></tr>
 <tr><th>Returns</th><th colspan='2'>Description</th></tr>
 <tr><td style='text-align:center'><kbd>CBOR.Int</kbd></td><td colspan='2' style='width:100%'>Object.</td></tr>
 </table></div>
 <h4 id='methods.cbor.int'>2.1.1.&nbsp;&nbsp;CBOR.Int Methods</h4>
-<h4 id='cbor.int.getint8'>2.1.1.1.&nbsp;&nbsp;getInt8()</h4>
+<h4 id='cbor.int.get_int8'>2.1.1.1.&nbsp;&nbsp;get_int8()</h4>
 <div class='webpkifloat'>
 <table class='webpkitable' style='margin-left:2em;width:50em'>
-<tr><th>Syntax</th><td style='width:100%'><kbd>getInt8()</kbd></td></tr>
+<tr><th>Syntax</th><td style='width:100%'><kbd>get_int8()</kbd></td></tr>
 <tr><th>Description</th><td style='width:100%'>Get CBOR <code>int8</code> object.<div style='margin-top:0.5em'>If the return value is outside the range <code>-0x80 </code>to<code> 0x7f</code>, a <a href='#main.errors'>CBOR.Exception</a> is thrown.</div></td></tr>
 <tr><td colspan='2' class='webpkidiv'></td></tr>
 <tr><th>Returns</th><th>Description</th></tr>
-<tr><td style='text-align:center'><kbd>Number</kbd></td><td style='width:100%'>Decoded integer.</td></tr>
+<tr><td style='text-align:center'><kbd>int</kbd></td><td style='width:100%'>Decoded integer.</td></tr>
 </table></div>
-<h4 id='cbor.int.getuint8'>2.1.1.2.&nbsp;&nbsp;getUint8()</h4>
+<h4 id='cbor.int.get_uint8'>2.1.1.2.&nbsp;&nbsp;get_uint8()</h4>
 <div class='webpkifloat'>
 <table class='webpkitable' style='margin-left:2em;width:50em'>
-<tr><th>Syntax</th><td style='width:100%'><kbd>getUint8()</kbd></td></tr>
+<tr><th>Syntax</th><td style='width:100%'><kbd>get_uint8()</kbd></td></tr>
 <tr><th>Description</th><td style='width:100%'>Get CBOR <code>uint8</code> object.<div style='margin-top:0.5em'>If the return value is outside the range <code>0 </code>to<code> 0xff</code>, a <a href='#main.errors'>CBOR.Exception</a> is thrown.</div></td></tr>
 <tr><td colspan='2' class='webpkidiv'></td></tr>
 <tr><th>Returns</th><th>Description</th></tr>
-<tr><td style='text-align:center'><kbd>Number</kbd></td><td style='width:100%'>Decoded integer.</td></tr>
+<tr><td style='text-align:center'><kbd>int</kbd></td><td style='width:100%'>Decoded integer.</td></tr>
 </table></div>
-<h4 id='cbor.int.getint16'>2.1.1.3.&nbsp;&nbsp;getInt16()</h4>
+<h4 id='cbor.int.get_int16'>2.1.1.3.&nbsp;&nbsp;get_int16()</h4>
 <div class='webpkifloat'>
 <table class='webpkitable' style='margin-left:2em;width:50em'>
-<tr><th>Syntax</th><td style='width:100%'><kbd>getInt16()</kbd></td></tr>
+<tr><th>Syntax</th><td style='width:100%'><kbd>get_int16()</kbd></td></tr>
 <tr><th>Description</th><td style='width:100%'>Get CBOR <code>int16</code> object.<div style='margin-top:0.5em'>If the return value is outside the range <code>-0x8000 </code>to<code> 0x7fff</code>, a <a href='#main.errors'>CBOR.Exception</a> is thrown.</div></td></tr>
 <tr><td colspan='2' class='webpkidiv'></td></tr>
 <tr><th>Returns</th><th>Description</th></tr>
-<tr><td style='text-align:center'><kbd>Number</kbd></td><td style='width:100%'>Decoded integer.</td></tr>
+<tr><td style='text-align:center'><kbd>int</kbd></td><td style='width:100%'>Decoded integer.</td></tr>
 </table></div>
-<h4 id='cbor.int.getuint16'>2.1.1.4.&nbsp;&nbsp;getUint16()</h4>
+<h4 id='cbor.int.get_uint16'>2.1.1.4.&nbsp;&nbsp;get_uint16()</h4>
 <div class='webpkifloat'>
 <table class='webpkitable' style='margin-left:2em;width:50em'>
-<tr><th>Syntax</th><td style='width:100%'><kbd>getUint16()</kbd></td></tr>
+<tr><th>Syntax</th><td style='width:100%'><kbd>get_uint16()</kbd></td></tr>
 <tr><th>Description</th><td style='width:100%'>Get CBOR <code>uint16</code> object.<div style='margin-top:0.5em'>If the return value is outside the range <code>0 </code>to<code> 0xffff</code>, a <a href='#main.errors'>CBOR.Exception</a> is thrown.</div></td></tr>
 <tr><td colspan='2' class='webpkidiv'></td></tr>
 <tr><th>Returns</th><th>Description</th></tr>
-<tr><td style='text-align:center'><kbd>Number</kbd></td><td style='width:100%'>Decoded integer.</td></tr>
+<tr><td style='text-align:center'><kbd>int</kbd></td><td style='width:100%'>Decoded integer.</td></tr>
 </table></div>
-<h4 id='cbor.int.getint32'>2.1.1.5.&nbsp;&nbsp;getInt32()</h4>
+<h4 id='cbor.int.get_int32'>2.1.1.5.&nbsp;&nbsp;get_int32()</h4>
 <div class='webpkifloat'>
 <table class='webpkitable' style='margin-left:2em;width:50em'>
-<tr><th>Syntax</th><td style='width:100%'><kbd>getInt32()</kbd></td></tr>
+<tr><th>Syntax</th><td style='width:100%'><kbd>get_int32()</kbd></td></tr>
 <tr><th>Description</th><td style='width:100%'>Get CBOR <code>int32</code> object.<div style='margin-top:0.5em'>If the return value is outside the range <code>-0x80000000 </code>to<code> 0x7fffffff</code>, a <a href='#main.errors'>CBOR.Exception</a> is thrown.</div></td></tr>
 <tr><td colspan='2' class='webpkidiv'></td></tr>
 <tr><th>Returns</th><th>Description</th></tr>
-<tr><td style='text-align:center'><kbd>Number</kbd></td><td style='width:100%'>Decoded integer.</td></tr>
+<tr><td style='text-align:center'><kbd>int</kbd></td><td style='width:100%'>Decoded integer.</td></tr>
 </table></div>
-<h4 id='cbor.int.getuint32'>2.1.1.6.&nbsp;&nbsp;getUint32()</h4>
+<h4 id='cbor.int.get_uint32'>2.1.1.6.&nbsp;&nbsp;get_uint32()</h4>
 <div class='webpkifloat'>
 <table class='webpkitable' style='margin-left:2em;width:50em'>
-<tr><th>Syntax</th><td style='width:100%'><kbd>getUint32()</kbd></td></tr>
+<tr><th>Syntax</th><td style='width:100%'><kbd>get_uint32()</kbd></td></tr>
 <tr><th>Description</th><td style='width:100%'>Get CBOR <code>uint32</code> object.<div style='margin-top:0.5em'>If the return value is outside the range <code>0 </code>to<code> 0xffffffff</code>, a <a href='#main.errors'>CBOR.Exception</a> is thrown.</div></td></tr>
 <tr><td colspan='2' class='webpkidiv'></td></tr>
 <tr><th>Returns</th><th>Description</th></tr>
-<tr><td style='text-align:center'><kbd>Number</kbd></td><td style='width:100%'>Decoded integer.</td></tr>
+<tr><td style='text-align:center'><kbd>int</kbd></td><td style='width:100%'>Decoded integer.</td></tr>
 </table></div>
-<h4 id='cbor.int.getint53'>2.1.1.7.&nbsp;&nbsp;getInt53()</h4>
+<h4 id='cbor.int.get_int53'>2.1.1.7.&nbsp;&nbsp;get_int53()</h4>
 <div class='webpkifloat'>
 <table class='webpkitable' style='margin-left:2em;width:50em'>
-<tr><th>Syntax</th><td style='width:100%'><kbd>getInt53()</kbd></td></tr>
+<tr><th>Syntax</th><td style='width:100%'><kbd>get_int53()</kbd></td></tr>
 <tr><th>Description</th><td style='width:100%'>Get CBOR <code>int53</code> object.<div style='margin-top:0.5em'>If the return value is outside the range <code></code><kbd>Number.MIN_SAFE_INTEGER</kbd>&nbsp;(<code>-9007199254740991</code>)<code> </code>to<code> </code><kbd>Number.MAX_SAFE_INTEGER</kbd>&nbsp;(<code>9007199254740991</code>)<code></code>, a <a href='#main.errors'>CBOR.Exception</a> is thrown. </div><div style='margin-top:0.5em'>Since 53-bit integers are specific to JavaScript, <code>int53</code> objects should be used with caution in cross-platform scenarios.</div></td></tr>
 <tr><td colspan='2' class='webpkidiv'></td></tr>
 <tr><th>Returns</th><th>Description</th></tr>
-<tr><td style='text-align:center'><kbd>Number</kbd></td><td style='width:100%'>Decoded integer.</td></tr>
+<tr><td style='text-align:center'><kbd>int</kbd></td><td style='width:100%'>Decoded integer.</td></tr>
 </table></div>
-<h4 id='cbor.int.getint64'>2.1.1.8.&nbsp;&nbsp;getInt64()</h4>
+<h4 id='cbor.int.get_int64'>2.1.1.8.&nbsp;&nbsp;get_int64()</h4>
 <div class='webpkifloat'>
 <table class='webpkitable' style='margin-left:2em;width:50em'>
-<tr><th>Syntax</th><td style='width:100%'><kbd>getInt64()</kbd></td></tr>
+<tr><th>Syntax</th><td style='width:100%'><kbd>get_int64()</kbd></td></tr>
 <tr><th>Description</th><td style='width:100%'>Get CBOR <code>int64</code> object.<div style='margin-top:0.5em'>If the return value is outside the range <code>-0x8000000000000000 </code>to<code> 0x7fffffffffffffff</code>, a <a href='#main.errors'>CBOR.Exception</a> is thrown.</div></td></tr>
 <tr><td colspan='2' class='webpkidiv'></td></tr>
 <tr><th>Returns</th><th>Description</th></tr>
-<tr><td style='text-align:center'><kbd>BigInt</kbd></td><td style='width:100%'>Decoded integer.</td></tr>
+<tr><td style='text-align:center'><kbd>int</kbd></td><td style='width:100%'>Decoded integer.</td></tr>
 </table></div>
-<h4 id='cbor.int.getuint64'>2.1.1.9.&nbsp;&nbsp;getUint64()</h4>
+<h4 id='cbor.int.get_uint64'>2.1.1.9.&nbsp;&nbsp;get_uint64()</h4>
 <div class='webpkifloat'>
 <table class='webpkitable' style='margin-left:2em;width:50em'>
-<tr><th>Syntax</th><td style='width:100%'><kbd>getUint64()</kbd></td></tr>
+<tr><th>Syntax</th><td style='width:100%'><kbd>get_uint64()</kbd></td></tr>
 <tr><th>Description</th><td style='width:100%'>Get CBOR <code>uint64</code> object.<div style='margin-top:0.5em'>If the return value is outside the range <code>0 </code>to<code> 0xffffffffffffffff</code>, a <a href='#main.errors'>CBOR.Exception</a> is thrown.</div></td></tr>
 <tr><td colspan='2' class='webpkidiv'></td></tr>
 <tr><th>Returns</th><th>Description</th></tr>
-<tr><td style='text-align:center'><kbd>BigInt</kbd></td><td style='width:100%'>Decoded integer.</td></tr>
+<tr><td style='text-align:center'><kbd>int</kbd></td><td style='width:100%'>Decoded integer.</td></tr>
 </table></div>
-<h4 id='cbor.int.getint128'>2.1.1.10.&nbsp;&nbsp;getInt128()</h4>
+<h4 id='cbor.int.get_int128'>2.1.1.10.&nbsp;&nbsp;get_int128()</h4>
 <div class='webpkifloat'>
 <table class='webpkitable' style='margin-left:2em;width:50em'>
-<tr><th>Syntax</th><td style='width:100%'><kbd>getInt128()</kbd></td></tr>
+<tr><th>Syntax</th><td style='width:100%'><kbd>get_int128()</kbd></td></tr>
 <tr><th>Description</th><td style='width:100%'>Get CBOR <code>int128</code> object.<div style='margin-top:0.5em'>If the return value is outside the range <code>-0x80000000000000000000000000000000 </code>to<code> 0x7fffffffffffffffffffffffffffffff</code>, a <a href='#main.errors'>CBOR.Exception</a> is thrown.</div></td></tr>
 <tr><td colspan='2' class='webpkidiv'></td></tr>
 <tr><th>Returns</th><th>Description</th></tr>
-<tr><td style='text-align:center'><kbd>BigInt</kbd></td><td style='width:100%'>Decoded integer.</td></tr>
+<tr><td style='text-align:center'><kbd>int</kbd></td><td style='width:100%'>Decoded integer.</td></tr>
 </table></div>
-<h4 id='cbor.int.getuint128'>2.1.1.11.&nbsp;&nbsp;getUint128()</h4>
+<h4 id='cbor.int.get_uint128'>2.1.1.11.&nbsp;&nbsp;get_uint128()</h4>
 <div class='webpkifloat'>
 <table class='webpkitable' style='margin-left:2em;width:50em'>
-<tr><th>Syntax</th><td style='width:100%'><kbd>getUint128()</kbd></td></tr>
+<tr><th>Syntax</th><td style='width:100%'><kbd>get_uint128()</kbd></td></tr>
 <tr><th>Description</th><td style='width:100%'>Get CBOR <code>uint128</code> object.<div style='margin-top:0.5em'>If the return value is outside the range <code>0 </code>to<code> 0xffffffffffffffffffffffffffffffff</code>, a <a href='#main.errors'>CBOR.Exception</a> is thrown.</div></td></tr>
 <tr><td colspan='2' class='webpkidiv'></td></tr>
 <tr><th>Returns</th><th>Description</th></tr>
-<tr><td style='text-align:center'><kbd>BigInt</kbd></td><td style='width:100%'>Decoded integer.</td></tr>
+<tr><td style='text-align:center'><kbd>int</kbd></td><td style='width:100%'>Decoded integer.</td></tr>
 </table></div>
 <h4 id='cbor.int.get_big_int'>2.1.1.12.&nbsp;&nbsp;get_big_int()</h4>
 <div class='webpkifloat'>
@@ -429,136 +421,136 @@ finish the operation using the standard constructor.</div></td></tr>
 See also <a href='#numbers.integers'>Integer Numbers</a>.</div></td></tr>
 <tr><td colspan='2' class='webpkidiv'></td></tr>
 <tr><th>Returns</th><th>Description</th></tr>
-<tr><td style='text-align:center'><kbd>BigInt</kbd></td><td style='width:100%'>Decoded integer.</td></tr>
+<tr><td style='text-align:center'><kbd>int</kbd></td><td style='width:100%'>Decoded integer.</td></tr>
 </table></div>
-<h4 id='cbor.int.createint8'>2.1.1.13.&nbsp;&nbsp;CBOR.Int.createInt8()</h4>
+<h4 id='cbor.int.create_int8'>2.1.1.13.&nbsp;&nbsp;CBOR.Int.create_int8()</h4>
 <div class='webpkifloat'>
 <table class='webpkitable' style='margin-left:2em;width:50em'>
-<tr><th>Syntax</th><td colspan='2' style='width:100%'><kbd>CBOR.Int.createInt8(<i>value</i>)</kbd></td></tr>
-<tr><th>Description</th><td colspan='2' style='width:100%'>Create CBOR <code>int8</code> object.<div style='margin-top:0.5em'>If <kbd><i>value</i></kbd> is outside the range <code>-0x80 </code>to<code> 0x7f</code>, a <a href='#main.errors'>CBOR.Exception</a> is thrown.</div><div style='margin-top:0.5em'>See also <a href='#cbor.int.getint8'>getInt8()</a>.</div></td></tr>
+<tr><th>Syntax</th><td colspan='2' style='width:100%'><kbd>CBOR.Int.create_int8(<i>value</i>)</kbd></td></tr>
+<tr><th>Description</th><td colspan='2' style='width:100%'>Create CBOR <code>int8</code> object.<div style='margin-top:0.5em'>If <kbd><i>value</i></kbd> is outside the range <code>-0x80 </code>to<code> 0x7f</code>, a <a href='#main.errors'>CBOR.Exception</a> is thrown.</div><div style='margin-top:0.5em'>See also <a href='#cbor.int.getint8'>get_int8()</a>.</div></td></tr>
 <tr><td colspan='3' class='webpkidiv'></td></tr>
 <tr><th>Parameter</th><th>Type</th><th>Description</th></tr>
-<tr><td style='text-align:center'><kbd><i>value</i></kbd></td><td style='text-align:center'><kbd>Number</kbd>&nbsp;<code>/</code>&nbsp;<kbd>BigInt</kbd></td><td style='width:100%'>Integer to be wrapped.</td></tr>
+<tr><td style='text-align:center'><kbd><i>value</i></kbd></td><td style='text-align:center'><kbd>int</kbd></td><td style='width:100%'>Integer to be wrapped.</td></tr>
 <tr><td colspan='3' class='webpkidiv'></td></tr>
 <tr><th>Returns</th><th colspan='2'>Description</th></tr>
 <tr><td style='text-align:center'><kbd>CBOR.Int</kbd></td><td colspan='2' style='width:100%'>Instantiated <a href='#wrapper.cbor.int'>CBOR.Int</a> object.</td></tr>
 </table></div>
-<h4 id='cbor.int.createuint8'>2.1.1.14.&nbsp;&nbsp;CBOR.Int.createUint8()</h4>
+<h4 id='cbor.int.create_uint8'>2.1.1.14.&nbsp;&nbsp;CBOR.Int.create_uint8()</h4>
 <div class='webpkifloat'>
 <table class='webpkitable' style='margin-left:2em;width:50em'>
-<tr><th>Syntax</th><td colspan='2' style='width:100%'><kbd>CBOR.Int.createUint8(<i>value</i>)</kbd></td></tr>
-<tr><th>Description</th><td colspan='2' style='width:100%'>Create CBOR <code>uint8</code> object.<div style='margin-top:0.5em'>If <kbd><i>value</i></kbd> is outside the range <code>0 </code>to<code> 0xff</code>, a <a href='#main.errors'>CBOR.Exception</a> is thrown.</div><div style='margin-top:0.5em'>See also <a href='#cbor.int.getuint8'>getUint8()</a>.</div></td></tr>
+<tr><th>Syntax</th><td colspan='2' style='width:100%'><kbd>CBOR.Int.create_uint8(<i>value</i>)</kbd></td></tr>
+<tr><th>Description</th><td colspan='2' style='width:100%'>Create CBOR <code>uint8</code> object.<div style='margin-top:0.5em'>If <kbd><i>value</i></kbd> is outside the range <code>0 </code>to<code> 0xff</code>, a <a href='#main.errors'>CBOR.Exception</a> is thrown.</div><div style='margin-top:0.5em'>See also <a href='#cbor.int.getuint8'>get_uint8()</a>.</div></td></tr>
 <tr><td colspan='3' class='webpkidiv'></td></tr>
 <tr><th>Parameter</th><th>Type</th><th>Description</th></tr>
-<tr><td style='text-align:center'><kbd><i>value</i></kbd></td><td style='text-align:center'><kbd>Number</kbd>&nbsp;<code>/</code>&nbsp;<kbd>BigInt</kbd></td><td style='width:100%'>Integer to be wrapped.</td></tr>
+<tr><td style='text-align:center'><kbd><i>value</i></kbd></td><td style='text-align:center'><kbd>int</kbd></td><td style='width:100%'>Integer to be wrapped.</td></tr>
 <tr><td colspan='3' class='webpkidiv'></td></tr>
 <tr><th>Returns</th><th colspan='2'>Description</th></tr>
 <tr><td style='text-align:center'><kbd>CBOR.Int</kbd></td><td colspan='2' style='width:100%'>Instantiated <a href='#wrapper.cbor.int'>CBOR.Int</a> object.</td></tr>
 </table></div>
-<h4 id='cbor.int.createint16'>2.1.1.15.&nbsp;&nbsp;CBOR.Int.createInt16()</h4>
+<h4 id='cbor.int.create_int16'>2.1.1.15.&nbsp;&nbsp;CBOR.Int.create_int16()</h4>
 <div class='webpkifloat'>
 <table class='webpkitable' style='margin-left:2em;width:50em'>
-<tr><th>Syntax</th><td colspan='2' style='width:100%'><kbd>CBOR.Int.createInt16(<i>value</i>)</kbd></td></tr>
-<tr><th>Description</th><td colspan='2' style='width:100%'>Create CBOR <code>int16</code> object.<div style='margin-top:0.5em'>If <kbd><i>value</i></kbd> is outside the range <code>-0x8000 </code>to<code> 0x7fff</code>, a <a href='#main.errors'>CBOR.Exception</a> is thrown.</div><div style='margin-top:0.5em'>See also <a href='#cbor.int.getint16'>getInt16()</a>.</div></td></tr>
+<tr><th>Syntax</th><td colspan='2' style='width:100%'><kbd>CBOR.Int.create_int16(<i>value</i>)</kbd></td></tr>
+<tr><th>Description</th><td colspan='2' style='width:100%'>Create CBOR <code>int16</code> object.<div style='margin-top:0.5em'>If <kbd><i>value</i></kbd> is outside the range <code>-0x8000 </code>to<code> 0x7fff</code>, a <a href='#main.errors'>CBOR.Exception</a> is thrown.</div><div style='margin-top:0.5em'>See also <a href='#cbor.int.getint16'>get_int16()</a>.</div></td></tr>
 <tr><td colspan='3' class='webpkidiv'></td></tr>
 <tr><th>Parameter</th><th>Type</th><th>Description</th></tr>
-<tr><td style='text-align:center'><kbd><i>value</i></kbd></td><td style='text-align:center'><kbd>Number</kbd>&nbsp;<code>/</code>&nbsp;<kbd>BigInt</kbd></td><td style='width:100%'>Integer to be wrapped.</td></tr>
+<tr><td style='text-align:center'><kbd><i>value</i></kbd></td><td style='text-align:center'><kbd>int</kbd></td><td style='width:100%'>Integer to be wrapped.</td></tr>
 <tr><td colspan='3' class='webpkidiv'></td></tr>
 <tr><th>Returns</th><th colspan='2'>Description</th></tr>
 <tr><td style='text-align:center'><kbd>CBOR.Int</kbd></td><td colspan='2' style='width:100%'>Instantiated <a href='#wrapper.cbor.int'>CBOR.Int</a> object.</td></tr>
 </table></div>
-<h4 id='cbor.int.createuint16'>2.1.1.16.&nbsp;&nbsp;CBOR.Int.createUint16()</h4>
+<h4 id='cbor.int.create_uint16'>2.1.1.16.&nbsp;&nbsp;CBOR.Int.create_uint16()</h4>
 <div class='webpkifloat'>
 <table class='webpkitable' style='margin-left:2em;width:50em'>
-<tr><th>Syntax</th><td colspan='2' style='width:100%'><kbd>CBOR.Int.createUint16(<i>value</i>)</kbd></td></tr>
-<tr><th>Description</th><td colspan='2' style='width:100%'>Create CBOR <code>uint16</code> object.<div style='margin-top:0.5em'>If <kbd><i>value</i></kbd> is outside the range <code>0 </code>to<code> 0xffff</code>, a <a href='#main.errors'>CBOR.Exception</a> is thrown.</div><div style='margin-top:0.5em'>See also <a href='#cbor.int.getuint16'>getUint16()</a>.</div></td></tr>
+<tr><th>Syntax</th><td colspan='2' style='width:100%'><kbd>CBOR.Int.create_uint16(<i>value</i>)</kbd></td></tr>
+<tr><th>Description</th><td colspan='2' style='width:100%'>Create CBOR <code>uint16</code> object.<div style='margin-top:0.5em'>If <kbd><i>value</i></kbd> is outside the range <code>0 </code>to<code> 0xffff</code>, a <a href='#main.errors'>CBOR.Exception</a> is thrown.</div><div style='margin-top:0.5em'>See also <a href='#cbor.int.getuint16'>get_uint16()</a>.</div></td></tr>
 <tr><td colspan='3' class='webpkidiv'></td></tr>
 <tr><th>Parameter</th><th>Type</th><th>Description</th></tr>
-<tr><td style='text-align:center'><kbd><i>value</i></kbd></td><td style='text-align:center'><kbd>Number</kbd>&nbsp;<code>/</code>&nbsp;<kbd>BigInt</kbd></td><td style='width:100%'>Integer to be wrapped.</td></tr>
+<tr><td style='text-align:center'><kbd><i>value</i></kbd></td><td style='text-align:center'><kbd>int</kbd></td><td style='width:100%'>Integer to be wrapped.</td></tr>
 <tr><td colspan='3' class='webpkidiv'></td></tr>
 <tr><th>Returns</th><th colspan='2'>Description</th></tr>
 <tr><td style='text-align:center'><kbd>CBOR.Int</kbd></td><td colspan='2' style='width:100%'>Instantiated <a href='#wrapper.cbor.int'>CBOR.Int</a> object.</td></tr>
 </table></div>
-<h4 id='cbor.int.createint32'>2.1.1.17.&nbsp;&nbsp;CBOR.Int.createInt32()</h4>
+<h4 id='cbor.int.create_int32'>2.1.1.17.&nbsp;&nbsp;CBOR.Int.create_int32()</h4>
 <div class='webpkifloat'>
 <table class='webpkitable' style='margin-left:2em;width:50em'>
-<tr><th>Syntax</th><td colspan='2' style='width:100%'><kbd>CBOR.Int.createInt32(<i>value</i>)</kbd></td></tr>
-<tr><th>Description</th><td colspan='2' style='width:100%'>Create CBOR <code>int32</code> object.<div style='margin-top:0.5em'>If <kbd><i>value</i></kbd> is outside the range <code>-0x80000000 </code>to<code> 0x7fffffff</code>, a <a href='#main.errors'>CBOR.Exception</a> is thrown.</div><div style='margin-top:0.5em'>See also <a href='#cbor.int.getint32'>getInt32()</a>.</div></td></tr>
+<tr><th>Syntax</th><td colspan='2' style='width:100%'><kbd>CBOR.Int.create_int32(<i>value</i>)</kbd></td></tr>
+<tr><th>Description</th><td colspan='2' style='width:100%'>Create CBOR <code>int32</code> object.<div style='margin-top:0.5em'>If <kbd><i>value</i></kbd> is outside the range <code>-0x80000000 </code>to<code> 0x7fffffff</code>, a <a href='#main.errors'>CBOR.Exception</a> is thrown.</div><div style='margin-top:0.5em'>See also <a href='#cbor.int.getint32'>get_int32()</a>.</div></td></tr>
 <tr><td colspan='3' class='webpkidiv'></td></tr>
 <tr><th>Parameter</th><th>Type</th><th>Description</th></tr>
-<tr><td style='text-align:center'><kbd><i>value</i></kbd></td><td style='text-align:center'><kbd>Number</kbd>&nbsp;<code>/</code>&nbsp;<kbd>BigInt</kbd></td><td style='width:100%'>Integer to be wrapped.</td></tr>
+<tr><td style='text-align:center'><kbd><i>value</i></kbd></td><td style='text-align:center'><kbd>int</kbd></td><td style='width:100%'>Integer to be wrapped.</td></tr>
 <tr><td colspan='3' class='webpkidiv'></td></tr>
 <tr><th>Returns</th><th colspan='2'>Description</th></tr>
 <tr><td style='text-align:center'><kbd>CBOR.Int</kbd></td><td colspan='2' style='width:100%'>Instantiated <a href='#wrapper.cbor.int'>CBOR.Int</a> object.</td></tr>
 </table></div>
-<h4 id='cbor.int.createuint32'>2.1.1.18.&nbsp;&nbsp;CBOR.Int.createUint32()</h4>
+<h4 id='cbor.int.create_uint32'>2.1.1.18.&nbsp;&nbsp;CBOR.Int.create_uint32()</h4>
 <div class='webpkifloat'>
 <table class='webpkitable' style='margin-left:2em;width:50em'>
-<tr><th>Syntax</th><td colspan='2' style='width:100%'><kbd>CBOR.Int.createUint32(<i>value</i>)</kbd></td></tr>
-<tr><th>Description</th><td colspan='2' style='width:100%'>Create CBOR <code>uint32</code> object.<div style='margin-top:0.5em'>If <kbd><i>value</i></kbd> is outside the range <code>0 </code>to<code> 0xffffffff</code>, a <a href='#main.errors'>CBOR.Exception</a> is thrown.</div><div style='margin-top:0.5em'>See also <a href='#cbor.int.getuint32'>getUint32()</a>.</div></td></tr>
+<tr><th>Syntax</th><td colspan='2' style='width:100%'><kbd>CBOR.Int.create_uint32(<i>value</i>)</kbd></td></tr>
+<tr><th>Description</th><td colspan='2' style='width:100%'>Create CBOR <code>uint32</code> object.<div style='margin-top:0.5em'>If <kbd><i>value</i></kbd> is outside the range <code>0 </code>to<code> 0xffffffff</code>, a <a href='#main.errors'>CBOR.Exception</a> is thrown.</div><div style='margin-top:0.5em'>See also <a href='#cbor.int.getuint32'>get_uint32()</a>.</div></td></tr>
 <tr><td colspan='3' class='webpkidiv'></td></tr>
 <tr><th>Parameter</th><th>Type</th><th>Description</th></tr>
-<tr><td style='text-align:center'><kbd><i>value</i></kbd></td><td style='text-align:center'><kbd>Number</kbd>&nbsp;<code>/</code>&nbsp;<kbd>BigInt</kbd></td><td style='width:100%'>Integer to be wrapped.</td></tr>
+<tr><td style='text-align:center'><kbd><i>value</i></kbd></td><td style='text-align:center'><kbd>int</kbd></td><td style='width:100%'>Integer to be wrapped.</td></tr>
 <tr><td colspan='3' class='webpkidiv'></td></tr>
 <tr><th>Returns</th><th colspan='2'>Description</th></tr>
 <tr><td style='text-align:center'><kbd>CBOR.Int</kbd></td><td colspan='2' style='width:100%'>Instantiated <a href='#wrapper.cbor.int'>CBOR.Int</a> object.</td></tr>
 </table></div>
-<h4 id='cbor.int.createint53'>2.1.1.19.&nbsp;&nbsp;CBOR.Int.createInt53()</h4>
+<h4 id='cbor.int.create_int53'>2.1.1.19.&nbsp;&nbsp;CBOR.Int.create_int53()</h4>
 <div class='webpkifloat'>
 <table class='webpkitable' style='margin-left:2em;width:50em'>
-<tr><th>Syntax</th><td colspan='2' style='width:100%'><kbd>CBOR.Int.createInt53(<i>value</i>)</kbd></td></tr>
-<tr><th>Description</th><td colspan='2' style='width:100%'>Create CBOR <code>int53</code> object.<div style='margin-top:0.5em'>If <kbd><i>value</i></kbd> is outside the range <code></code><kbd>Number.MIN_SAFE_INTEGER</kbd>&nbsp;(<code>-9007199254740991</code>)<code> </code>to<code> </code><kbd>Number.MAX_SAFE_INTEGER</kbd>&nbsp;(<code>9007199254740991</code>)<code></code>, a <a href='#main.errors'>CBOR.Exception</a> is thrown.</div><div style='margin-top:0.5em'>See also <a href='#cbor.int.getint53'>getInt53()</a>.</div><div style='margin-top:0.5em'>Since 53-bit integers are specific to JavaScript, <code>int53</code> objects should be used with caution in cross-platform scenarios.</div></td></tr>
+<tr><th>Syntax</th><td colspan='2' style='width:100%'><kbd>CBOR.Int.create_int53(<i>value</i>)</kbd></td></tr>
+<tr><th>Description</th><td colspan='2' style='width:100%'>Create CBOR <code>int53</code> object.<div style='margin-top:0.5em'>If <kbd><i>value</i></kbd> is outside the range <code></code><kbd>Number.MIN_SAFE_INTEGER</kbd>&nbsp;(<code>-9007199254740991</code>)<code> </code>to<code> </code><kbd>Number.MAX_SAFE_INTEGER</kbd>&nbsp;(<code>9007199254740991</code>)<code></code>, a <a href='#main.errors'>CBOR.Exception</a> is thrown.</div><div style='margin-top:0.5em'>See also <a href='#cbor.int.getint53'>get_int53()</a>.</div><div style='margin-top:0.5em'>Since 53-bit integers are specific to JavaScript, <code>int53</code> objects should be used with caution in cross-platform scenarios.</div></td></tr>
 <tr><td colspan='3' class='webpkidiv'></td></tr>
 <tr><th>Parameter</th><th>Type</th><th>Description</th></tr>
-<tr><td style='text-align:center'><kbd><i>value</i></kbd></td><td style='text-align:center'><kbd>Number</kbd>&nbsp;<code>/</code>&nbsp;<kbd>BigInt</kbd></td><td style='width:100%'>Integer to be wrapped.</td></tr>
+<tr><td style='text-align:center'><kbd><i>value</i></kbd></td><td style='text-align:center'><kbd>int</kbd></td><td style='width:100%'>Integer to be wrapped.</td></tr>
 <tr><td colspan='3' class='webpkidiv'></td></tr>
 <tr><th>Returns</th><th colspan='2'>Description</th></tr>
 <tr><td style='text-align:center'><kbd>CBOR.Int</kbd></td><td colspan='2' style='width:100%'>Instantiated <a href='#wrapper.cbor.int'>CBOR.Int</a> object.</td></tr>
 </table></div>
-<h4 id='cbor.int.createint64'>2.1.1.20.&nbsp;&nbsp;CBOR.Int.createInt64()</h4>
+<h4 id='cbor.int.create_int64'>2.1.1.20.&nbsp;&nbsp;CBOR.Int.create_int64()</h4>
 <div class='webpkifloat'>
 <table class='webpkitable' style='margin-left:2em;width:50em'>
-<tr><th>Syntax</th><td colspan='2' style='width:100%'><kbd>CBOR.Int.createInt64(<i>value</i>)</kbd></td></tr>
-<tr><th>Description</th><td colspan='2' style='width:100%'>Create CBOR <code>int64</code> object.<div style='margin-top:0.5em'>If <kbd><i>value</i></kbd> is outside the range <code>-0x8000000000000000 </code>to<code> 0x7fffffffffffffff</code>, a <a href='#main.errors'>CBOR.Exception</a> is thrown.</div><div style='margin-top:0.5em'>See also <a href='#cbor.int.getint64'>getInt64()</a>.</div></td></tr>
+<tr><th>Syntax</th><td colspan='2' style='width:100%'><kbd>CBOR.Int.create_int64(<i>value</i>)</kbd></td></tr>
+<tr><th>Description</th><td colspan='2' style='width:100%'>Create CBOR <code>int64</code> object.<div style='margin-top:0.5em'>If <kbd><i>value</i></kbd> is outside the range <code>-0x8000000000000000 </code>to<code> 0x7fffffffffffffff</code>, a <a href='#main.errors'>CBOR.Exception</a> is thrown.</div><div style='margin-top:0.5em'>See also <a href='#cbor.int.getint64'>get_int64()</a>.</div></td></tr>
 <tr><td colspan='3' class='webpkidiv'></td></tr>
 <tr><th>Parameter</th><th>Type</th><th>Description</th></tr>
-<tr><td style='text-align:center'><kbd><i>value</i></kbd></td><td style='text-align:center'><kbd>Number</kbd>&nbsp;<code>/</code>&nbsp;<kbd>BigInt</kbd></td><td style='width:100%'>Integer to be wrapped.</td></tr>
+<tr><td style='text-align:center'><kbd><i>value</i></kbd></td><td style='text-align:center'><kbd>int</kbd></td><td style='width:100%'>Integer to be wrapped.</td></tr>
 <tr><td colspan='3' class='webpkidiv'></td></tr>
 <tr><th>Returns</th><th colspan='2'>Description</th></tr>
 <tr><td style='text-align:center'><kbd>CBOR.Int</kbd></td><td colspan='2' style='width:100%'>Instantiated <a href='#wrapper.cbor.int'>CBOR.Int</a> object.</td></tr>
 </table></div>
-<h4 id='cbor.int.createuint64'>2.1.1.21.&nbsp;&nbsp;CBOR.Int.createUint64()</h4>
+<h4 id='cbor.int.create_uint64'>2.1.1.21.&nbsp;&nbsp;CBOR.Int.create_uint64()</h4>
 <div class='webpkifloat'>
 <table class='webpkitable' style='margin-left:2em;width:50em'>
-<tr><th>Syntax</th><td colspan='2' style='width:100%'><kbd>CBOR.Int.createUint64(<i>value</i>)</kbd></td></tr>
-<tr><th>Description</th><td colspan='2' style='width:100%'>Create CBOR <code>uint64</code> object.<div style='margin-top:0.5em'>If <kbd><i>value</i></kbd> is outside the range <code>0 </code>to<code> 0xffffffffffffffff</code>, a <a href='#main.errors'>CBOR.Exception</a> is thrown.</div><div style='margin-top:0.5em'>See also <a href='#cbor.int.getuint64'>getUint64()</a>.</div></td></tr>
+<tr><th>Syntax</th><td colspan='2' style='width:100%'><kbd>CBOR.Int.create_uint64(<i>value</i>)</kbd></td></tr>
+<tr><th>Description</th><td colspan='2' style='width:100%'>Create CBOR <code>uint64</code> object.<div style='margin-top:0.5em'>If <kbd><i>value</i></kbd> is outside the range <code>0 </code>to<code> 0xffffffffffffffff</code>, a <a href='#main.errors'>CBOR.Exception</a> is thrown.</div><div style='margin-top:0.5em'>See also <a href='#cbor.int.getuint64'>get_uint64()</a>.</div></td></tr>
 <tr><td colspan='3' class='webpkidiv'></td></tr>
 <tr><th>Parameter</th><th>Type</th><th>Description</th></tr>
-<tr><td style='text-align:center'><kbd><i>value</i></kbd></td><td style='text-align:center'><kbd>Number</kbd>&nbsp;<code>/</code>&nbsp;<kbd>BigInt</kbd></td><td style='width:100%'>Integer to be wrapped.</td></tr>
+<tr><td style='text-align:center'><kbd><i>value</i></kbd></td><td style='text-align:center'><kbd>int</kbd></td><td style='width:100%'>Integer to be wrapped.</td></tr>
 <tr><td colspan='3' class='webpkidiv'></td></tr>
 <tr><th>Returns</th><th colspan='2'>Description</th></tr>
 <tr><td style='text-align:center'><kbd>CBOR.Int</kbd></td><td colspan='2' style='width:100%'>Instantiated <a href='#wrapper.cbor.int'>CBOR.Int</a> object.</td></tr>
 </table></div>
-<h4 id='cbor.int.createint128'>2.1.1.22.&nbsp;&nbsp;CBOR.Int.createInt128()</h4>
+<h4 id='cbor.int.create_int128'>2.1.1.22.&nbsp;&nbsp;CBOR.Int.create_int128()</h4>
 <div class='webpkifloat'>
 <table class='webpkitable' style='margin-left:2em;width:50em'>
-<tr><th>Syntax</th><td colspan='2' style='width:100%'><kbd>CBOR.Int.createInt128(<i>value</i>)</kbd></td></tr>
-<tr><th>Description</th><td colspan='2' style='width:100%'>Create CBOR <code>int128</code> object.<div style='margin-top:0.5em'>If <kbd><i>value</i></kbd> is outside the range <code>-0x80000000000000000000000000000000 </code>to<code> 0x7fffffffffffffffffffffffffffffff</code>, a <a href='#main.errors'>CBOR.Exception</a> is thrown.</div><div style='margin-top:0.5em'>See also <a href='#cbor.int.getint128'>getInt128()</a>.</div></td></tr>
+<tr><th>Syntax</th><td colspan='2' style='width:100%'><kbd>CBOR.Int.create_int128(<i>value</i>)</kbd></td></tr>
+<tr><th>Description</th><td colspan='2' style='width:100%'>Create CBOR <code>int128</code> object.<div style='margin-top:0.5em'>If <kbd><i>value</i></kbd> is outside the range <code>-0x80000000000000000000000000000000 </code>to<code> 0x7fffffffffffffffffffffffffffffff</code>, a <a href='#main.errors'>CBOR.Exception</a> is thrown.</div><div style='margin-top:0.5em'>See also <a href='#cbor.int.getint128'>get_int128()</a>.</div></td></tr>
 <tr><td colspan='3' class='webpkidiv'></td></tr>
 <tr><th>Parameter</th><th>Type</th><th>Description</th></tr>
-<tr><td style='text-align:center'><kbd><i>value</i></kbd></td><td style='text-align:center'><kbd>Number</kbd>&nbsp;<code>/</code>&nbsp;<kbd>BigInt</kbd></td><td style='width:100%'>Integer to be wrapped.</td></tr>
+<tr><td style='text-align:center'><kbd><i>value</i></kbd></td><td style='text-align:center'><kbd>int</kbd></td><td style='width:100%'>Integer to be wrapped.</td></tr>
 <tr><td colspan='3' class='webpkidiv'></td></tr>
 <tr><th>Returns</th><th colspan='2'>Description</th></tr>
 <tr><td style='text-align:center'><kbd>CBOR.Int</kbd></td><td colspan='2' style='width:100%'>Instantiated <a href='#wrapper.cbor.int'>CBOR.Int</a> object.</td></tr>
 </table></div>
-<h4 id='cbor.int.createuint128'>2.1.1.23.&nbsp;&nbsp;CBOR.Int.createUint128()</h4>
+<h4 id='cbor.int.create_uint128'>2.1.1.23.&nbsp;&nbsp;CBOR.Int.create_uint128()</h4>
 <div class='webpkifloat'>
 <table class='webpkitable' style='margin-left:2em;width:50em'>
-<tr><th>Syntax</th><td colspan='2' style='width:100%'><kbd>CBOR.Int.createUint128(<i>value</i>)</kbd></td></tr>
-<tr><th>Description</th><td colspan='2' style='width:100%'>Create CBOR <code>uint128</code> object.<div style='margin-top:0.5em'>If <kbd><i>value</i></kbd> is outside the range <code>0 </code>to<code> 0xffffffffffffffffffffffffffffffff</code>, a <a href='#main.errors'>CBOR.Exception</a> is thrown.</div><div style='margin-top:0.5em'>See also <a href='#cbor.int.getuint128'>getUint128()</a>.</div></td></tr>
+<tr><th>Syntax</th><td colspan='2' style='width:100%'><kbd>CBOR.Int.create_uint128(<i>value</i>)</kbd></td></tr>
+<tr><th>Description</th><td colspan='2' style='width:100%'>Create CBOR <code>uint128</code> object.<div style='margin-top:0.5em'>If <kbd><i>value</i></kbd> is outside the range <code>0 </code>to<code> 0xffffffffffffffffffffffffffffffff</code>, a <a href='#main.errors'>CBOR.Exception</a> is thrown.</div><div style='margin-top:0.5em'>See also <a href='#cbor.int.getuint128'>get_uint128()</a>.</div></td></tr>
 <tr><td colspan='3' class='webpkidiv'></td></tr>
 <tr><th>Parameter</th><th>Type</th><th>Description</th></tr>
-<tr><td style='text-align:center'><kbd><i>value</i></kbd></td><td style='text-align:center'><kbd>Number</kbd>&nbsp;<code>/</code>&nbsp;<kbd>BigInt</kbd></td><td style='width:100%'>Integer to be wrapped.</td></tr>
+<tr><td style='text-align:center'><kbd><i>value</i></kbd></td><td style='text-align:center'><kbd>int</kbd></td><td style='width:100%'>Integer to be wrapped.</td></tr>
 <tr><td colspan='3' class='webpkidiv'></td></tr>
 <tr><th>Returns</th><th colspan='2'>Description</th></tr>
 <tr><td style='text-align:center'><kbd>CBOR.Int</kbd></td><td colspan='2' style='width:100%'>Instantiated <a href='#wrapper.cbor.int'>CBOR.Int</a> object.</td></tr>
@@ -575,7 +567,7 @@ For supporting <code>NaN</code> and <code>Infinity</code>, see
 <a href='non-finite-numbers.html'>Non-Finite Numbers</a>.</div></td></tr>
 <tr><td colspan='3' class='webpkidiv'></td></tr>
 <tr><th>Parameter</th><th>Type</th><th>Description</th></tr>
-<tr><td style='text-align:center'><kbd><i>value</i></kbd></td><td style='text-align:center'><kbd>Number</kbd></td><td style='width:100%'>Floating-point number to be wrapped.</td></tr>
+<tr><td style='text-align:center'><kbd><i>value</i></kbd></td><td style='text-align:center'><kbd>float</kbd></td><td style='width:100%'>Floating-point number to be wrapped.</td></tr>
 <tr><td colspan='3' class='webpkidiv'></td></tr>
 <tr><th>Returns</th><th colspan='2'>Description</th></tr>
 <tr><td style='text-align:center'><kbd>CBOR.Float</kbd></td><td colspan='2' style='width:100%'>Object.</td></tr>
@@ -588,7 +580,7 @@ For supporting <code>NaN</code> and <code>Infinity</code>, see
 <tr><th>Description</th><td style='width:100%'>Get CBOR floating-point object.<div style='margin-top:0.5em'>If the CBOR object is not a <code>float16</code> object, a <a href='#main.errors'>CBOR.Exception</a> is thrown.</div></td></tr>
 <tr><td colspan='2' class='webpkidiv'></td></tr>
 <tr><th>Returns</th><th>Description</th></tr>
-<tr><td style='text-align:center'><kbd>Number</kbd></td><td style='width:100%'>Decoded floating-point number.</td></tr>
+<tr><td style='text-align:center'><kbd>float</kbd></td><td style='width:100%'>Decoded floating-point number.</td></tr>
 </table></div>
 <h4 id='cbor.float.get_float32'>2.2.1.2.&nbsp;&nbsp;get_float32()</h4>
 <div class='webpkifloat'>
@@ -597,7 +589,7 @@ For supporting <code>NaN</code> and <code>Infinity</code>, see
 <tr><th>Description</th><td style='width:100%'>Get CBOR floating-point object.<div style='margin-top:0.5em'>If the CBOR object is not a <code>float32</code> or <code>float16</code> object, a <a href='#main.errors'>CBOR.Exception</a> is thrown.</div></td></tr>
 <tr><td colspan='2' class='webpkidiv'></td></tr>
 <tr><th>Returns</th><th>Description</th></tr>
-<tr><td style='text-align:center'><kbd>Number</kbd></td><td style='width:100%'>Decoded floating-point number.</td></tr>
+<tr><td style='text-align:center'><kbd>float</kbd></td><td style='width:100%'>Decoded floating-point number.</td></tr>
 </table></div>
 <h4 id='cbor.float.get_float64'>2.2.1.3.&nbsp;&nbsp;get_float64()</h4>
 <div class='webpkifloat'>
@@ -606,7 +598,7 @@ For supporting <code>NaN</code> and <code>Infinity</code>, see
 <tr><th>Description</th><td style='width:100%'>Get CBOR floating-point object.<div style='margin-top:0.5em'>If the CBOR object is not a <code>float64</code>, <code>float32</code>, or <code>float16</code> object, a <a href='#main.errors'>CBOR.Exception</a> is thrown.</div></td></tr>
 <tr><td colspan='2' class='webpkidiv'></td></tr>
 <tr><th>Returns</th><th>Description</th></tr>
-<tr><td style='text-align:center'><kbd>Number</kbd></td><td style='width:100%'>Decoded floating-point number.</td></tr>
+<tr><td style='text-align:center'><kbd>float</kbd></td><td style='width:100%'>Decoded floating-point number.</td></tr>
 </table></div>
 <h4 id='cbor.float.create_extended_float'>2.2.1.4.&nbsp;&nbsp;CBOR.Float.create_extended_float()</h4>
 <div class='webpkifloat'>
@@ -623,7 +615,7 @@ and <kbd>Number.NEGATIVE_INFINITY</kbd>.</div>
 See also <a href='non-finite-numbers.html'>Non-Finite Numbers</a>.</div></td></tr>
 <tr><td colspan='3' class='webpkidiv'></td></tr>
 <tr><th>Parameter</th><th>Type</th><th>Description</th></tr>
-<tr><td style='text-align:center'><kbd><i>value</i></kbd></td><td style='text-align:center'><kbd>Number</kbd></td><td style='width:100%'>Floating-point number to be wrapped.</td></tr>
+<tr><td style='text-align:center'><kbd><i>value</i></kbd></td><td style='text-align:center'><kbd>float</kbd></td><td style='width:100%'>Floating-point number to be wrapped.</td></tr>
 <tr><td colspan='3' class='webpkidiv'></td></tr>
 <tr><th>Returns</th><th colspan='2'>Description</th></tr>
 <tr><td style='text-align:center'><kbd>CBOR.<i>Wrapper</i></kbd></td><td colspan='2' style='width:100%'>Instantiated <a href='#wrapper.cbor.float'>CBOR.Float</a> or
@@ -648,7 +640,7 @@ the non-finite values, <kbd>Number.NaN</kbd>,
 or <kbd>Number.NEGATIVE_INFINITY</kbd>.</div></td></tr>
 <tr><td colspan='2' class='webpkidiv'></td></tr>
 <tr><th>Returns</th><th>Description</th></tr>
-<tr><td style='text-align:center'><kbd>Number</kbd></td><td style='width:100%'>Decoded floating-point number.</td></tr>
+<tr><td style='text-align:center'><kbd>float</kbd></td><td style='width:100%'>Decoded floating-point number.</td></tr>
 </table></div>
 <h4 id='cbor.float.create_float16'>2.2.1.6.&nbsp;&nbsp;CBOR.Float.create_float16()</h4>
 <div class='webpkifloat'>
@@ -664,7 +656,7 @@ is out of range, or is <i>non-finite</i>, a <a href='#main.errors'>CBOR.Exceptio
 See also <a href='#cbor.float.getfloat16'>get_float16()</a>.</div></td></tr>
 <tr><td colspan='3' class='webpkidiv'></td></tr>
 <tr><th>Parameter</th><th>Type</th><th>Description</th></tr>
-<tr><td style='text-align:center'><kbd><i>value</i></kbd></td><td style='text-align:center'><kbd>Number</kbd></td><td style='width:100%'>Floating-point number to be wrapped.</td></tr>
+<tr><td style='text-align:center'><kbd><i>value</i></kbd></td><td style='text-align:center'><kbd>float</kbd></td><td style='width:100%'>Floating-point number to be wrapped.</td></tr>
 <tr><td colspan='3' class='webpkidiv'></td></tr>
 <tr><th>Returns</th><th colspan='2'>Description</th></tr>
 <tr><td style='text-align:center'><kbd>CBOR.Float</kbd></td><td colspan='2' style='width:100%'>Instantiated <a href='#wrapper.cbor.float'>CBOR.Float</a> object.</td></tr>
@@ -687,7 +679,7 @@ representation (e.g. <code>2.5</code>).</div>
 See also <a href='#cbor.float.getfloat32'>get_float32()</a>.</div></td></tr>
 <tr><td colspan='3' class='webpkidiv'></td></tr>
 <tr><th>Parameter</th><th>Type</th><th>Description</th></tr>
-<tr><td style='text-align:center'><kbd><i>value</i></kbd></td><td style='text-align:center'><kbd>Number</kbd></td><td style='width:100%'>Floating-point number to be wrapped.</td></tr>
+<tr><td style='text-align:center'><kbd><i>value</i></kbd></td><td style='text-align:center'><kbd>float</kbd></td><td style='width:100%'>Floating-point number to be wrapped.</td></tr>
 <tr><td colspan='3' class='webpkidiv'></td></tr>
 <tr><th>Returns</th><th colspan='2'>Description</th></tr>
 <tr><td style='text-align:center'><kbd>CBOR.Float</kbd></td><td colspan='2' style='width:100%'>Instantiated <a href='#wrapper.cbor.float'>CBOR.Float</a> object.</td></tr>
@@ -697,7 +689,7 @@ See also <a href='#cbor.float.getfloat32'>get_float32()</a>.</div></td></tr>
 <div class='webpkifloat'>
 <table class='webpkitable' style='margin-left:2em;width:50em'>
 <tr><th>Name</th><th>Type</th><th>Description</th></tr>
-<tr><td style='text-align:center'><kbd><i>length</i></kbd></td><td style='text-align:center'><kbd>Number</kbd></td><td style='width:100%'>Length in bytes of the underlying <span style='white-space:nowrap'><code>IEEE</code> <code>754</code></span> type.</td></tr>
+<tr><td style='text-align:center'><kbd><i>length</i></kbd></td><td style='text-align:center'><kbd>int</kbd></td><td style='width:100%'>Length in bytes of the underlying <span style='white-space:nowrap'><code>IEEE</code> <code>754</code></span> type.</td></tr>
 </table></div>
 <h4 id='wrapper.cbor.nonfinite'>2.3.&nbsp;&nbsp;CBOR.NonFinite</h4>
 <div class='webpkifloat'>
@@ -711,7 +703,7 @@ non-finite number in <span style='white-space:nowrap'><code>IEEE</code> <code>75
 See also <a href='non-finite-numbers.html'>Non-Finite Numbers</a>.</div></td></tr>
 <tr><td colspan='3' class='webpkidiv'></td></tr>
 <tr><th>Parameter</th><th>Type</th><th>Description</th></tr>
-<tr><td style='text-align:center'><kbd><i>value</i></kbd></td><td style='text-align:center'><kbd>BigInt</kbd></td><td style='width:100%'>Non-finite floating-point number to be wrapped.</td></tr>
+<tr><td style='text-align:center'><kbd><i>value</i></kbd></td><td style='text-align:center'><kbd>int</kbd></td><td style='width:100%'>Non-finite floating-point number to be wrapped.</td></tr>
 <tr><td colspan='3' class='webpkidiv'></td></tr>
 <tr><th>Returns</th><th colspan='2'>Description</th></tr>
 <tr><td style='text-align:center'><kbd>CBOR.NonFinite</kbd></td><td colspan='2' style='width:100%'>Object.</td></tr>
@@ -727,7 +719,7 @@ This method returns the value of a non-finite object. The value is
 provided in the most compact form based on CBOR serialization rules.</div></td></tr>
 <tr><td colspan='2' class='webpkidiv'></td></tr>
 <tr><th>Returns</th><th>Description</th></tr>
-<tr><td style='text-align:center'><kbd>BigInt</kbd></td><td style='width:100%'>Decoded <i>non-finite</i> number as a <code>BigInt</code>.</td></tr>
+<tr><td style='text-align:center'><kbd>int</kbd></td><td style='width:100%'>Decoded <i>non-finite</i> number as a <code>BigInt</code>.</td></tr>
 </table></div>
 <h4 id='cbor.nonfinite.get_non_finite64'>2.3.1.2.&nbsp;&nbsp;get_non_finite64()</h4>
 <div class='webpkifloat'>
@@ -740,7 +732,7 @@ expanded to 64 bits.  That is, a received <code>7c01</code> will be
 returned as <code>7ff0040000000000</code>.</div></td></tr>
 <tr><td colspan='2' class='webpkidiv'></td></tr>
 <tr><th>Returns</th><th>Description</th></tr>
-<tr><td style='text-align:center'><kbd>BigInt</kbd></td><td style='width:100%'>Decoded <i>non-finite</i> number as a <code>BigInt</code>.</td></tr>
+<tr><td style='text-align:center'><kbd>int</kbd></td><td style='width:100%'>Decoded <i>non-finite</i> number as a <code>BigInt</code>.</td></tr>
 </table></div>
 <h4 id='cbor.nonfinite.is_nan'>2.3.1.3.&nbsp;&nbsp;is_nan()</h4>
 <div class='webpkifloat'>
@@ -798,7 +790,7 @@ See also <a href='#cbor.nonfinite.getsign'>get_sign()</a>.</div></td></tr>
 <tr><td style='text-align:center'><kbd><i>sign</i></kbd></td><td style='text-align:center'><kbd>Boolean</kbd></td><td style='width:100%'>Sign bit.</td></tr>
 <tr><td colspan='3' class='webpkidiv'></td></tr>
 <tr><th>Returns</th><th colspan='2'>Description</th></tr>
-<tr><td style='text-align:center'><kbd>this</kbd></td><td colspan='2' style='width:100%'>Current object.</td></tr>
+<tr><td style='text-align:center'><kbd>self</kbd></td><td colspan='2' style='width:100%'>Current object.</td></tr>
 </table></div>
 <h4 id='cbor.nonfinite.create_payload'>2.3.1.7.&nbsp;&nbsp;CBOR.NonFinite.create_payload()</h4>
 <div class='webpkifloat'>
@@ -812,7 +804,7 @@ a <a href='#main.errors'>CBOR.Exception</a> is thrown.</div>
 For details turn to the <a href='non-finite-numbers.html#payload-option'>Payload Option</a>.</div></td></tr>
 <tr><td colspan='3' class='webpkidiv'></td></tr>
 <tr><th>Parameter</th><th>Type</th><th>Description</th></tr>
-<tr><td style='text-align:center'><kbd><i>payload</i></kbd></td><td style='text-align:center'><kbd>BigInt</kbd></td><td style='width:100%'>Payload data.</td></tr>
+<tr><td style='text-align:center'><kbd><i>payload</i></kbd></td><td style='text-align:center'><kbd>int</kbd></td><td style='width:100%'>Payload data.</td></tr>
 <tr><td colspan='3' class='webpkidiv'></td></tr>
 <tr><th>Returns</th><th colspan='2'>Description</th></tr>
 <tr><td style='text-align:center'><kbd>CBOR.NonFinite</kbd></td><td colspan='2' style='width:100%'>Instantiated <a href='#wrapper.cbor.nonfinite'>CBOR.NonFinite</a>
@@ -828,14 +820,14 @@ object.</td></tr>
       <a href='#cbor.nonfinite.createpayload'>CBOR.NonFinite.create_payload()</a>.</div></td></tr>
 <tr><td colspan='2' class='webpkidiv'></td></tr>
 <tr><th>Returns</th><th>Description</th></tr>
-<tr><td style='text-align:center'><kbd>BigInt</kbd></td><td style='width:100%'>Payload.</td></tr>
+<tr><td style='text-align:center'><kbd>int</kbd></td><td style='width:100%'>Payload.</td></tr>
 </table></div>
 <h4 id='properties.cbor.nonfinite'>2.3.2.&nbsp;&nbsp;CBOR.NonFinite Properties</h4>
 <h4 id='cbor.nonfinite.length'>2.3.2.1.&nbsp;&nbsp;length</h4>
 <div class='webpkifloat'>
 <table class='webpkitable' style='margin-left:2em;width:50em'>
 <tr><th>Name</th><th>Type</th><th>Description</th></tr>
-<tr><td style='text-align:center'><kbd><i>length</i></kbd></td><td style='text-align:center'><kbd>Number</kbd></td><td style='width:100%'>Length in bytes of the underlying <span style='white-space:nowrap'><code>IEEE</code> <code>754</code></span> type.</td></tr>
+<tr><td style='text-align:center'><kbd><i>length</i></kbd></td><td style='text-align:center'><kbd>int</kbd></td><td style='width:100%'>Length in bytes of the underlying <span style='white-space:nowrap'><code>IEEE</code> <code>754</code></span> type.</td></tr>
 </table></div>
 <h4 id='wrapper.cbor.string'>2.4.&nbsp;&nbsp;CBOR.String</h4>
 <div class='webpkifloat'>
@@ -844,7 +836,7 @@ object.</td></tr>
 <tr><th>Description</th><td colspan='2' style='width:100%'>Constructor.  Creates a CBOR text-string (<code>tstr</code>) object.</td></tr>
 <tr><td colspan='3' class='webpkidiv'></td></tr>
 <tr><th>Parameter</th><th>Type</th><th>Description</th></tr>
-<tr><td style='text-align:center'><kbd><i>text_string</i></kbd></td><td style='text-align:center'><kbd>String</kbd></td><td style='width:100%'>String to be wrapped.</td></tr>
+<tr><td style='text-align:center'><kbd><i>text_string</i></kbd></td><td style='text-align:center'><kbd>str</kbd></td><td style='width:100%'>String to be wrapped.</td></tr>
 <tr><td colspan='3' class='webpkidiv'></td></tr>
 <tr><th>Returns</th><th colspan='2'>Description</th></tr>
 <tr><td style='text-align:center'><kbd>CBOR.String</kbd></td><td colspan='2' style='width:100%'>Object.</td></tr>
@@ -857,7 +849,7 @@ object.</td></tr>
 <tr><th>Description</th><td style='width:100%'>Get CBOR text-string.</td></tr>
 <tr><td colspan='2' class='webpkidiv'></td></tr>
 <tr><th>Returns</th><th>Description</th></tr>
-<tr><td style='text-align:center'><kbd>String</kbd></td><td style='width:100%'>Decoded text-string.</td></tr>
+<tr><td style='text-align:center'><kbd>str</kbd></td><td style='width:100%'>Decoded text-string.</td></tr>
 </table></div>
 <h4 id='wrapper.cbor.bytes'>2.5.&nbsp;&nbsp;CBOR.Bytes</h4>
 <div class='webpkifloat'>
@@ -866,7 +858,7 @@ object.</td></tr>
 <tr><th>Description</th><td colspan='2' style='width:100%'>Constructor.  Creates a CBOR byte-string (<code>bstr</code>) object.</td></tr>
 <tr><td colspan='3' class='webpkidiv'></td></tr>
 <tr><th>Parameter</th><th>Type</th><th>Description</th></tr>
-<tr><td style='text-align:center'><kbd><i>byte_string</i></kbd></td><td style='text-align:center'><kbd>Uint8Array</kbd></td><td style='width:100%'>Binary data to be wrapped.</td></tr>
+<tr><td style='text-align:center'><kbd><i>byte_string</i></kbd></td><td style='text-align:center'><kbd>bytes</kbd></td><td style='width:100%'>Binary data to be wrapped.</td></tr>
 <tr><td colspan='3' class='webpkidiv'></td></tr>
 <tr><th>Returns</th><th colspan='2'>Description</th></tr>
 <tr><td style='text-align:center'><kbd>CBOR.Bytes</kbd></td><td colspan='2' style='width:100%'>Object.</td></tr>
@@ -879,7 +871,7 @@ object.</td></tr>
 <tr><th>Description</th><td style='width:100%'>Get CBOR byte-string.</td></tr>
 <tr><td colspan='2' class='webpkidiv'></td></tr>
 <tr><th>Returns</th><th>Description</th></tr>
-<tr><td style='text-align:center'><kbd>Uint8Array</kbd></td><td style='width:100%'>Decoded byte-string.</td></tr>
+<tr><td style='text-align:center'><kbd>bytes</kbd></td><td style='width:100%'>Decoded byte-string.</td></tr>
 </table></div>
 <h4 id='wrapper.cbor.boolean'>2.6.&nbsp;&nbsp;CBOR.Boolean</h4>
 <div class='webpkifloat'>
@@ -933,7 +925,7 @@ See also <a href='#common.isnull'>is_null()</a>.</td></tr>
 <tr><td style='text-align:center'><kbd><i>object</i></kbd></td><td style='text-align:center'><kbd>CBOR.<i>Wrapper</i></kbd></td><td style='width:100%'>Object to be appended to the array.</td></tr>
 <tr><td colspan='3' class='webpkidiv'></td></tr>
 <tr><th>Returns</th><th colspan='2'>Description</th></tr>
-<tr><td style='text-align:center'><kbd>this</kbd></td><td colspan='2' style='width:100%'>Current object.</td></tr>
+<tr><td style='text-align:center'><kbd>self</kbd></td><td colspan='2' style='width:100%'>Current object.</td></tr>
 </table></div>
 <h4 id='cbor.array.get'>2.8.1.2.&nbsp;&nbsp;get()</h4>
 <div class='webpkifloat'>
@@ -942,7 +934,7 @@ See also <a href='#common.isnull'>is_null()</a>.</td></tr>
 <tr><th>Description</th><td colspan='2' style='width:100%'>Get CBOR object at a specific position in the array.</td></tr>
 <tr><td colspan='3' class='webpkidiv'></td></tr>
 <tr><th>Parameter</th><th>Type</th><th>Description</th></tr>
-<tr><td style='text-align:center'><kbd><i>index</i></kbd></td><td style='text-align:center'><kbd>Number</kbd></td><td style='width:100%'>Array index <code>(0..length-1)</code>.</td></tr>
+<tr><td style='text-align:center'><kbd><i>index</i></kbd></td><td style='text-align:center'><kbd>int</kbd></td><td style='width:100%'>Array index <code>(0..length-1)</code>.</td></tr>
 <tr><td colspan='3' class='webpkidiv'></td></tr>
 <tr><th>Returns</th><th colspan='2'>Description</th></tr>
 <tr><td style='text-align:center'><kbd>CBOR.<i>Wrapper</i></kbd></td><td colspan='2' style='width:100%'>Retrieved object.</td></tr>
@@ -954,7 +946,7 @@ See also <a href='#common.isnull'>is_null()</a>.</td></tr>
 <tr><th>Description</th><td colspan='2' style='width:100%'>Remove CBOR object at a specific position in the array.</td></tr>
 <tr><td colspan='3' class='webpkidiv'></td></tr>
 <tr><th>Parameter</th><th>Type</th><th>Description</th></tr>
-<tr><td style='text-align:center'><kbd><i>index</i></kbd></td><td style='text-align:center'><kbd>Number</kbd></td><td style='width:100%'>Array index <code>(0..length-1)</code>.</td></tr>
+<tr><td style='text-align:center'><kbd><i>index</i></kbd></td><td style='text-align:center'><kbd>int</kbd></td><td style='width:100%'>Array index <code>(0..length-1)</code>.</td></tr>
 <tr><td colspan='3' class='webpkidiv'></td></tr>
 <tr><th>Returns</th><th colspan='2'>Description</th></tr>
 <tr><td style='text-align:center'><kbd>CBOR.<i>Wrapper</i></kbd></td><td colspan='2' style='width:100%'>Previous object.</td></tr>
@@ -966,7 +958,7 @@ See also <a href='#common.isnull'>is_null()</a>.</td></tr>
 <tr><th>Description</th><td colspan='2' style='width:100%'>Update CBOR object at a specific position in the array.</td></tr>
 <tr><td colspan='3' class='webpkidiv'></td></tr>
 <tr><th>Parameter</th><th>Type</th><th>Description</th></tr>
-<tr><td style='text-align:center'><kbd><i>index</i></kbd></td><td style='text-align:center'><kbd>Number</kbd></td><td style='width:100%'>Array index <code>(0..length-1)</code>.</td></tr>
+<tr><td style='text-align:center'><kbd><i>index</i></kbd></td><td style='text-align:center'><kbd>int</kbd></td><td style='width:100%'>Array index <code>(0..length-1)</code>.</td></tr>
 <tr><td style='text-align:center'><kbd><i>object</i></kbd></td><td style='text-align:center'><kbd>CBOR.<i>Wrapper</i></kbd></td><td style='width:100%'>Update object.</td></tr>
 <tr><td colspan='3' class='webpkidiv'></td></tr>
 <tr><th>Returns</th><th colspan='2'>Description</th></tr>
@@ -979,13 +971,13 @@ See also <a href='#common.isnull'>is_null()</a>.</td></tr>
 <tr><th>Description</th><td colspan='2' style='width:100%'>Insert CBOR object <i>before</i> an object at a specific position in the array.</td></tr>
 <tr><td colspan='3' class='webpkidiv'></td></tr>
 <tr><th>Parameter</th><th>Type</th><th>Description</th></tr>
-<tr><td style='text-align:center'><kbd><i>index</i></kbd></td><td style='text-align:center'><kbd>Number</kbd></td><td style='width:100%'>Array index <code>(0..length)</code>.
+<tr><td style='text-align:center'><kbd><i>index</i></kbd></td><td style='text-align:center'><kbd>int</kbd></td><td style='width:100%'>Array index <code>(0..length)</code>.
 <div style='margin-top:0.5em'>If <kbd><i>index</i></kbd>
 is equal to <code>length</code>, <kbd><i>object</i></kbd> is <i>appended</i>.</div></td></tr>
 <tr><td style='text-align:center'><kbd><i>object</i></kbd></td><td style='text-align:center'><kbd>CBOR.<i>Wrapper</i></kbd></td><td style='width:100%'>Update object.</td></tr>
 <tr><td colspan='3' class='webpkidiv'></td></tr>
 <tr><th>Returns</th><th colspan='2'>Description</th></tr>
-<tr><td style='text-align:center'><kbd>this</kbd></td><td colspan='2' style='width:100%'>Current object.</td></tr>
+<tr><td style='text-align:center'><kbd>self</kbd></td><td colspan='2' style='width:100%'>Current object.</td></tr>
 </table></div>
 <h4 id='cbor.array.to_array'>2.8.1.6.&nbsp;&nbsp;to_array()</h4>
 <div class='webpkifloat'>
@@ -1006,14 +998,14 @@ using <a href='#main.deterministic'>Deterministic&nbsp;Encoding</a>.
 <a href='#decoder.cbor.initdecoder'>CBOR.init_decoder()</a>.</div></td></tr>
 <tr><td colspan='2' class='webpkidiv'></td></tr>
 <tr><th>Returns</th><th>Description</th></tr>
-<tr><td style='text-align:center'><kbd>Uint8Array</kbd></td><td style='width:100%'>CBOR encoded data.</td></tr>
+<tr><td style='text-align:center'><kbd>bytes</kbd></td><td style='width:100%'>CBOR encoded data.</td></tr>
 </table></div>
 <h4 id='properties.cbor.array'>2.8.2.&nbsp;&nbsp;CBOR.Array Properties</h4>
 <h4 id='cbor.array.length'>2.8.2.1.&nbsp;&nbsp;length</h4>
 <div class='webpkifloat'>
 <table class='webpkitable' style='margin-left:2em;width:50em'>
 <tr><th>Name</th><th>Type</th><th>Description</th></tr>
-<tr><td style='text-align:center'><kbd><i>length</i></kbd></td><td style='text-align:center'><kbd>Number</kbd></td><td style='width:100%'>Number of objects in the array.</td></tr>
+<tr><td style='text-align:center'><kbd><i>length</i></kbd></td><td style='text-align:center'><kbd>int</kbd></td><td style='width:100%'>Number of objects in the array.</td></tr>
 </table></div>
 <h4 id='wrapper.cbor.map'>2.9.&nbsp;&nbsp;CBOR.Map</h4>
 <div class='webpkifloat'>
@@ -1050,7 +1042,7 @@ of <i>any</i> complexity can be used.</div></td></tr>
 <tr><td style='text-align:center'><kbd><i>object</i></kbd></td><td style='text-align:center'><kbd>CBOR.<i>Wrapper</i></kbd></td><td style='width:100%'>Object (value).</td></tr>
 <tr><td colspan='3' class='webpkidiv'></td></tr>
 <tr><th>Returns</th><th colspan='2'>Description</th></tr>
-<tr><td style='text-align:center'><kbd>this</kbd></td><td colspan='2' style='width:100%'>Current object.</td></tr>
+<tr><td style='text-align:center'><kbd>self</kbd></td><td colspan='2' style='width:100%'>Current object.</td></tr>
 </table></div>
 <h4 id='cbor.map.setdynamic'>2.9.1.2.&nbsp;&nbsp;setDynamic()</h4>
 <div class='webpkifloat'>
@@ -1065,7 +1057,7 @@ Consult test file <code>dynamic.js</code> for examples.</div></td></tr>
 <tr><td style='text-align:center'><kbd><i>dynamic</i></kbd></td><td style='text-align:center'><kbd>function|=&gt;</kbd></td><td style='width:100%'>Function or =&gt; operator with one parameter holding <kbd>this</kbd>.</td></tr>
 <tr><td colspan='3' class='webpkidiv'></td></tr>
 <tr><th>Returns</th><th colspan='2'>Description</th></tr>
-<tr><td style='text-align:center'><kbd>this</kbd></td><td colspan='2' style='width:100%'>Current object.</td></tr>
+<tr><td style='text-align:center'><kbd>self</kbd></td><td colspan='2' style='width:100%'>Current object.</td></tr>
 </table></div>
 <h4 id='cbor.map.merge'>2.9.1.3.&nbsp;&nbsp;merge()</h4>
 <div class='webpkifloat'>
@@ -1079,7 +1071,7 @@ for each member of the <kbd><i>map</i></kbd> argument.</td></tr>
 <tr><td style='text-align:center'><kbd><i>map</i></kbd></td><td style='text-align:center'><kbd>CBOR.Map</kbd></td><td style='width:100%'>CBOR <code>map</code> wrapper object.</td></tr>
 <tr><td colspan='3' class='webpkidiv'></td></tr>
 <tr><th>Returns</th><th colspan='2'>Description</th></tr>
-<tr><td style='text-align:center'><kbd>this</kbd></td><td colspan='2' style='width:100%'>Current object.</td></tr>
+<tr><td style='text-align:center'><kbd>self</kbd></td><td colspan='2' style='width:100%'>Current object.</td></tr>
 </table></div>
 <h4 id='cbor.map.update'>2.9.1.4.&nbsp;&nbsp;update()</h4>
 <div class='webpkifloat'>
@@ -1182,14 +1174,14 @@ Improper key order causes a <a href='#main.errors'>CBOR.Exception</a> to be thro
 By default, map keys are sorted <i>internally</i>.</td></tr>
 <tr><td colspan='3' class='webpkidiv'></td></tr>
 <tr><th>Returns</th><th colspan='2'>Description</th></tr>
-<tr><td style='text-align:center'><kbd>this</kbd></td><td colspan='2' style='width:100%'>Current object.</td></tr>
+<tr><td style='text-align:center'><kbd>self</kbd></td><td colspan='2' style='width:100%'>Current object.</td></tr>
 </table></div>
 <h4 id='properties.cbor.map'>2.9.2.&nbsp;&nbsp;CBOR.Map Properties</h4>
 <h4 id='cbor.map.length'>2.9.2.1.&nbsp;&nbsp;length</h4>
 <div class='webpkifloat'>
 <table class='webpkitable' style='margin-left:2em;width:50em'>
 <tr><th>Name</th><th>Type</th><th>Description</th></tr>
-<tr><td style='text-align:center'><kbd><i>length</i></kbd></td><td style='text-align:center'><kbd>Number</kbd></td><td style='width:100%'>Number of map entries.</td></tr>
+<tr><td style='text-align:center'><kbd><i>length</i></kbd></td><td style='text-align:center'><kbd>int</kbd></td><td style='width:100%'>Number of map entries.</td></tr>
 </table></div>
 <h4 id='wrapper.cbor.tag'>2.10.&nbsp;&nbsp;CBOR.Tag</h4>
 <div class='webpkifloat'>
@@ -1206,7 +1198,7 @@ and tag&nbsp;<code>1010</code> <span style='white-space:nowrap'>[<a href='https:
 </div></td></tr>
 <tr><td colspan='3' class='webpkidiv'></td></tr>
 <tr><th>Parameter</th><th>Type</th><th>Description</th></tr>
-<tr><td style='text-align:center'><kbd><i>tag_number</i></kbd></td><td style='text-align:center'><kbd>Number</kbd>&nbsp;<code>/</code>&nbsp;<kbd>BigInt</kbd></td><td style='width:100%'>Tag number.</td></tr>
+<tr><td style='text-align:center'><kbd><i>tag_number</i></kbd></td><td style='text-align:center'><kbd>int</kbd></td><td style='width:100%'>Tag number.</td></tr>
 <tr><td style='text-align:center'><kbd><i>object</i></kbd></td><td style='text-align:center'><kbd>CBOR.<i>Wrapper</i></kbd></td><td style='width:100%'>Object to be wrapped in a tag.</td></tr>
 <tr><td colspan='3' class='webpkidiv'></td></tr>
 <tr><th>Returns</th><th colspan='2'>Description</th></tr>
@@ -1220,7 +1212,7 @@ and tag&nbsp;<code>1010</code> <span style='white-space:nowrap'>[<a href='https:
 <tr><th>Description</th><td style='width:100%'>Get CBOR tag number.</td></tr>
 <tr><td colspan='2' class='webpkidiv'></td></tr>
 <tr><th>Returns</th><th>Description</th></tr>
-<tr><td style='text-align:center'><kbd>BigInt</kbd></td><td style='width:100%'>Decoded tag number.</td></tr>
+<tr><td style='text-align:center'><kbd>int</kbd></td><td style='width:100%'>Decoded tag number.</td></tr>
 </table></div>
 <h4 id='cbor.tag.get'>2.10.1.2.&nbsp;&nbsp;get()</h4>
 <div class='webpkifloat'>
@@ -1236,7 +1228,7 @@ and tag&nbsp;<code>1010</code> <span style='white-space:nowrap'>[<a href='https:
 <div class='webpkifloat'>
 <table class='webpkitable' style='margin-left:2em;width:50em'>
 <tr><th>Name</th><th>Type</th><th>Description</th></tr>
-<tr><td style='text-align:center'><kbd><i>cotx_id</i></kbd></td><td style='text-align:center'><kbd>String</kbd></td><td style='width:100%'>COTX <span style='white-space:nowrap'>[<a href='https://datatracker.ietf.org/doc/draft-rundgren-cotx/' title='COTX'>COTX<img src='xtl.svg' alt='link'></a>]</span> support:
+<tr><td style='text-align:center'><kbd><i>cotx_id</i></kbd></td><td style='text-align:center'><kbd>str</kbd></td><td style='width:100%'>COTX <span style='white-space:nowrap'>[<a href='https://datatracker.ietf.org/doc/draft-rundgren-cotx/' title='COTX'>COTX<img src='xtl.svg' alt='link'></a>]</span> support:
 object ID string.<div style='margin-top:0.5em'>
 Only valid for COTX tags.
 See also <a href='#cbor.tag.gettagnumber'>get_tag_number()</a>.</div></td></tr>
@@ -1264,7 +1256,7 @@ is serving as a limited set of <i>unique and reserved labels</i> (keys)
 in CBOR maps.</div></td></tr>
 <tr><td colspan='3' class='webpkidiv'></td></tr>
 <tr><th>Parameter</th><th>Type</th><th>Description</th></tr>
-<tr><td style='text-align:center'><kbd><i>value</i></kbd></td><td style='text-align:center'><kbd>Number</kbd></td><td style='width:100%'>Simple value.</td></tr>
+<tr><td style='text-align:center'><kbd><i>value</i></kbd></td><td style='text-align:center'><kbd>int</kbd></td><td style='width:100%'>Simple value.</td></tr>
 <tr><td colspan='3' class='webpkidiv'></td></tr>
 <tr><th>Returns</th><th colspan='2'>Description</th></tr>
 <tr><td style='text-align:center'><kbd>CBOR.Simple</kbd></td><td colspan='2' style='width:100%'>Object.</td></tr>
@@ -1277,14 +1269,14 @@ in CBOR maps.</div></td></tr>
 <tr><th>Description</th><td style='width:100%'>Get CBOR <code>simple</code> object.</td></tr>
 <tr><td colspan='2' class='webpkidiv'></td></tr>
 <tr><th>Returns</th><th>Description</th></tr>
-<tr><td style='text-align:center'><kbd>Number</kbd></td><td style='width:100%'>Returned simple value.</td></tr>
+<tr><td style='text-align:center'><kbd>int</kbd></td><td style='width:100%'>Returned simple value.</td></tr>
 </table></div>
 
   <h3 id='main.time'>3.&nbsp;&nbsp;Time Objects</h3>
 
   Since CBOR lacks dedicated (native) time-objects, section 3.4.1 and 3.4.2 of
   CBOR&nbsp;<span style='white-space:nowrap'>[<a href='https://www.rfc-editor.org/rfc/rfc8949.html' title='RFC8949'>RFC8949<img src='xtl.svg' alt='link'></a>]</span> define tag <code>0</code> and <code>1</code> for this purpose.
-  CBOR.js provides built-in decoders for these tags (<a href='#wrapper.cbor.tag'>CBOR.Tag</a>).
+  CBOR.py provides built-in decoders for these tags (<a href='#wrapper.cbor.tag'>CBOR.Tag</a>).
   That is, if the current object is a tag <code>0</code>, it is sufficient
   calling <a href='#time.getdatetime'>get_date_time()</a>.
   Note that these methods are also available <i>without</i> the tag construct.
@@ -1359,7 +1351,7 @@ See also <a href='#utility.cbor.createepochtime'>CBOR.create_epoch_time()</a>.</
 See also <a href='#cbor.array.encodeassequence'>encode_as_sequence()</a>.</div></td></tr>
 <tr><td colspan='2' class='webpkidiv'></td></tr>
 <tr><th>Returns</th><th>Description</th></tr>
-<tr><td style='text-align:center'><kbd>Uint8Array</kbd></td><td style='width:100%'>CBOR encoded data.</td></tr>
+<tr><td style='text-align:center'><kbd>bytes</kbd></td><td style='width:100%'>CBOR encoded data.</td></tr>
 </table></div>
 <h4 id='common.clone'>4.2.&nbsp;&nbsp;clone()</h4>
 <div class='webpkifloat'>
@@ -1403,7 +1395,7 @@ additional white space is inserted between individual objects
 in maps and arrays, to make the result easier to read.</td></tr>
 <tr><td colspan='3' class='webpkidiv'></td></tr>
 <tr><th>Returns</th><th colspan='2'>Description</th></tr>
-<tr><td style='text-align:center'><kbd>String</kbd></td><td colspan='2' style='width:100%'>Textual version of the wrapped CBOR content.</td></tr>
+<tr><td style='text-align:center'><kbd>str</kbd></td><td colspan='2' style='width:100%'>Textual version of the wrapped CBOR content.</td></tr>
 </table></div>
 <h4 id='common.to_string'>4.5.&nbsp;&nbsp;to_string()</h4>
 <div class='webpkifloat'>
@@ -1414,7 +1406,7 @@ Equivalent to calling <a href='#common.todiagnostic'>to_diagnostic()</a>
 with a <code>true</code> argument.</td></tr>
 <tr><td colspan='2' class='webpkidiv'></td></tr>
 <tr><th>Returns</th><th>Description</th></tr>
-<tr><td style='text-align:center'><kbd>String</kbd></td><td style='width:100%'>Textual version of the wrapped CBOR content.</td></tr>
+<tr><td style='text-align:center'><kbd>str</kbd></td><td style='width:100%'>Textual version of the wrapped CBOR content.</td></tr>
 </table></div>
 <h4 id='common.is_null'>4.6.&nbsp;&nbsp;is_null()</h4>
 <div class='webpkifloat'>
@@ -1440,7 +1432,7 @@ holds a CBOR <code>null</code> item, else <code>false</code> is returned.</td></
  <div style='margin:0.5em 0'>
  The purpose of this method is to detect possible misunderstandings between parties
  using CBOR based protocols.  Together with the strict type checking performed
- by the CBOR.js API, a programmatic counterpart to schema-based decoding
+ by the CBOR.py API, a programmatic counterpart to schema-based decoding
  can be achieved.
  </div>
  Note that array <a href='#cbor.array.get'>get()</a>,
@@ -1456,7 +1448,7 @@ array.get(1).scan();&nbsp;&nbsp;&nbsp;&nbsp;// mark array[1] as read<br>
 array.check_for_unread();</code></div></td></tr>
 <tr><td colspan='2' class='webpkidiv'></td></tr>
 <tr><th>Returns</th><th>Description</th></tr>
-<tr><td style='text-align:center'><kbd>this</kbd></td><td style='width:100%'>Current object.</td></tr>
+<tr><td style='text-align:center'><kbd>self</kbd></td><td style='width:100%'>Current object.</td></tr>
 </table></div>
 <h4 id='common.scan'>4.8.&nbsp;&nbsp;scan()</h4>
 <div class='webpkifloat'>
@@ -1468,7 +1460,7 @@ This is only meaningful in conjunction with
 <a href='#common.checkforunread'>check_for_unread()</a>.</td></tr>
 <tr><td colspan='2' class='webpkidiv'></td></tr>
 <tr><th>Returns</th><th>Description</th></tr>
-<tr><td style='text-align:center'><kbd>this</kbd></td><td style='width:100%'>Current object.</td></tr>
+<tr><td style='text-align:center'><kbd>self</kbd></td><td style='width:100%'>Current object.</td></tr>
 </table></div>
 
   <h3 id='main.decoding'>5.&nbsp;&nbsp;Decoding CBOR</h3>
@@ -1489,7 +1481,7 @@ This is only meaningful in conjunction with
 Unsupported or malformed CBOR data cause a <a href='#main.errors'>CBOR.Exception</a> to be thrown.</td></tr>
 <tr><td colspan='3' class='webpkidiv'></td></tr>
 <tr><th>Parameter</th><th>Type</th><th>Description</th></tr>
-<tr><td style='text-align:center'><kbd><i>cbor</i></kbd></td><td style='text-align:center'><kbd>Uint8Array</kbd></td><td style='width:100%'>CBOR binary data <i>holding exactly one CBOR object</i>.</td></tr>
+<tr><td style='text-align:center'><kbd><i>cbor</i></kbd></td><td style='text-align:center'><kbd>bytes</kbd></td><td style='width:100%'>CBOR binary data <i>holding exactly one CBOR object</i>.</td></tr>
 <tr><td colspan='3' class='webpkidiv'></td></tr>
 <tr><th>Returns</th><th colspan='2'>Description</th></tr>
 <tr><td style='text-align:center'><kbd>CBOR.<i>Wrapper</i></kbd></td><td colspan='2' style='width:100%'>Object.</td></tr>
@@ -1510,8 +1502,8 @@ See also <a href='#decoder.decoder.setmaxnestinglevel'><i>Decoder</i>.set_max_ne
 <a href='#decoder.decoder.getbytecount'><i>Decoder</i>.get_byte_count()</a>.</div></td></tr>
 <tr><td colspan='3' class='webpkidiv'></td></tr>
 <tr><th>Parameter</th><th>Type</th><th>Description</th></tr>
-<tr><td style='text-align:center'><kbd><i>cbor</i></kbd></td><td style='text-align:center'><kbd>Uint8Array</kbd></td><td style='width:100%'>The CBOR data (bytes) to be decoded.</td></tr>
-<tr><td style='text-align:center'><kbd><i>options</i></kbd></td><td style='text-align:center'><kbd>Number</kbd></td><td style='width:100%'>The decoder options.
+<tr><td style='text-align:center'><kbd><i>cbor</i></kbd></td><td style='text-align:center'><kbd>bytes</kbd></td><td style='width:100%'>The CBOR data (bytes) to be decoded.</td></tr>
+<tr><td style='text-align:center'><kbd><i>options</i></kbd></td><td style='text-align:center'><kbd>int</kbd></td><td style='width:100%'>The decoder options.
 Multiple options can be combined using the binary OR-operator
 ("<code>|</code>").
 A zero (0) sets the decoder default mode.
@@ -1526,7 +1518,7 @@ a <i>single</i> CBOR object, while preparing for the next object.</li>
 (<i>empty</i> sequences are permitted).</li>
 </ul>
 Note that data that has not yet been decoded, is not verified for correctness.
-The application note <a href='https://github.com/cyberphone/CBOR.js/tree/main/doc/app-notes/large-payloads'>Large&nbsp;Payloads</a> shows how this can be utilized.
+The application note <a href='https://github.com/cyberphone/CBOR.py/tree/main/doc/app-notes/large-payloads'>Large&nbsp;Payloads</a> shows how this can be utilized.
 <div style='margin-top:0.5em'>
 See also <a href='#cbor.array.encodeassequence'>encode_as_sequence()</a>.</div></div>
 <div id='CBOR.LENIENT_MAP_DECODING' style='margin-top:0.8em'>
@@ -1566,7 +1558,7 @@ Usage in code:</div>
 &nbsp;&nbsp;.decode_with_options()</code></div></td></tr>
 <tr><td colspan='3' class='webpkidiv'></td></tr>
 <tr><th>Parameter</th><th>Type</th><th>Description</th></tr>
-<tr><td style='text-align:center'><kbd><i>maxLevel</i></kbd></td><td style='text-align:center'><kbd>Number</kbd></td><td style='width:100%'>Maximum nesting level.  The default setting is <code>100</code>.</td></tr>
+<tr><td style='text-align:center'><kbd><i>maxLevel</i></kbd></td><td style='text-align:center'><kbd>int</kbd></td><td style='width:100%'>Maximum nesting level.  The default setting is <code>100</code>.</td></tr>
 <tr><td colspan='3' class='webpkidiv'></td></tr>
 <tr><th>Returns</th><th colspan='2'>Description</th></tr>
 <tr><td style='text-align:center'><kbd><i>Decoder</i></kbd></td><td colspan='2' style='width:100%'>Decoder object to be used with
@@ -1592,7 +1584,7 @@ Unsupported or malformed CBOR data cause a <a href='#main.errors'>CBOR.Exception
 This is equivalent to the position of the next item to be read.</div></td></tr>
 <tr><td colspan='2' class='webpkidiv'></td></tr>
 <tr><th>Returns</th><th>Description</th></tr>
-<tr><td style='text-align:center'><kbd>Number</kbd></td><td style='width:100%'>The number of bytes read so far.</td></tr>
+<tr><td style='text-align:center'><kbd>int</kbd></td><td style='width:100%'>The number of bytes read so far.</td></tr>
 </table></div>
 <h4 id='decoder.cbor.from_diagnostic'>5.6.&nbsp;&nbsp;CBOR.from_diagnostic()</h4>
 <div class='webpkifloat'>
@@ -1606,7 +1598,7 @@ See also <a href='#decoder.cbor.fromdiagnosticseq'>CBOR.from_diagnostic_seq()</a
 JSON data.</div></td></tr>
 <tr><td colspan='3' class='webpkidiv'></td></tr>
 <tr><th>Parameter</th><th>Type</th><th>Description</th></tr>
-<tr><td style='text-align:center'><kbd><i>cbor_text</i></kbd></td><td style='text-align:center'><kbd>String</kbd></td><td style='width:100%'>CBOR in textual format.</td></tr>
+<tr><td style='text-align:center'><kbd><i>cbor_text</i></kbd></td><td style='text-align:center'><kbd>str</kbd></td><td style='width:100%'>CBOR in textual format.</td></tr>
 <tr><td colspan='3' class='webpkidiv'></td></tr>
 <tr><th>Returns</th><th colspan='2'>Description</th></tr>
 <tr><td style='text-align:center'><kbd>CBOR.<i>Wrapper</i></kbd></td><td colspan='2' style='width:100%'>Object.</td></tr>
@@ -1622,7 +1614,7 @@ character (<kbd>','</kbd>) as a separator.
 <div style='margin-top:0.5em'>Note: empty sequences are permitted.</div></td></tr>
 <tr><td colspan='3' class='webpkidiv'></td></tr>
 <tr><th>Parameter</th><th>Type</th><th>Description</th></tr>
-<tr><td style='text-align:center'><kbd><i>cbor_text</i></kbd></td><td style='text-align:center'><kbd>String</kbd></td><td style='width:100%'>CBOR in textual format.</td></tr>
+<tr><td style='text-align:center'><kbd><i>cbor_text</i></kbd></td><td style='text-align:center'><kbd>str</kbd></td><td style='width:100%'>CBOR in textual format.</td></tr>
 <tr><td colspan='3' class='webpkidiv'></td></tr>
 <tr><th>Returns</th><th colspan='2'>Description</th></tr>
 <tr><td style='text-align:center'><kbd>[CBOR.<i>Wrapper</i>...]</kbd></td><td colspan='2' style='width:100%'>JavaScript array holding zero or more objects.</td></tr>
@@ -1630,114 +1622,8 @@ character (<kbd>','</kbd>) as a separator.
 
   <h3 id='main.utility'>6.&nbsp;&nbsp;Utility Methods</h3>
 
-  The CBOR.js implementation supports a set of utility methods.
-  <h4 id='utility.cbor.addarrays'>6.1.&nbsp;&nbsp;CBOR.addArrays()</h4>
-<div class='webpkifloat'>
-<table class='webpkitable' style='margin-left:2em;width:50em'>
-<tr><th>Syntax</th><td colspan='2' style='width:100%'><kbd>CBOR.addArrays(<i>a</i>, <i>b</i>)</kbd></td></tr>
-<tr><th>Description</th><td colspan='2' style='width:100%'>Add two arrays.</td></tr>
-<tr><td colspan='3' class='webpkidiv'></td></tr>
-<tr><th>Parameter</th><th>Type</th><th>Description</th></tr>
-<tr><td style='text-align:center'><kbd><i>a</i></kbd></td><td style='text-align:center'><kbd>Uint8Array</kbd></td><td style='width:100%'>First array.</td></tr>
-<tr><td style='text-align:center'><kbd><i>b</i></kbd></td><td style='text-align:center'><kbd>Uint8Array</kbd></td><td style='width:100%'>Second array.</td></tr>
-<tr><td colspan='3' class='webpkidiv'></td></tr>
-<tr><th>Returns</th><th colspan='2'>Description</th></tr>
-<tr><td style='text-align:center'><kbd>Uint8Array</kbd></td><td colspan='2' style='width:100%'>Concatenation of array <kbd><i>a</i></kbd> and <kbd><i>b</i></kbd>.</td></tr>
-</table></div>
-<h4 id='utility.cbor.comparearrays'>6.2.&nbsp;&nbsp;CBOR.compareArrays()</h4>
-<div class='webpkifloat'>
-<table class='webpkitable' style='margin-left:2em;width:50em'>
-<tr><th>Syntax</th><td colspan='2' style='width:100%'><kbd>CBOR.compareArrays(<i>a</i>, <i>b</i>)</kbd></td></tr>
-<tr><th>Description</th><td colspan='2' style='width:100%'>Compare two arrays lexicographically.</td></tr>
-<tr><td colspan='3' class='webpkidiv'></td></tr>
-<tr><th>Parameter</th><th>Type</th><th>Description</th></tr>
-<tr><td style='text-align:center'><kbd><i>a</i></kbd></td><td style='text-align:center'><kbd>Uint8Array</kbd></td><td style='width:100%'>First array.</td></tr>
-<tr><td style='text-align:center'><kbd><i>b</i></kbd></td><td style='text-align:center'><kbd>Uint8Array</kbd></td><td style='width:100%'>Second array.</td></tr>
-<tr><td colspan='3' class='webpkidiv'></td></tr>
-<tr><th>Returns</th><th colspan='2'>Description</th></tr>
-<tr><td style='text-align:center'><kbd>Number</kbd></td><td colspan='2' style='width:100%'>If <kbd><i>a</i></kbd> and <kbd><i>b</i></kbd> are identical,
-<kbd>0</kbd> is retuned.
-If <kbd><i>a</i>&nbsp;&gt;&nbsp;<i>b</i></kbd>,
-a positive number is returned.
-If <kbd><i>a</i>&nbsp;&lt;&nbsp;<i>b</i></kbd>,
-a negative number is returned.</td></tr>
-</table></div>
-<h4 id='utility.cbor.tohex'>6.3.&nbsp;&nbsp;CBOR.toHex()</h4>
-<div class='webpkifloat'>
-<table class='webpkitable' style='margin-left:2em;width:50em'>
-<tr><th>Syntax</th><td colspan='2' style='width:100%'><kbd>CBOR.toHex(<i>byteArray</i>)</kbd></td></tr>
-<tr><th>Description</th><td colspan='2' style='width:100%'>Encode binary string to hexadecimal.</td></tr>
-<tr><td colspan='3' class='webpkidiv'></td></tr>
-<tr><th>Parameter</th><th>Type</th><th>Description</th></tr>
-<tr><td style='text-align:center'><kbd><i>byteArray</i></kbd></td><td style='text-align:center'><kbd>Uint8Array</kbd></td><td style='width:100%'>Zero or more bytes to be encoded.</td></tr>
-<tr><td colspan='3' class='webpkidiv'></td></tr>
-<tr><th>Returns</th><th colspan='2'>Description</th></tr>
-<tr><td style='text-align:center'><kbd>String</kbd></td><td colspan='2' style='width:100%'>Hexadecimal encoded data.</td></tr>
-</table></div>
-<h4 id='utility.cbor.fromhex'>6.4.&nbsp;&nbsp;CBOR.fromHex()</h4>
-<div class='webpkifloat'>
-<table class='webpkitable' style='margin-left:2em;width:50em'>
-<tr><th>Syntax</th><td colspan='2' style='width:100%'><kbd>CBOR.fromHex(<i>hexString</i>)</kbd></td></tr>
-<tr><th>Description</th><td colspan='2' style='width:100%'>Decode hexadecimal data into binary.</td></tr>
-<tr><td colspan='3' class='webpkidiv'></td></tr>
-<tr><th>Parameter</th><th>Type</th><th>Description</th></tr>
-<tr><td style='text-align:center'><kbd><i>hexString</i></kbd></td><td style='text-align:center'><kbd>String</kbd></td><td style='width:100%'>String with zero or more hexadecimal pairs. Each pair represents one byte.</td></tr>
-<tr><td colspan='3' class='webpkidiv'></td></tr>
-<tr><th>Returns</th><th colspan='2'>Description</th></tr>
-<tr><td style='text-align:center'><kbd>Uint8Array</kbd></td><td colspan='2' style='width:100%'>The resulting binary (bytes).</td></tr>
-</table></div>
-<h4 id='utility.cbor.tobase64url'>6.5.&nbsp;&nbsp;CBOR.toBase64Url()</h4>
-<div class='webpkifloat'>
-<table class='webpkitable' style='margin-left:2em;width:50em'>
-<tr><th>Syntax</th><td colspan='2' style='width:100%'><kbd>CBOR.toBase64Url(<i>byteArray</i>)</kbd></td></tr>
-<tr><th>Description</th><td colspan='2' style='width:100%'>Encode binary string to base64Url.</td></tr>
-<tr><td colspan='3' class='webpkidiv'></td></tr>
-<tr><th>Parameter</th><th>Type</th><th>Description</th></tr>
-<tr><td style='text-align:center'><kbd><i>byteArray</i></kbd></td><td style='text-align:center'><kbd>Uint8Array</kbd></td><td style='width:100%'>Zero or more bytes to be encoded.</td></tr>
-<tr><td colspan='3' class='webpkidiv'></td></tr>
-<tr><th>Returns</th><th colspan='2'>Description</th></tr>
-<tr><td style='text-align:center'><kbd>String</kbd></td><td colspan='2' style='width:100%'>Base64Url encoded data.</td></tr>
-</table></div>
-<h4 id='utility.cbor.frombase64url'>6.6.&nbsp;&nbsp;CBOR.fromBase64Url()</h4>
-<div class='webpkifloat'>
-<table class='webpkitable' style='margin-left:2em;width:50em'>
-<tr><th>Syntax</th><td colspan='2' style='width:100%'><kbd>CBOR.fromBase64Url(<i>base64</i>)</kbd></td></tr>
-<tr><th>Description</th><td colspan='2' style='width:100%'>Decode base64Url encoded data into binary.
-Note that this method is <i>permissive</i>; it accepts
-base64 encoded data as well as data with or without
-<kbd>'='</kbd> padding.</td></tr>
-<tr><td colspan='3' class='webpkidiv'></td></tr>
-<tr><th>Parameter</th><th>Type</th><th>Description</th></tr>
-<tr><td style='text-align:center'><kbd><i>base64</i></kbd></td><td style='text-align:center'><kbd>String</kbd></td><td style='width:100%'>String in base64Url notation.  The string may be empty.</td></tr>
-<tr><td colspan='3' class='webpkidiv'></td></tr>
-<tr><th>Returns</th><th colspan='2'>Description</th></tr>
-<tr><td style='text-align:center'><kbd>Uint8Array</kbd></td><td colspan='2' style='width:100%'>The resulting binary (bytes).</td></tr>
-</table></div>
-<h4 id='utility.cbor.tobigint'>6.7.&nbsp;&nbsp;CBOR.toBigInt()</h4>
-<div class='webpkifloat'>
-<table class='webpkitable' style='margin-left:2em;width:50em'>
-<tr><th>Syntax</th><td colspan='2' style='width:100%'><kbd>CBOR.toBigInt(<i>byteArray</i>)</kbd></td></tr>
-<tr><th>Description</th><td colspan='2' style='width:100%'>Convert binary string to BigInt.</td></tr>
-<tr><td colspan='3' class='webpkidiv'></td></tr>
-<tr><th>Parameter</th><th>Type</th><th>Description</th></tr>
-<tr><td style='text-align:center'><kbd><i>byteArray</i></kbd></td><td style='text-align:center'><kbd>Uint8Array</kbd></td><td style='width:100%'>Zero or more bytes representing an <i>unsigned</i> number.</td></tr>
-<tr><td colspan='3' class='webpkidiv'></td></tr>
-<tr><th>Returns</th><th colspan='2'>Description</th></tr>
-<tr><td style='text-align:center'><kbd>BigInt</kbd></td><td colspan='2' style='width:100%'>Resulting BigInt number.</td></tr>
-</table></div>
-<h4 id='utility.cbor.frombigint'>6.8.&nbsp;&nbsp;CBOR.fromBigInt()</h4>
-<div class='webpkifloat'>
-<table class='webpkitable' style='margin-left:2em;width:50em'>
-<tr><th>Syntax</th><td colspan='2' style='width:100%'><kbd>CBOR.fromBigInt(<i>value</i>)</kbd></td></tr>
-<tr><th>Description</th><td colspan='2' style='width:100%'>Convert BigInt into binary string.</td></tr>
-<tr><td colspan='3' class='webpkidiv'></td></tr>
-<tr><th>Parameter</th><th>Type</th><th>Description</th></tr>
-<tr><td style='text-align:center'><kbd><i>value</i></kbd></td><td style='text-align:center'><kbd>BigInt</kbd></td><td style='width:100%'>Value to be converted must be greater or equal to zero.</td></tr>
-<tr><td colspan='3' class='webpkidiv'></td></tr>
-<tr><th>Returns</th><th colspan='2'>Description</th></tr>
-<tr><td style='text-align:center'><kbd>Uint8Array</kbd></td><td colspan='2' style='width:100%'>The resulting binary (one or more bytes).</td></tr>
-</table></div>
-<h4 id='utility.cbor.create_date_time'>6.9.&nbsp;&nbsp;CBOR.create_date_time()</h4>
+  The CBOR.py implementation supports a set of utility methods.
+  <h4 id='utility.cbor.create_date_time'>6.1.&nbsp;&nbsp;CBOR.create_date_time()</h4>
 <div class='webpkifloat'>
 <table class='webpkitable' style='margin-left:2em;width:50em'>
 <tr><th>Syntax</th><td colspan='2' style='width:100%'><kbd>CBOR.create_date_time(<i>instant</i>, <i>millis</i>, <i>utc</i>)</kbd></td></tr>
@@ -1781,7 +1667,7 @@ else the local time followed by the <code>UTC</code> offset
 <tr><th>Returns</th><th colspan='2'>Description</th></tr>
 <tr><td style='text-align:center'><kbd>CBOR.String</kbd></td><td colspan='2' style='width:100%'>Wrapper holding a <code>DateTime</code> object.</td></tr>
 </table></div>
-<h4 id='utility.cbor.create_epoch_time'>6.10.&nbsp;&nbsp;CBOR.create_epoch_time()</h4>
+<h4 id='utility.cbor.create_epoch_time'>6.2.&nbsp;&nbsp;CBOR.create_epoch_time()</h4>
 <div class='webpkifloat'>
 <table class='webpkitable' style='margin-left:2em;width:50em'>
 <tr><th>Syntax</th><td colspan='2' style='width:100%'><kbd>CBOR.create_epoch_time(<i>instant</i>, <i>millis</i>)</kbd></td></tr>
@@ -1826,12 +1712,6 @@ add a second to the created time object.</div></td></tr>
 
 <div id='jsnumbers.int'></div><h4 id='numbers.integers'>7.1.&nbsp;&nbsp;Integers</h4>
 
-<p>
-  Due to the <kbd>Number.MAX_SAFE_INTEGER</kbd> limitation,
-  in all places in the <code>CBOR.js</code> API where an integer
-  in the form of a JavaScript <kbd>Number</kbd> is expected, <kbd>Number.isInteger(<i>value</i>)</kbd>
-  must be <code>true</code>, else a <a href='#main.errors'>CBOR.Exception</a> will be thrown.
-</p>
 The following table holds additional CDDL defintions <span style='white-space:nowrap'>[<a href='https://www.ietf.org/archive/id/draft-rundgren-cbor-core-25.html#name-additional-cddl-types' title='CDDL-EXT'>CDDL-EXT<img src='xtl.svg' alt='link'></a>]</span>
 and their API counterparts:
 <div class='webpkifloat'>
@@ -1933,16 +1813,16 @@ and their API counterparts:
   <li>Counterparts to the <i>fixed-size</i>, <i>two's complement</i> integer types,
   featured in languages like Java, C, and Rust.
   </li>
-  <li style='padding-top:0.5em'>Integer mapping the JavaScript <code>Number</code> type.
+  <li style='padding-top:0.5em'>Integer mapping the Python <code>Number</code> type.
     Consult <a href='#cbor.int.getint53'>get_int53()</a> for details.
   </li>
 </ol>
   <h4 id='numbers.floating-point'>7.2.&nbsp;&nbsp;Floating-Point Numbers</h4>
 
   Although CBOR encoding depends on 16, 32, and 64-bit IEEE&nbsp;754
-  variants, the CBOR.js implementation makes this
+  variants, the CBOR.py implementation makes this
   transparent. The <a href='#wrapper.cbor.float'>CBOR.Float</a>
-  wrapper object only exposes the JavaScript <kbd>Number</kbd> type.
+  wrapper object only exposes the Python <kbd>Number</kbd> type.
   <p>
   For applications depending on non-finite numbers
   (<code>NaN</code> and <code>Infinity</code>),
@@ -1964,7 +1844,7 @@ and their API counterparts:
   <p>
     Due to the
     <a href='#main.deterministic'>Deterministic Encoding</a>
-    scheme used by CBOR.js, CBOR data can be <i>bidirectionally</i>
+    scheme used by CBOR.py, CBOR data can be <i>bidirectionally</i>
     converted between its native (binary) format and diagnostic notation
     without getting corrupted.  Note though that text-binary-text &quot;roundtrips&quot;
     do not necessarily return identical text: <kbd>0x10</kbd> used
@@ -1980,7 +1860,7 @@ ${dn-table}
   While there are different ways you can encode certain CBOR objects,
   this is non-trivial to support in general purpose platform-based tools,
   not to mention the limited utility of such measures.
-  Therefore the CBOR.js API implements specific (non-variant)
+  Therefore the CBOR.py API implements specific (non-variant)
   encodings, aka &quot;Deterministic Encoding&quot;.  Fortunately, the selected 
   encoding scheme is <i>backward compatible</i> with most existing CBOR <i>decoders</i>.
   However, for <i>decoding</i> (only), compliance with deterministic encoding
@@ -2018,7 +1898,7 @@ here using the result of the previous encoding example:
   <h3 id='main.errors'>11.&nbsp;&nbsp;Error Handling</h3>
 
   Encoding and decoding errors throw <code>CBOR.Exception</code>,
-  derived from the JavaScript <code>Error</code> object.
+  derived from the Python <code>Error</code> object.
   <h3 id='main.version'>12.&nbsp;&nbsp;Version</h3>
 
   API version: 1.0.21.  Note that the current API version is accessible through

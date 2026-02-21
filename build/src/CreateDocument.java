@@ -646,7 +646,7 @@ CBOR.NonFinite.create_payload()</a>.</div>""";
        <div style='margin:0.5em 0'>
        The purpose of this method is to detect possible misunderstandings between parties
        using CBOR based protocols.  Together with the strict type checking performed
-       by the CBOR.js API, a programmatic counterpart to schema-based decoding
+       by the CBOR.py API, a programmatic counterpart to schema-based decoding
        can be achieved.
        </div>
        Note that array <a href='#cbor.array.get'>get()</a>,
@@ -910,7 +910,7 @@ CBOR.NonFinite.create_payload()</a>.</div>""";
       (<i>empty</i> sequences are permitted).</li>
       </ul>
       Note that data that has not yet been decoded, is not verified for correctness.
-      The application note <a href='https://github.com/cyberphone/CBOR.js/tree/main/doc/app-notes/large-payloads'>Large&nbsp;Payloads</a> shows how this can be utilized.
+      The application note <a href='https://github.com/cyberphone/CBOR.py/tree/main/doc/app-notes/large-payloads'>Large&nbsp;Payloads</a> shows how this can be utilized.
       <div style='margin-top:0.5em'>
       See also <a href='#cbor.array.encodeassequence'>encode_as_sequence()</a>.</div></div>
       <div id='CBOR.LENIENT_MAP_DECODING' style='margin-top:0.8em'>
@@ -1115,17 +1115,16 @@ CBOR.NonFinite.create_payload()</a>.</div>""";
     CBOR_TAG("CBOR.Tag"),
     CBOR_SIMPLE("CBOR.Simple"),
 
-    JS_THIS("this"),
+    JS_THIS("self"),
 
-    JS_NUMBER("Number"),
-    JS_NUMBER_BIGINT("Number</kbd>&nbsp;<code>/</code>&nbsp;<kbd>BigInt"),
+    JS_INT("int"),
+    JS_FLOAT("float"),
     JS_ARRAY("[CBOR.<i>Wrapper</i>...]"),
-    JS_BIGINT("BigInt"),
     JS_DATE("Date"),
     JS_BOOLEAN("Boolean"),
-    JS_STRING("String"),
+    JS_STRING("str"),
     JS_DYNAMIC("function|=&gt;"),
-    JS_UINT8ARRAY("Uint8Array");
+    JS_UINT8ARRAY("bytes");
 
     String text;
 
@@ -1688,8 +1687,8 @@ CBOR.NonFinite.create_payload()</a>.</div>""";
   }
 
   void rangedIntMethod(Wrapper wrapper, int bits, String min, String max) {
-    String type = (min.equals("0") ? "Uint" : "Int") + String.valueOf(bits);
-    String method = "get" + type;
+    String type = (min.equals("0") ? "uint" : "int") + String.valueOf(bits);
+    String method = "get_" + type;
     StringBuilder description = new StringBuilder(
         "Get CBOR <code>")
         .append(type.toLowerCase())
@@ -1703,12 +1702,12 @@ CBOR.NonFinite.create_payload()</a>.</div>""";
     }
     description.append("</div>");
     wrapper.addMethod(method, description.toString())
-        .setReturn(bits >= 64 ? DataTypes.JS_BIGINT : DataTypes.JS_NUMBER, W_GETINTNN_RETURN_DESCR);
+        .setReturn(DataTypes.JS_INT, W_GETINTNN_RETURN_DESCR);
   }
 
   void createRangedMethod(Wrapper wrapper, int bits, String min, String max) {
-    String type = (min.equals("0") ? "Uint" : "Int") + String.valueOf(bits);
-    String method = "CBOR.Int.create" + type;
+    String type = (min.equals("0") ? "uint" : "int") + String.valueOf(bits);
+    String method = "CBOR.Int.create_" + type;
     StringBuilder description = new StringBuilder(
         "Create CBOR <code>")
         .append(type.toLowerCase())
@@ -1717,7 +1716,7 @@ CBOR.NonFinite.create_payload()</a>.</div>""";
         .append(max).append("</code>, a <a href='#main.errors'>CBOR.Exception</a> is thrown.</div>" +
         "<div style='margin-top:0.5em'>See also <a href='#cbor.int.get")
         .append(type.toLowerCase())
-        .append("'>get")
+        .append("'>get_")
         .append(type)
         .append("()</a>.</div>");
     if (bits == 53) {
@@ -1726,7 +1725,7 @@ CBOR.NonFinite.create_payload()</a>.</div>""";
         "should be used with caution in cross-platform scenarios.</div>");
     }
     wrapper.addMethod(method, description.toString())
-        .addParameter("value", DataTypes.JS_NUMBER_BIGINT, "Integer to be wrapped.")
+        .addParameter("value", DataTypes.JS_INT, "Integer to be wrapped.")
         .setReturn(DataTypes.CBOR_INT,
                    "Instantiated <a href='#wrapper.cbor.int'>CBOR.Int</a> object.");
   }
@@ -1778,7 +1777,7 @@ CBOR.NonFinite.create_payload()</a>.</div>""";
         "0xffffffffffffffffffffffffffffffff");
 
     wrapper.addMethod("get_big_int", W_GETBIGINT_DESCR)
-        .setReturn(DataTypes.JS_BIGINT, W_GETINTNN_RETURN_DESCR);
+        .setReturn(DataTypes.JS_INT, W_GETINTNN_RETURN_DESCR);
 
     createRangedMethod(wrapper, 8,
         "-0x80",
@@ -1831,58 +1830,58 @@ CBOR.NonFinite.create_payload()</a>.</div>""";
     // CBOR.Int
 
     intMethods(addWrapper(DataTypes.CBOR_INT, W_INT_DESCR)
-        .addWrapperParameter("value", DataTypes.JS_NUMBER_BIGINT, W_INT_P1_DESCR));
+        .addWrapperParameter("value", DataTypes.JS_INT, W_INT_P1_DESCR));
 
     // CBOR.Float
 
     addWrapper(DataTypes.CBOR_FLOAT, W_FLOAT_DESCR)
-        .addWrapperParameter("value", DataTypes.JS_NUMBER, W_FLOAT_P1_DESCR)
+        .addWrapperParameter("value", DataTypes.JS_FLOAT, W_FLOAT_P1_DESCR)
 
         .addMethod("get_float16", W_GETFLOAT_DESCR +
             "<div style='margin-top:0.5em'>" +
             "If the CBOR object is not a <code>float16</code> object, " +
             "a <a href='#main.errors'>CBOR.Exception</a> is thrown.</div>")
-        .setReturn(DataTypes.JS_NUMBER, W_GETFLOAT_RETURN_DESCR)
+        .setReturn(DataTypes.JS_FLOAT, W_GETFLOAT_RETURN_DESCR)
 
         .addMethod("get_float32", W_GETFLOAT_DESCR +
             "<div style='margin-top:0.5em'>" +
             "If the CBOR object is not a <code>float32</code> or <code>float16</code> object, " +
             "a <a href='#main.errors'>CBOR.Exception</a> is thrown.</div>")
-        .setReturn(DataTypes.JS_NUMBER, W_GETFLOAT_RETURN_DESCR)
+        .setReturn(DataTypes.JS_FLOAT, W_GETFLOAT_RETURN_DESCR)
 
         .addMethod("get_float64", W_GETFLOAT_DESCR + 
             "<div style='margin-top:0.5em'>" +
             "If the CBOR object is not a <code>float64</code>, <code>float32</code>, or <code>float16</code> object, " +
             "a <a href='#main.errors'>CBOR.Exception</a> is thrown.</div>")
-        .setReturn(DataTypes.JS_NUMBER, W_GETFLOAT_RETURN_DESCR)
+        .setReturn(DataTypes.JS_FLOAT, W_GETFLOAT_RETURN_DESCR)
 
         .addMethod("CBOR.Float.create_extended_float", W_CREEXTFLOAT_DESCR)
-        .addParameter("value", DataTypes.JS_NUMBER, W_CREEXTFLOAT_P1_DESCR)
+        .addParameter("value", DataTypes.JS_FLOAT, W_CREEXTFLOAT_P1_DESCR)
         .setReturn(DataTypes.CBOR_Any, W_CREEXTFLOAT_RETURN_DESCR)
 
         .addMethod("get_extended_float64", W_GETEXTFLOAT_DESCR)
-        .setReturn(DataTypes.JS_NUMBER, W_GETEXTFLOAT_RETURN_DESCR)
+        .setReturn(DataTypes.JS_FLOAT, W_GETEXTFLOAT_RETURN_DESCR)
         
         .addMethod("CBOR.Float.create_float16", W_CREFLOAT16_DESCR)
-        .addParameter("value", DataTypes.JS_NUMBER, W_CREFLOAT16_P1_DESCR)
+        .addParameter("value", DataTypes.JS_FLOAT, W_CREFLOAT16_P1_DESCR)
         .setReturn(DataTypes.CBOR_FLOAT, W_CREFLOAT16_RETURN_DESCR)
 
         .addMethod("CBOR.Float.create_float32", W_CREFLOAT32_DESCR)
-        .addParameter("value", DataTypes.JS_NUMBER, W_CREFLOAT32_P1_DESCR)
+        .addParameter("value", DataTypes.JS_FLOAT, W_CREFLOAT32_P1_DESCR)
         .setReturn(DataTypes.CBOR_FLOAT, W_CREFLOAT32_RETURN_DESCR)
 
-        .setProperty("length", DataTypes.JS_NUMBER, W_FLOAT_PROP_DESCR);
+        .setProperty("length", DataTypes.JS_INT, W_FLOAT_PROP_DESCR);
 
     // CBOR.NonFinite
 
     addWrapper(DataTypes.CBOR_NONFIN, W_NONFIN_DESCR)
-        .addWrapperParameter("value", DataTypes.JS_BIGINT, W_NONFIN_P1_DESCR)
+        .addWrapperParameter("value", DataTypes.JS_INT, W_NONFIN_P1_DESCR)
 
         .addMethod("get_non_finite", W_GET_NONFIN_DESCR)
-        .setReturn(DataTypes.JS_BIGINT, W_GET_NONFIN_RETURN_DESCR)
+        .setReturn(DataTypes.JS_INT, W_GET_NONFIN_RETURN_DESCR)
 
         .addMethod("get_non_finite64", W_GET_NONFIN64_DESCR)
-        .setReturn(DataTypes.JS_BIGINT, W_GET_NONFIN64_RETURN_DESCR)
+        .setReturn(DataTypes.JS_INT, W_GET_NONFIN64_RETURN_DESCR)
 
         .addMethod("is_nan", W_ISNAN_NONFIN_DESCR)
         .setReturn(DataTypes.JS_BOOLEAN, W_ISNAN_NONFIN_RETURN_DESCR)
@@ -1898,13 +1897,13 @@ CBOR.NonFinite.create_payload()</a>.</div>""";
         .setReturn(DataTypes.JS_THIS, W_SETSIGN_NONFIN_RETURN_DESCR)
 
         .addMethod("CBOR.NonFinite.create_payload", W_CREPAYLOAD_NONFIN_DESCR)
-        .addParameter("payload", DataTypes.JS_BIGINT, W_CREPAYLOAD_NONFIN_P1_DESCR)
+        .addParameter("payload", DataTypes.JS_INT, W_CREPAYLOAD_NONFIN_P1_DESCR)
         .setReturn(DataTypes.CBOR_NONFIN, W_CREPAYLOAD_NONFIN_RETURN_DESCR)
 
         .addMethod("get_payload", W_GETPAYLOAD_NONFIN_DESCR)
-        .setReturn(DataTypes.JS_BIGINT, W_GETPAYLOAD_NONFIN_RETURN_DESCR)
+        .setReturn(DataTypes.JS_INT, W_GETPAYLOAD_NONFIN_RETURN_DESCR)
 
-        .setProperty("length", DataTypes.JS_NUMBER, W_FLOAT_PROP_DESCR);
+        .setProperty("length", DataTypes.JS_INT, W_FLOAT_PROP_DESCR);
     
     // CBOR.String
 
@@ -1943,20 +1942,20 @@ CBOR.NonFinite.create_payload()</a>.</div>""";
         .setReturn(DataTypes.JS_THIS, CURRENT_RETURN_DESCR)
 
         .addMethod("get", W_ARRAY_GET_DESCR)
-        .addParameter("index", DataTypes.JS_NUMBER, ARRAY_INDEX_P1_DESCR)
+        .addParameter("index", DataTypes.JS_INT, ARRAY_INDEX_P1_DESCR)
         .setReturn(DataTypes.CBOR_Any, W_ARRAY_GET_RETURN_DESCR)
 
         .addMethod("remove", W_ARRAY_REMOVE_DESCR)
-        .addParameter("index", DataTypes.JS_NUMBER, ARRAY_INDEX_P1_DESCR)
+        .addParameter("index", DataTypes.JS_INT, ARRAY_INDEX_P1_DESCR)
         .setReturn(DataTypes.CBOR_Any, W_ARRAY_UPDATE_RETURN_DESCR)
 
         .addMethod("update", W_ARRAY_UPDATE_DESCR)
-        .addParameter("index", DataTypes.JS_NUMBER, ARRAY_INDEX_P1_DESCR)
+        .addParameter("index", DataTypes.JS_INT, ARRAY_INDEX_P1_DESCR)
         .addParameter("object", DataTypes.CBOR_Any, W_ARRAY_UPDATE_P2_DESCR)
         .setReturn(DataTypes.CBOR_Any, W_ARRAY_UPDATE_RETURN_DESCR)
 
         .addMethod("insert", W_ARRAY_INSERT_DESCR)
-        .addParameter("index", DataTypes.JS_NUMBER, ARRAY_INDEX_INSERT_P1_DESCR)
+        .addParameter("index", DataTypes.JS_INT, ARRAY_INDEX_INSERT_P1_DESCR)
         .addParameter("object", DataTypes.CBOR_Any, W_ARRAY_UPDATE_P2_DESCR)
         .setReturn(DataTypes.JS_THIS, CURRENT_RETURN_DESCR)
 
@@ -1966,7 +1965,7 @@ CBOR.NonFinite.create_payload()</a>.</div>""";
         .addMethod("encode_as_sequence", W_ARRAY_ENC_AS_SEQ_DESCR)
         .setReturn(DataTypes.JS_UINT8ARRAY, W_ARRAY_ENC_AS_SEQ_RETURN_DESCR)
 
-        .setProperty("length", DataTypes.JS_NUMBER, W_ARRAY_PROP_DESCR);
+        .setProperty("length", DataTypes.JS_INT, W_ARRAY_PROP_DESCR);
 
     // CBOR.Map
 
@@ -2015,16 +2014,16 @@ CBOR.NonFinite.create_payload()</a>.</div>""";
         .addParameter("pre_sorted_keys", DataTypes.JS_BOOLEAN, W_MAP_SET_SORTING_MODE_P1_DESCR)
         .setReturn(DataTypes.JS_THIS, CURRENT_RETURN_DESCR)
 
-        .setProperty("length", DataTypes.JS_NUMBER, W_MAP_PROP_DESCR);
+        .setProperty("length", DataTypes.JS_INT, W_MAP_PROP_DESCR);
 
     // CBOR.Tag
 
     addWrapper(DataTypes.CBOR_TAG, W_TAG_DESCR)
-        .addWrapperParameter("tag_number", DataTypes.JS_NUMBER_BIGINT, W_TAG_P1_DESCR)
+        .addWrapperParameter("tag_number", DataTypes.JS_INT, W_TAG_P1_DESCR)
         .addWrapperParameter("object", DataTypes.CBOR_Any, W_TAG_P2_DESCR)
 
         .addMethod("get_tag_number", W_TAG_GETNUM_DESCR)
-        .setReturn(DataTypes.JS_BIGINT, W_TAG_GETNUM_RETURN_DESCR)
+        .setReturn(DataTypes.JS_INT, W_TAG_GETNUM_RETURN_DESCR)
 
         .addMethod("get", W_TAG_GET_DESCR)
         .setReturn(DataTypes.CBOR_Any, W_TAG_GET_RETURN_DESCR)
@@ -2035,10 +2034,10 @@ CBOR.NonFinite.create_payload()</a>.</div>""";
     // CBOR.Simple
 
     addWrapper(DataTypes.CBOR_SIMPLE, W_SIMPLE_DESCR)
-        .addWrapperParameter("value", DataTypes.JS_NUMBER, W_SIMPLE_PARAM_DESCR)
+        .addWrapperParameter("value", DataTypes.JS_INT, W_SIMPLE_PARAM_DESCR)
 
         .addMethod("get_simple", W_SIMPLE_GETVAL_DESCR)
-        .setReturn(DataTypes.JS_NUMBER, W_SIMPLE_GETVAL_RETURN_DESCR);
+        .setReturn(DataTypes.JS_INT, W_SIMPLE_GETVAL_RETURN_DESCR);
 
     // Time
 
@@ -2086,13 +2085,13 @@ CBOR.NonFinite.create_payload()</a>.</div>""";
 
     addDecoderMethod("CBOR.init_decoder", INITEXT_DESCR)
         .addParameter("cbor", DataTypes.JS_UINT8ARRAY, INITEXT_P1_DESCR)
-        .addParameter("options", DataTypes.JS_NUMBER, INITEXT_P2_DESCR)
+        .addParameter("options", DataTypes.JS_INT, INITEXT_P2_DESCR)
         .setReturn(DataTypes.ExtendedDecoder, INITEXT_RETURN_DESCR);
     
     // Decoder.set_max_nesting_level()
 
     addDecoderMethod("<i>Decoder</i>.set_max_nesting_level", SETMAXNESTINGLEVEL_DESCR)
-        .addParameter("maxLevel", DataTypes.JS_NUMBER, SETMAXNESTINGLEVEL_P1_DESCR)
+        .addParameter("maxLevel", DataTypes.JS_INT, SETMAXNESTINGLEVEL_P1_DESCR)
         .setReturn(DataTypes.ExtendedDecoder, INITEXT_RETURN_DESCR);
 
     // Decoder.decode_with_options()
@@ -2103,7 +2102,7 @@ CBOR.NonFinite.create_payload()</a>.</div>""";
     // Decoder.get_byte_count()
 
     addDecoderMethod("<i>Decoder</i>.get_byte_count", GETBYTECOUNT_DESCR)
-        .setReturn(DataTypes.JS_NUMBER, GETBYTECOUNT_RETURN_DESCR);
+        .setReturn(DataTypes.JS_INT, GETBYTECOUNT_RETURN_DESCR);
 
     // CBOR.from_diagnostic()
 
@@ -2116,56 +2115,6 @@ CBOR.NonFinite.create_payload()</a>.</div>""";
     addDecoderMethod("CBOR.from_diagnostic_seq", DIAGDECSEQ_DESCR)
         .addParameter("cbor_text", DataTypes.JS_STRING, DIAGDECSEQ_P1_DESCR)
         .setReturn(DataTypes.JS_ARRAY, DIAGDECSEQ_RETURN_DESCR);
-
-    // CBOR.addArrays()
-
-    addUtilityMethod("CBOR.addArrays", ADDARRAYS_DESCR)
-        .addParameter("a", DataTypes.JS_UINT8ARRAY, ADDARRAYS_P1_DESCR)
-        .addParameter("b", DataTypes.JS_UINT8ARRAY, ADDARRAYS_P2_DESCR)
-        .setReturn(DataTypes.JS_UINT8ARRAY, ADDARRAYS_RETURN_DESCR);
-
-    // CBOR.compareArrays()
-
-    addUtilityMethod("CBOR.compareArrays", CMPARRAYS_DESCR)
-        .addParameter("a", DataTypes.JS_UINT8ARRAY, CMPARRAYS_P1_DESCR)
-        .addParameter("b", DataTypes.JS_UINT8ARRAY, CMPARRAYS_P2_DESCR)
-        .setReturn(DataTypes.JS_NUMBER, CMPARRAYS_RETURN_DESCR);
-
-    // CBOR.toHex()
-
-    addUtilityMethod("CBOR.toHex", TOHEX_DESCR)
-        .addParameter("byteArray", DataTypes.JS_UINT8ARRAY, TOHEX_P1_DESCR)
-        .setReturn(DataTypes.JS_STRING, TOHEX_RETURN_DESCR);
-
-    // CBOR.fromHex()
-
-    addUtilityMethod("CBOR.fromHex", FROMHEX_DESCR)
-        .addParameter("hexString", DataTypes.JS_STRING, FROMHEX_P1_DESCR)
-        .setReturn(DataTypes.JS_UINT8ARRAY, FROMHEX_RETURN_DESCR);
-
-    // CBOR.toBase64Url()
-
-    addUtilityMethod("CBOR.toBase64Url", TOB64U_DESCR)
-        .addParameter("byteArray", DataTypes.JS_UINT8ARRAY, TOB64U_P1_DESCR)
-        .setReturn(DataTypes.JS_STRING, TOB64U_RETURN_DESCR);
-
-    // CBOR.fromBase64Url()
-
-    addUtilityMethod("CBOR.fromBase64Url", FROMB64U_DESCR)
-        .addParameter("base64", DataTypes.JS_STRING, FROMB64U_P1_DESCR)
-        .setReturn(DataTypes.JS_UINT8ARRAY, FROMB64U_RETURN_DESCR);
-
-    // CBOR.toBigInt()
-
-    addUtilityMethod("CBOR.toBigInt", TOBIGINT_DESCR)
-        .addParameter("byteArray", DataTypes.JS_UINT8ARRAY, TOBIGINT_P1_DESCR)
-        .setReturn(DataTypes.JS_BIGINT, TOBIGINT_RETURN_DESCR);
-
-    // CBOR.fromBigInt()
-
-    addUtilityMethod("CBOR.fromBigInt", FROMBIGINT_DESCR)
-        .addParameter("value", DataTypes.JS_BIGINT, FROMBIGINT_P1_DESCR)
-        .setReturn(DataTypes.JS_UINT8ARRAY, FROMBIGINT_RETURN_DESCR);
 
      // CBOR.create_date_time()
 

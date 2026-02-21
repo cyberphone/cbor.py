@@ -4,7 +4,7 @@
   <link rel='icon' href='webpkiorg.png' sizes='192x192'>
   <meta name='viewport' content='initial-scale=1.0'>
   <meta charset='UTF-8'>
-  <title>CBOR JavaScript API</title>
+  <title>Python API for CBOR</title>
   <link rel='stylesheet' type='text/css' href='style.css'>
   <script>
     function tocSwitch(ip) {
@@ -20,24 +20,24 @@
   </script>
 </head>
 <body>
-  <a href='https://github.com/cyberphone/CBOR.js#cborjs'>
-  <img style="max-width:30%" src="cbor.js.svg" alt="logo" title="CBOR.js logotype"></a>
-  <div style="text-align:center;font-weight:normal;font-size:1.8em;margin-top:0.5em">CBOR.js - JavaScript API for CBOR</div>
+  <a href='https://github.com/cyberphone/CBOR.py#cborpy'>
+  <img style="max-width:30%" src="cbor.py.svg" alt="logo" title="CBOR.py logotype"></a>
+  <div style="text-align:center;font-weight:normal;font-size:1.8em;margin-top:0.5em">CBOR.py - Python API for CBOR</div>
   <h3 id='toc'>Table of Contents</h3>
   ${TOC}
   ${INTRO}
-  This document describes a JavaScript API for encoding and decoding CBOR&nbsp;${RFC8949} data using the
+  This document describes a Python API for encoding and decoding CBOR&nbsp;${RFC8949} data using the
   ${CBOR::Core} cross platform profile.
   The API loosely mimics the &quot;JSON&quot; object by exposing a <i>single global object</i>,
   unsurprisingly named &quot;CBOR&quot;.
 
   To minimize the need for application developers having detailed knowledge of CBOR,
-  the CBOR.js API provides a set of high-level wrapper objects.
+  the CBOR.py API provides a set of high-level wrapper objects.
 
   The wrapper objects are used for encoding CBOR data items,
   as well as being the result of CBOR decoding.
 
-  The CBOR.js API provides some specific features including:
+  The CBOR.py API provides some specific features including:
   <ul style='margin-block-start:0.3em'>
     <li><a href='#main.deterministic'>Deterministic Encoding</a></li>
     <li><a href='#main.diagnostic'>Diagnostic Notation</a> encoder and decoder</li>
@@ -47,7 +47,7 @@
   <p>
   Note: in this specification CBOR data items are subsequently referred to as "CBOR objects".
 </p>
-  Although this document describes a JavaScript API, it may also serve
+  Although this document describes a Python API, it may also serve
   as a guide for <code>CBOR::Core</code> implementations for other software platforms.
   ${WRAPPER_INTRO}
   This section describes the wrapper objects and their specific methods.
@@ -58,40 +58,40 @@
   CDDL&nbsp;${RFC8610} notation) supported by this specification:
   <div class='webpkifloat'>
     <table class='webpkitable' style='margin-left:2em'>
-      <tr><th>CDDL</th><th>Wrapper&nbsp;Object</th><th>JavaScript</th><th>Notes</th></tr>
+      <tr><th>CDDL</th><th>Wrapper&nbsp;Object</th><th>Python</th><th>Notes</th></tr>
       <tr style='text-align:center'>
         <td><code>integer</code></td>
         <td><a href='#wrapper.cbor.int'>CBOR.Int</a></td>
-        <td><kbd>Number</kbd>&nbsp;<code>/</code>&nbsp;<kbd>BigInt</kbd></td>
+        <td><kbd>int</kbd></td>
         <td>1</td>
       </tr>
       <tr style='text-align:center'>
         <td rowspan='2'><code>float</code></td>
         <td><a href='#wrapper.cbor.float'>CBOR.Float</a></td>
-        <td><kbd>Number</kbd></td>
+        <td><kbd>float</kbd></td>
         <td><code>2</code>, <code>3</code></td>
       </tr>
       <tr style='text-align:center'>
         <td><a href='#wrapper.cbor.nonfinite'>CBOR.NonFinite</a></td>
-        <td><kbd>BigInt</kbd></td>
+        <td><kbd>int</kbd></td>
         <td><code>3</code></td>
       </tr>
       <tr style='text-align:center'>
         <td><code>bstr</code></td>
         <td><a href='#wrapper.cbor.bytes'>CBOR.Bytes</a></td>
-        <td><kbd>Uint8Array</kbd></td>
+        <td><kbd>bytes</kbd></td>
         <td></td>
       </tr>
       <tr style='text-align:center'>
         <td><code>tstr</code></td>
         <td><a href='#wrapper.cbor.string'>CBOR.String</a></td>
-        <td><kbd>String</kbd></td>
+        <td><kbd>str</kbd></td>
         <td></td>
       </tr>
       <tr style='text-align:center'>
         <td><code>bool</code></td>
         <td><a href='#wrapper.cbor.boolean'>CBOR.Boolean</a></td>
-        <td><kbd>Boolean</kbd></td>
+        <td><kbd>bool</kbd></td>
         <td></td>
       </tr>
       <tr style='text-align:center'>
@@ -145,7 +145,7 @@
   ${TIME_OBJECTS}
   Since CBOR lacks dedicated (native) time-objects, section 3.4.1 and 3.4.2 of
   CBOR&nbsp;${RFC8949} define tag <code>0</code> and <code>1</code> for this purpose.
-  CBOR.js provides built-in decoders for these tags (<a href='#wrapper.cbor.tag'>CBOR.Tag</a>).
+  CBOR.py provides built-in decoders for these tags (<a href='#wrapper.cbor.tag'>CBOR.Tag</a>).
   That is, if the current object is a tag <code>0</code>, it is sufficient
   calling <a href='#time.getdatetime'>get_date_time()</a>.
   Note that these methods are also available <i>without</i> the tag construct.
@@ -162,16 +162,10 @@
   See also <a href='#common.encode'>encode()</a>.
   ${DECODING_METHODS}
   ${UTILITY_INTRO}
-  The CBOR.js implementation supports a set of utility methods.
+  The CBOR.py implementation supports a set of utility methods.
   ${UTILITY_METHODS}
   ${CBOR_NUMBERS}
 <div id='jsnumbers.int'></div>${INTEGERS}
-<p>
-  Due to the <kbd>Number.MAX_SAFE_INTEGER</kbd> limitation,
-  in all places in the <code>CBOR.js</code> API where an integer
-  in the form of a JavaScript <kbd>Number</kbd> is expected, <kbd>Number.isInteger(<i>value</i>)</kbd>
-  must be <code>true</code>, else a <a href='#main.errors'>CBOR.Exception</a> will be thrown.
-</p>
 The following table holds additional CDDL defintions ${CDDL-EXT}
 and their API counterparts:
 <div class='webpkifloat'>
@@ -273,15 +267,15 @@ and their API counterparts:
   <li>Counterparts to the <i>fixed-size</i>, <i>two's complement</i> integer types,
   featured in languages like Java, C, and Rust.
   </li>
-  <li style='padding-top:0.5em'>Integer mapping the JavaScript <code>Number</code> type.
+  <li style='padding-top:0.5em'>Integer mapping the Python <code>Number</code> type.
     Consult <a href='#cbor.int.getint53'>get_int53()</a> for details.
   </li>
 </ol>
   ${FLOATING_POINT}
   Although CBOR encoding depends on 16, 32, and 64-bit IEEE&nbsp;754
-  variants, the CBOR.js implementation makes this
+  variants, the CBOR.py implementation makes this
   transparent. The <a href='#wrapper.cbor.float'>CBOR.Float</a>
-  wrapper object only exposes the JavaScript <kbd>Number</kbd> type.
+  wrapper object only exposes the Python <kbd>Number</kbd> type.
   <p>
   For applications depending on non-finite numbers
   (<code>NaN</code> and <code>Infinity</code>),
@@ -302,7 +296,7 @@ and their API counterparts:
   <p>
     Due to the
     <a href='#main.deterministic'>Deterministic Encoding</a>
-    scheme used by CBOR.js, CBOR data can be <i>bidirectionally</i>
+    scheme used by CBOR.py, CBOR data can be <i>bidirectionally</i>
     converted between its native (binary) format and diagnostic notation
     without getting corrupted.  Note though that text-binary-text &quot;roundtrips&quot;
     do not necessarily return identical text: <kbd>0x10</kbd> used
@@ -317,7 +311,7 @@ and their API counterparts:
   While there are different ways you can encode certain CBOR objects,
   this is non-trivial to support in general purpose platform-based tools,
   not to mention the limited utility of such measures.
-  Therefore the CBOR.js API implements specific (non-variant)
+  Therefore the CBOR.py API implements specific (non-variant)
   encodings, aka &quot;Deterministic Encoding&quot;.  Fortunately, the selected 
   encoding scheme is <i>backward compatible</i> with most existing CBOR <i>decoders</i>.
   However, for <i>decoding</i> (only), compliance with deterministic encoding
@@ -338,7 +332,7 @@ and their API counterparts:
   ${EXAMPLES_SEQ_DEC}
   ${ERROR_HANDLING}
   Encoding and decoding errors throw <code>CBOR.Exception</code>,
-  derived from the JavaScript <code>Error</code> object.
+  derived from the Python <code>Error</code> object.
   ${VERSION_INFO}
   API version: 1.0.21.  Note that the current API version is accessible through
   the static property <kbd>CBOR.version</kbd>.<br>
